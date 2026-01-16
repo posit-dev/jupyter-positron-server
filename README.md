@@ -6,7 +6,7 @@ Run Positron Server inside your Jupyter environment using [jupyter-server-proxy]
 
 - Python >= 3.9
 - [positron-server](https://github.com/posit-dev/positron) installed and available in your PATH
-- A valid Positron license key file
+- A valid Positron license key file, set as a `POSITRON_LICENSE_KEY_FILE` environment variable
 
 ## Installation
 

@@ -63,7 +63,6 @@ def setup_positron_server():
         '--host', host,
         '--port', '{port}',
         '--connection-token', _CONNECTION_TOKEN,
-        '--accept-server-license-terms',
         '--server-base-path', '/positron/',
     ]
 
