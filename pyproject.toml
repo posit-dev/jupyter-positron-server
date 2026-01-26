@@ -17,5 +17,10 @@ dependencies = [
 [tool.setuptools.package-dir]
 jupyter_positron_server = "jupyter-positron-server"
 
+[dependency-groups]
+dev = [
+    "pytest>=8.4.2",
+]
+
 [project.entry-points."jupyter_serverproxy_servers"]
 positron = "jupyter_positron_server:setup_positron_server"
