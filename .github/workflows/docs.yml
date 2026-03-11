@@ -20,7 +20,7 @@ jobs:
           python-version: "3.13"
       - name: Install dependencies
         run: |
-          uv pip install -e ".[dev]"
+          uv sync --group dev
       - name: Set up Quarto
         uses: quarto-dev/quarto-actions/setup@v2
       - name: Build docs
