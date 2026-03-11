@@ -1129,26 +1129,26 @@ name = "jupyter-positron-server"
 version = "0.0.1"
 source = { virtual = "." }
 dependencies = [
-    { name = "griffe" },
     { name = "jupyter-server-proxy" },
-    { name = "quartodoc" },
 ]
 
 [package.dev-dependencies]
 dev = [
+    { name = "griffe" },
     { name = "pytest", version = "8.4.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10'" },
     { name = "pytest", version = "9.0.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.10'" },
+    { name = "quartodoc" },
 ]
 
 [package.metadata]
-requires-dist = [
-    { name = "griffe", specifier = ">=1.3.2,<2.0.0" },
-    { name = "jupyter-server-proxy", specifier = ">=4.1.2" },
-    { name = "quartodoc", specifier = ">=0.11.1" },
-]
+requires-dist = [{ name = "jupyter-server-proxy", specifier = ">=4.1.2" }]
 
 [package.metadata.requires-dev]
-dev = [{ name = "pytest", specifier = ">=8.4.2" }]
+dev = [
+    { name = "griffe", specifier = ">=1.3.2,<2.0.0" },
+    { name = "pytest", specifier = ">=8.4.2" },
+    { name = "quartodoc", specifier = ">=0.11.1" },
+]
 
 [[package]]
 name = "jupyter-server"
