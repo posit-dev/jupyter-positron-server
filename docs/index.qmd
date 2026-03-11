@@ -1,0 +1,33 @@
+---
+title: "jupyter-positron-server"
+---
+
+Run [Positron Server](https://github.com/posit-dev/positron) inside your Jupyter environment.
+
+## Overview
+
+`jupyter-positron-server` is a [jupyter-server-proxy](https://jupyter-server-proxy.readthedocs.io/) extension that enables running Positron Server within JupyterHub. This allows users to access the full Positron IDE experience directly from their Jupyter environment without needing a separate deployment.
+
+This project draws inspiration from [jupyter-rsession-proxy](https://github.com/jupyterhub/jupyter-rsession-proxy), which provides similar functionality for RStudio Server. Both packages leverage the `jupyter-server-proxy` framework to integrate external web applications into the Jupyter ecosystem.
+
+## Quick Start
+
+```bash
+pip install jupyter-positron-server
+```
+
+After installation, start JupyterLab and click the "Positron" icon in the launcher to open Positron Server.
+
+See the [Get Started](get_started.qmd) guide for detailed setup instructions.
+
+## Requirements
+
+- Python >= 3.9
+- [positron-server](https://github.com/posit-dev/positron) installed and available in PATH
+- A valid Positron license key file
+
+## Related Projects
+
+- [jupyter-server-proxy](https://jupyter-server-proxy.readthedocs.io/) - The framework that powers this extension
+- [jupyter-rsession-proxy](https://github.com/jupyterhub/jupyter-rsession-proxy) - Similar proxy for RStudio Server
+- [Positron](https://github.com/posit-dev/positron) - The next-generation data science IDE

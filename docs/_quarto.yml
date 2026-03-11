@@ -1,0 +1,47 @@
+project:
+  type: website
+  output-dir: _site
+
+website:
+  title: "jupyter-positron-server"
+  description: "Run Positron Server in JupyterHub"
+  page-navigation: true
+  page-footer:
+    center: |
+      Proudly supported by
+      [![](https://www.posit.co/wp-content/uploads/2022/10/posit-logo-fullcolor-TM.svg){fig-alt="Posit PBC" width=65px}](https://posit.co/)
+  navbar:
+    background: light
+    pinned: true
+    left:
+      - text: "Get Started"
+        file: get_started.qmd
+      - text: "Configuration"
+        file: configuration.qmd
+      - text: "Reference"
+        file: reference/index.qmd
+    right:
+      - icon: github
+        href: https://github.com/posit-dev/jupyter-positron-server
+        aria-label: jupyter-positron-server GitHub
+
+format:
+  html:
+    theme: cosmo
+    toc: true
+
+quartodoc:
+  title: Reference
+  package: jupyter_positron_server
+  sections:
+    - title: Setup Functions
+      desc: "Functions to configure the Positron server proxy"
+      contents:
+        - setup_positron_server
+        - which_positron_server
+
+filters:
+  - interlinks
+
+interlinks:
+  sources: {}
