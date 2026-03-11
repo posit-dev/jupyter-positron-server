@@ -38,13 +38,9 @@ Set the `POSITRON_LICENSE_KEY_FILE` environment variable to point to your licens
 export POSITRON_LICENSE_KEY_FILE=/path/to/your/license.lic
 ```
 
-### 2. Start JupyterLab
+### 2. Start JupyterHub
 
-Launch JupyterLab as usual:
-
-```bash
-jupyter lab
-```
+Log into JupyterHub.
 
 ### 3. Open Positron
 
