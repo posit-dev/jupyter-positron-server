@@ -30,3 +30,7 @@ htmlcov/
 
 .ipynb_checkpoints/
 .venv/
+
+_site/
+reference/
+objects.json

@@ -1,0 +1,62 @@
+---
+title: "Get Started"
+---
+
+This guide walks you through installing and configuring `jupyter-positron-server` to run Positron Server in your Jupyter environment.
+
+## Prerequisites
+
+Before installing, ensure you have:
+
+1. **Python 3.9 or later**
+2. **Positron Server** installed and accessible in your system's PATH
+3. **A valid Positron license key file**
+
+## Installation
+
+Install from PyPI:
+
+```bash
+pip install jupyter-positron-server
+```
+
+Or install from source:
+
+```bash
+git clone https://github.com/posit-dev/jupyter-positron-server.git
+cd jupyter-positron-server
+pip install -e .
+```
+
+## Basic Setup
+
+### 1. Set the License Key
+
+Set the `POSITRON_LICENSE_KEY_FILE` environment variable to point to your license file:
+
+```bash
+export POSITRON_LICENSE_KEY_FILE=/path/to/your/license.lic
+```
+
+### 2. Start JupyterHub
+
+Log into JupyterHub.
+
+### 3. Open Positron
+
+Click the "Positron" icon in the JupyterLab launcher to start Positron Server.
+
+## How It Works
+
+`jupyter-positron-server` uses [jupyter-server-proxy](https://jupyter-server-proxy.readthedocs.io/) to proxy requests between JupyterHub/JupyterLab and the Positron Server process. When you click the Positron launcher icon:
+
+1. The proxy starts a new `positron-server` process (or connects to an existing one)
+2. A secure connection token is generated automatically
+3. Requests are proxied through the Jupyter server to Positron
+
+This approach is similar to how [jupyter-rsession-proxy](https://github.com/jupyterhub/jupyter-rsession-proxy) integrates RStudio Server with Jupyter.
+
+## Next Steps
+
+- Learn about [configuration options](configuration.qmd) for customizing your setup
+- Check the [API reference](reference/index.qmd) for details on the available functions

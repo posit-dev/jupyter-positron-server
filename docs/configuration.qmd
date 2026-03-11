@@ -1,0 +1,91 @@
+---
+title: "Configuration"
+---
+
+`jupyter-positron-server` can be configured using environment variables to customize how Positron Server runs within your Jupyter environment.
+
+## Environment Variables
+
+### Required
+
+| Variable | Description |
+|----------|-------------|
+| `POSITRON_LICENSE_KEY_FILE` | Path to your Positron license key file. Defaults to `/opt/license.lic` if not set. |
+
+### Optional
+
+| Variable | Description |
+|----------|-------------|
+| `POSITRON_CONNECTION_TOKEN` | Custom connection token for authentication. If not set, a secure random token is generated automatically. |
+| `POSITRON_HOST` | Host address for Positron Server to bind to. Defaults to `127.0.0.1`. |
+| `JSP_POSITRON_LAUNCHER_DISABLED` | Set to any value to hide the Positron launcher entry in JupyterLab. |
+
+### Connecting to an Existing Server
+
+If you have Positron Server already running, you can connect to it instead of starting a new process:
+
+| Variable | Description |
+|----------|-------------|
+| `JSP_POSITRON_PORT` | TCP port of an already-running Positron Server instance. |
+| `JSP_POSITRON_SOCKET` | Path to a UNIX socket of an already-running Positron Server instance. |
+
+When either `JSP_POSITRON_PORT` or `JSP_POSITRON_SOCKET` is set, no new server process will be started.
+
+## Configuration Examples
+
+### Basic Setup
+
+```bash
+export POSITRON_LICENSE_KEY_FILE=/opt/positron/license.lic
+jupyter lab
+```
+
+### Custom Host Binding
+
+```bash
+export POSITRON_LICENSE_KEY_FILE=/opt/positron/license.lic
+export POSITRON_HOST=0.0.0.0
+jupyter lab
+```
+
+### Connect to Existing Server on TCP Port
+
+```bash
+export JSP_POSITRON_PORT=8787
+jupyter lab
+```
+
+### Connect to Existing Server via UNIX Socket
+
+```bash
+export JSP_POSITRON_SOCKET=/tmp/positron.sock
+jupyter lab
+```
+
+### Disable Launcher Entry
+
+If you want to install the package but not show the launcher icon:
+
+```bash
+export JSP_POSITRON_LAUNCHER_DISABLED=1
+jupyter lab
+```
+
+## Server Command Arguments
+
+When starting a new Positron Server process, the following arguments are passed automatically:
+
+- `--accept-server-license-terms` - Accepts the license terms
+- `--host <POSITRON_HOST>` - Binds to the configured host (default: `127.0.0.1`)
+- `--port <port>` - Uses the port assigned by jupyter-server-proxy
+- `--connection-token <token>` - Uses the generated or configured connection token
+- `--server-base-path /positron/` - Sets the base path for the proxy
+
+## Server Discovery
+
+The package looks for the `positron-server` executable in the following order:
+
+1. In the system PATH (via `which positron-server`)
+2. At the default location: `/opt/vscode-reh-web-server-linux-arm64/bin/positron-server`
+
+If neither is found, a `FileNotFoundError` is raised.

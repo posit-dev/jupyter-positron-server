@@ -14,9 +14,9 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.10", "3.14"] # lowest and highest supported versions
+        python-version: ["3.9", "3.14"] # lowest and highest supported versions
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Install uv and Python
         uses: astral-sh/setup-uv@v5
         with:
