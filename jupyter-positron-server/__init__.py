@@ -2,7 +2,7 @@
 jupyter-positron-server: Run Positron Server inside your Jupyter environment.
 
 This package provides a jupyter-server-proxy extension that enables running
-Positron Server within JupyterHub or JupyterLab.
+Positron Server within JupyterHub.
 """
 
 from shutil import which
@@ -76,64 +76,61 @@ def setup_positron_server():
     See Also
     --------
     which_positron_server : Locates the positron-server executable.
-
-    Examples
-    --------
-    >>> from jupyter_positron_server import setup_positron_server
-    >>> config = setup_positron_server()
-    >>> config['launcher_entry']['title']
-    'Positron'
     """
     proxy_config_dict = {
         "new_browser_window": True,
         "timeout": 120,
         "launcher_entry": {
-            "enabled": False if os.environ.get("JSP_POSITRON_LAUNCHER_DISABLED") else True,
+            "enabled": False
+            if os.environ.get("JSP_POSITRON_LAUNCHER_DISABLED")
+            else True,
             "title": "Positron",
             "path_info": f"positron?tkn={_CONNECTION_TOKEN}",
-            "icon_path": os.path.join(_HERE, "icons/positron.svg")
-            },
-        }
+            "icon_path": os.path.join(_HERE, "icons/positron.svg"),
+        },
+    }
 
     # if positron-server is already running and listening to TCP port
     positron_port = os.environ.get("JSP_POSITRON_PORT", None)
     if positron_port:
-        proxy_config_dict.update({
-            "command": [],
-            "port": int(positron_port)
-            })
+        proxy_config_dict.update({"command": [], "port": int(positron_port)})
         return proxy_config_dict
 
     # if positron-server is already running and listening to UNIX socket
     positron_socket = os.environ.get("JSP_POSITRON_SOCKET", None)
     if positron_socket:
-        proxy_config_dict.update({
-            "command": [],
-            "unix_socket": positron_socket
-            })
+        proxy_config_dict.update({"command": [], "unix_socket": positron_socket})
         return proxy_config_dict
 
     host = os.environ.get("POSITRON_HOST", "127.0.0.1")
 
     command_arguments = [
         "--accept-server-license-terms",
-        "--host", host,
-        "--port", "{port}",
-        "--connection-token", _CONNECTION_TOKEN,
-        "--server-base-path", "/positron/",
+        "--host",
+        host,
+        "--port",
+        "{port}",
+        "--connection-token",
+        _CONNECTION_TOKEN,
+        "--server-base-path",
+        "/positron/",
     ]
 
     full_command = [which_positron_server()] + command_arguments
-    
+
     # Set up environment with license file
     env = {}
     license_key_file = os.environ.get("POSITRON_LICENSE_KEY_FILE", "/opt/license.lic")
     env["POSITRON_LICENSE_KEY_FILE"] = license_key_file
-    env["LD_LIBRARY_PATH"] = "/usr/local/lib:/opt/vscode-reh-web-server-linux-arm64/resources/activation/linux/aarch64"
-    
-    proxy_config_dict.update({
-        "command": full_command,
-        "environment": env,
-        })
+    env["LD_LIBRARY_PATH"] = (
+        "/usr/local/lib:/opt/vscode-reh-web-server-linux-arm64/resources/activation/linux/aarch64"
+    )
+
+    proxy_config_dict.update(
+        {
+            "command": full_command,
+            "environment": env,
+        }
+    )
 
     return proxy_config_dict

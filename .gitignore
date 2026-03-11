@@ -33,3 +33,4 @@ htmlcov/
 
 _site/
 reference/
+objects.json
