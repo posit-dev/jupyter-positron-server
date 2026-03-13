@@ -2,6 +2,52 @@ import os
 import pytest
 
 
+class TestMakeMappath:
+    """Tests for the _make_mappath() function."""
+
+    def test_mappath_strips_doubled_prefix(self):
+        """Test that mappath strips the doubled base_url prefix."""
+        from jupyter_positron_server import _make_mappath
+
+        mappath = _make_mappath()
+        result = mappath("/user/admin/positron/oss-dev/index.html")
+        assert result == "/oss-dev/index.html"
+
+    def test_mappath_handles_different_usernames(self):
+        """Test that mappath works with various usernames."""
+        from jupyter_positron_server import _make_mappath
+
+        mappath = _make_mappath()
+        assert mappath("/user/testuser/positron/api/v1") == "/api/v1"
+        assert mappath("/user/user-name-123/positron/static/js/main.js") == "/static/js/main.js"
+
+    def test_mappath_returns_root_for_positron_only(self):
+        """Test that mappath returns / when path ends at positron."""
+        from jupyter_positron_server import _make_mappath
+
+        mappath = _make_mappath()
+        result = mappath("/user/admin/positron/")
+        assert result == "/"
+
+    def test_mappath_no_match_returns_original(self):
+        """Test that non-matching paths are returned unchanged."""
+        from jupyter_positron_server import _make_mappath
+
+        mappath = _make_mappath()
+        assert mappath("/api/contents") == "/api/contents"
+        assert mappath("/static/file.js") == "/static/file.js"
+
+    def test_mappath_partial_match_returns_original(self):
+        """Test that partial matches don't strip incorrectly."""
+        from jupyter_positron_server import _make_mappath
+
+        mappath = _make_mappath()
+        # Missing /positron suffix
+        assert mappath("/user/admin/other/path") == "/user/admin/other/path"
+        # Not starting with /user
+        assert mappath("/api/user/admin/positron/test") == "/api/user/admin/positron/test"
+
+
 def test_which_positron_server_not_found(monkeypatch):
     """Test that FileNotFoundError is raised when positron-server is not in PATH."""
     monkeypatch.setenv("PATH", "")
@@ -12,7 +58,7 @@ def test_which_positron_server_not_found(monkeypatch):
     reload(jupyter_positron_server)
 
     with pytest.raises(
-        FileNotFoundError, match="Could not find executable positron-server"
+        FileNotFoundError, match="Could not find positron-server executable"
     ):
         jupyter_positron_server.which_positron_server()
 
