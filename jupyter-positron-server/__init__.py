@@ -6,8 +6,42 @@ Positron Server within JupyterHub.
 """
 
 from shutil import which
+import logging
 import os
+import platform
+import re
 import secrets
+
+logger = logging.getLogger(__name__)
+
+
+def _make_mappath():
+    """
+    Create a mappath function that strips the doubled base_url prefix from paths.
+
+    positron-server generates relative URLs like
+    ./user/admin/positron/oss-dev/... instead of ./oss-dev/...
+
+    When browser requests /user/admin/positron/user/admin/positron/oss-dev/...,
+    the proxy strips its prefix /user/admin/positron/ and mappath receives:
+    /user/admin/positron/oss-dev/...
+
+    This function strips that extra prefix to get: /oss-dev/...
+    """
+    # Match /user/USERNAME/positron at the start, capture everything after
+    pattern = re.compile(r"^/user/[^/]+/positron(/.*)$")
+
+    def mappath(path):
+        match = pattern.match(path)
+        if match:
+            rest = match.group(1) or "/"
+            logger.info(f"mappath: {path} -> {rest}")
+            return rest
+        logger.debug(f"mappath: {path} (no match)")
+        return path
+
+    return mappath
+
 
 _HERE = os.path.dirname(os.path.abspath(__file__))
 
@@ -42,10 +76,18 @@ def which_positron_server():
     command = which("positron-server")
     if not command:
         # Fall back to known location
-        default_path = "/opt/vscode-reh-web-server-linux-arm64/bin/positron-server"
+        default_path = "/opt/positron-server"
         if os.path.exists(default_path):
             return default_path
-        raise FileNotFoundError("Could not find executable positron-server!")
+        raise FileNotFoundError(
+            "Could not find positron-server executable.\n\n"
+            "Checked:\n"
+            "  - System PATH (not found)\n"
+            f"  - Default location: {default_path} (not found)\n\n"
+            "Please ensure positron-server is installed and either:\n"
+            "  1. Added to your system PATH, or\n"
+            f"  2. Installed at {default_path}"
+        )
     return command
 
 
@@ -80,6 +122,7 @@ def setup_positron_server():
     proxy_config_dict = {
         "new_browser_window": True,
         "timeout": 120,
+        "mappath": _make_mappath(),
         "launcher_entry": {
             "enabled": False
             if os.environ.get("JSP_POSITRON_LAUNCHER_DISABLED")
@@ -104,6 +147,28 @@ def setup_positron_server():
 
     host = os.environ.get("POSITRON_HOST", "127.0.0.1")
 
+    # Find license file: check env var first, then default location
+    # If no license file found, let positron-server use system license
+    license_key_file = os.environ.get("POSITRON_LICENSE_KEY_FILE")
+    if license_key_file:
+        logger.info(f"POSITRON_LICENSE_KEY_FILE set to: {license_key_file}")
+        if not os.path.exists(license_key_file):
+            raise FileNotFoundError(
+                f"Positron license file not found at '{license_key_file}' "
+                f"(specified by POSITRON_LICENSE_KEY_FILE environment variable). "
+                f"Please ensure the license file exists or set POSITRON_LICENSE_KEY_FILE "
+                f"to the correct path."
+            )
+    else:
+        default_license_path = "/opt/license.lic"
+        if os.path.exists(default_license_path):
+            license_key_file = default_license_path
+            logger.info(f"Using default license file: {license_key_file}")
+        else:
+            logger.info(
+                "No license file found, positron-server will use system license"
+            )
+
     command_arguments = [
         "--accept-server-license-terms",
         "--host",
@@ -112,25 +177,50 @@ def setup_positron_server():
         "{port}",
         "--connection-token",
         _CONNECTION_TOKEN,
-        "--server-base-path",
-        "/positron/",
+        # Note: --server-base-path is omitted. The proxy sends X-Forwarded-Prefix
+        # which positron-server uses, but it generates relative URLs that are doubled.
+        # We use mappath to fix the doubled paths instead.
     ]
 
-    full_command = [which_positron_server()] + command_arguments
+    # Only pass license file if one was found
+    if license_key_file:
+        command_arguments.extend(["--license-key-file", license_key_file])
 
-    # Set up environment with license file
-    env = {}
-    license_key_file = os.environ.get("POSITRON_LICENSE_KEY_FILE", "/opt/license.lic")
-    env["POSITRON_LICENSE_KEY_FILE"] = license_key_file
-    env["LD_LIBRARY_PATH"] = (
-        "/usr/local/lib:/opt/vscode-reh-web-server-linux-arm64/resources/activation/linux/aarch64"
+    # Determine LD_LIBRARY_PATH from positron-server location
+    positron_server_path = which_positron_server()
+    # Resolve symlinks to get the real path
+    real_path = os.path.realpath(positron_server_path)
+    # positron-server is at <root>/bin/positron-server, so go up two levels
+    positron_root = os.path.dirname(os.path.dirname(real_path))
+    # Determine architecture
+    arch = platform.machine()
+    activation_path = os.path.join(
+        positron_root, "resources", "activation", "linux", arch
     )
+
+    # Validate activation libraries exist (required for license validation)
+    if not os.path.isdir(activation_path):
+        raise FileNotFoundError(
+            f"Positron activation libraries not found at '{activation_path}'.\n\n"
+            f"This usually means positron-server is not installed correctly for "
+            f"your architecture ({arch}).\n"
+            f"Expected directory structure: {positron_root}/resources/activation/linux/{arch}/"
+        )
+
+    ld_library_path = f"/usr/local/lib:{activation_path}"
+
+    # Use env command to set LD_LIBRARY_PATH reliably
+    full_command = [
+        "/usr/bin/env",
+        f"LD_LIBRARY_PATH={ld_library_path}",
+        positron_server_path,
+    ] + command_arguments
 
     proxy_config_dict.update(
         {
             "command": full_command,
-            "environment": env,
         }
     )
 
+    logger.info(f"Positron server command: {' '.join(full_command)}")
     return proxy_config_dict

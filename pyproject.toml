@@ -17,6 +17,9 @@ dependencies = [
 [tool.setuptools.package-dir]
 jupyter_positron_server = "jupyter-positron-server"
 
+[tool.setuptools.package-data]
+jupyter_positron_server = ["icons/*.svg"]
+
 [dependency-groups]
 dev = [
     "pytest>=8.4.2",
