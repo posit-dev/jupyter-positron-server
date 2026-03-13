@@ -216,16 +216,9 @@ def setup_positron_server():
         positron_server_path,
     ] + command_arguments
 
-    environment = {}
-    # Pass license file via environment variable for backwards compatibility
-    # (in addition to CLI argument passed above)
-    if license_key_file:
-        environment["POSITRON_LICENSE_KEY_FILE"] = license_key_file
-
     proxy_config_dict.update(
         {
             "command": full_command,
-            "environment": environment,
         }
     )
 
