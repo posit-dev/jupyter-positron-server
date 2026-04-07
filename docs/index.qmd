@@ -12,19 +12,39 @@ This project draws inspiration from [jupyter-rsession-proxy](https://github.com/
 
 ## Quick Start
 
+1. [Request a free educational license](#getting-a-license)
+2. [Download Positron Server](get_started.qmd#download-positron-server) and add it to your PATH
+3. Install the package:
+
 ```bash
 pip install jupyter-positron-server
 ```
 
-After installation, start JupyterLab and click the "Positron" icon in the launcher to open Positron Server.
+After setup, start JupyterLab and click the "Positron" icon in the launcher to open Positron Server.
 
 See the [Get Started](get_started.qmd) guide for detailed setup instructions.
+
+## Features
+
+Positron Server provides a robust data science IDE without needing a local install or new infrastructure:
+
+- Rich Python and R support
+- OpenVSX extension marketplace access
+- Built-in data viewer and variables explorer
+- Integrated debugger, help pane, and version control
 
 ## Requirements
 
 - Python >= 3.9
+- JupyterHub with JupyterLab 4
 - [positron-server](https://github.com/posit-dev/positron) installed and available in PATH
 - A valid Positron license key file
+
+## Getting a License
+
+Positron Server is available for educational use only. Free licenses are available for currently enrolled students using Positron for coursework. Review the [Positron Education License Rider](https://github.com/posit-dev/positron/blob/main/LICENSE.txt) for full eligibility terms.
+
+To request a license, email [academic-licenses@posit.co](mailto:academic-licenses@posit.co).
 
 ## Related Projects
 
