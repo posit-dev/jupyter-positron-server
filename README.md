@@ -44,7 +44,7 @@ To request a license, email [academic-licenses@posit.co](mailto:academic-license
 Set the `POSITRON_LICENSE_KEY_FILE` environment variable to the path of your license key file (defaults to `/opt/license.lic` if not set):
 
 ```bash
-export POSITRON_LICENSE_KEY_FILE=/path/to/your/license.key
+export POSITRON_LICENSE_KEY_FILE=/path/to/your/license.lic
 ```
 
 ## Usage
