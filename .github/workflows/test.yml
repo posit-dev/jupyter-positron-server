@@ -42,7 +42,7 @@ jobs:
       - name: "Build Package"
         run: |
           uv build
-      - name: "Deploy to Test PyPI"
+      - name: "Deploy to PyPI"
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           user: __token__
