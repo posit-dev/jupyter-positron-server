@@ -9,39 +9,9 @@ from shutil import which
 import logging
 import os
 import platform
-import re
 import secrets
 
 logger = logging.getLogger(__name__)
-
-
-def _make_mappath():
-    """
-    Create a mappath function that strips the doubled base_url prefix from paths.
-
-    positron-server generates relative URLs like
-    ./user/admin/positron/oss-dev/... instead of ./oss-dev/...
-
-    When browser requests /user/admin/positron/user/admin/positron/oss-dev/...,
-    the proxy strips its prefix /user/admin/positron/ and mappath receives:
-    /user/admin/positron/oss-dev/...
-
-    This function strips that extra prefix to get: /oss-dev/...
-    """
-    # Match /user/USERNAME/positron at the start, capture everything after
-    pattern = re.compile(r"^/user/[^/]+/positron(/.*)$")
-
-    def mappath(path):
-        match = pattern.match(path)
-        if match:
-            rest = match.group(1) or "/"
-            logger.debug(f"mappath: {path} -> {rest}")
-            return rest
-        logger.debug(f"mappath: {path} (no match)")
-        return path
-
-    return mappath
-
 
 _HERE = os.path.dirname(os.path.abspath(__file__))
 
@@ -131,13 +101,17 @@ def setup_positron_server():
     proxy_config_dict = {
         "new_browser_window": True,
         "timeout": 120,
-        "mappath": _make_mappath(),
+        # Don't send X-Forwarded-Prefix - positron-server uses it to generate
+        # relative URLs which causes URL doubling in the browser.
+        # Without this header, positron-server generates root-relative URLs
+        # and jupyter-server-proxy handles the path rewriting automatically.
+        "request_headers_override": {"X-Forwarded-Prefix": ""},
         "launcher_entry": {
             "enabled": False
             if os.environ.get("JSP_POSITRON_LAUNCHER_DISABLED")
             else True,
             "title": "Positron",
-            "path_info": f"positron?tkn={_CONNECTION_TOKEN}",
+            "path_info": f"positron/?tkn={_CONNECTION_TOKEN}",
             "icon_path": os.path.join(_HERE, "icons/positron.svg"),
         },
     }
@@ -186,9 +160,6 @@ def setup_positron_server():
         "{port}",
         "--connection-token",
         _CONNECTION_TOKEN,
-        # Note: --server-base-path is omitted. The proxy sends X-Forwarded-Prefix
-        # which positron-server uses, but it generates relative URLs that are doubled.
-        # We use mappath to fix the doubled paths instead.
     ]
 
     # Only pass license file if one was found
