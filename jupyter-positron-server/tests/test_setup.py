@@ -63,6 +63,36 @@ def test_which_positron_server_not_found(monkeypatch):
         jupyter_positron_server.which_positron_server()
 
 
+def test_which_positron_server_path_takes_priority(monkeypatch):
+    """Test that PATH takes priority over known locations."""
+    import jupyter_positron_server
+
+    # Mock which() to return a value (found in PATH)
+    monkeypatch.setattr(jupyter_positron_server, "which", lambda prog: prog)
+    # Mock os.path.exists to return True for known locations
+    monkeypatch.setattr(os.path, "exists", lambda path: True)
+
+    result = jupyter_positron_server.which_positron_server()
+
+    # Should return the prog name (from PATH), not a known location path
+    assert result == "positron-server"
+
+
+def test_which_positron_server_fallback_order(monkeypatch):
+    """Test that known paths are checked in order."""
+    import jupyter_positron_server
+
+    # Mock which() to return None (not in PATH)
+    monkeypatch.setattr(jupyter_positron_server, "which", lambda prog: None)
+    # Mock os.path.exists to return True for all paths
+    monkeypatch.setattr(os.path, "exists", lambda path: True)
+
+    result = jupyter_positron_server.which_positron_server()
+
+    # Should return the first known path
+    assert result == "/usr/lib/positron-server/bin/positron-server"
+
+
 def test_setup_positron_server_tcp_mode(monkeypatch):
     """Test setup returns correct config when JSP_POSITRON_PORT is set."""
     monkeypatch.setenv("JSP_POSITRON_PORT", "8080")
