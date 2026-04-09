@@ -54,7 +54,7 @@ def which_positron_server():
     Locate the positron-server executable.
 
     Searches for the `positron-server` command in the system PATH, falling back
-    to a default installation location if not found.
+    to known installation locations if not found.
 
     Returns
     -------
@@ -64,31 +64,41 @@ def which_positron_server():
     Raises
     ------
     FileNotFoundError
-        If positron-server cannot be found in PATH or at the default location.
+        If positron-server cannot be found in PATH or at known locations.
 
     Examples
     --------
     >>> from jupyter_positron_server import which_positron_server
     >>> path = which_positron_server()
     >>> print(path)
-    '/usr/local/bin/positron-server'
+    '/opt/positron-server/bin/positron-server'
     """
-    command = which("positron-server")
-    if not command:
-        # Fall back to known location
-        default_path = "/opt/positron-server"
-        if os.path.exists(default_path):
-            return default_path
-        raise FileNotFoundError(
-            "Could not find positron-server executable.\n\n"
-            "Checked:\n"
-            "  - System PATH (not found)\n"
-            f"  - Default location: {default_path} (not found)\n\n"
-            "Please ensure positron-server is installed and either:\n"
-            "  1. Added to your system PATH, or\n"
-            f"  2. Installed at {default_path}"
-        )
-    return command
+    prog = "positron-server"
+    known_paths = [
+        os.path.join("/usr/lib/positron-server/bin", prog),
+        os.path.join("/opt/positron-server/bin", prog),
+    ]
+
+    # First check if it's in PATH
+    if which(prog):
+        return prog
+
+    # Fall back to known locations
+    for path in known_paths:
+        if os.path.exists(path):
+            return path
+
+    paths_checked = "\n".join(f"  - {p} (not found)" for p in known_paths)
+    raise FileNotFoundError(
+        f"Could not find {prog} executable.\n\n"
+        "Checked:\n"
+        "  - System PATH (not found)\n"
+        f"{paths_checked}\n\n"
+        "Please ensure positron-server is installed and either:\n"
+        "  1. Added to your system PATH, or\n"
+        "  2. Installed via deb package, or\n"
+        "  3. Extracted to /opt/positron-server/"
+    )
 
 
 def setup_positron_server():
