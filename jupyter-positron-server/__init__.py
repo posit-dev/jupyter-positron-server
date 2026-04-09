@@ -96,8 +96,7 @@ def which_positron_server():
         f"{paths_checked}\n\n"
         "Please ensure positron-server is installed and either:\n"
         "  1. Added to your system PATH, or\n"
-        "  2. Installed via deb package, or\n"
-        "  3. Extracted to /opt/positron-server/"
+        "  2. Extracted to /opt/positron-server/ or /usr/lib/positron-server/"
     )
 
 
