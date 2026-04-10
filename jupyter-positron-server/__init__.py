@@ -51,13 +51,12 @@ def _make_mappath():
 
 def rewrite_response(response, request):
     """
-    Fix positron-server redirect Location headers and add token.
+    Fix positron-server redirect Location headers.
 
     positron-server returns Location: /user/X/positron when it should return /
     Then jupyter-server-proxy adds the prefix, causing doubling.
 
-    This strips the prefix so jupyter-server-proxy adds it correctly once,
-    and ensures the token is included in the redirect URL.
+    This strips the prefix so jupyter-server-proxy adds it correctly once.
     """
     for header, v in response.headers.get_all():
         if header == "Location":
@@ -65,12 +64,8 @@ def rewrite_response(response, request):
             match = re.match(r"^/user/[^/]+/positron(/.*)?$", u.path)
             if match:
                 fixed_path = match.group(1) if match.group(1) else "/"
-                # Preserve existing query or add token if missing
-                query = u.query
-                if "tkn=" not in query:
-                    query = f"tkn={_CONNECTION_TOKEN}" + ("&" + query if query else "")
                 logger.info(f"rewrite_response: {u.path} -> {fixed_path}")
-                response.headers[header] = urlunparse(u._replace(path=fixed_path, query=query))
+                response.headers[header] = urlunparse(u._replace(path=fixed_path))
     return response
 
 
