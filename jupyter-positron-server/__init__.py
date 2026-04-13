@@ -41,9 +41,9 @@ def _make_mappath():
         match = pattern.match(path)
         if match:
             rest = match.group(1) or "/"
-            logger.info(f"mappath: {path} -> {rest}")
+            logger.debug(f"mappath: {path} -> {rest}")
             return rest
-        logger.info(f"mappath: {path} (no match)")
+        logger.debug(f"mappath: {path} (no match)")
         return path
 
     return mappath
@@ -58,13 +58,13 @@ def rewrite_response(response, request):
 
     This strips the prefix so jupyter-server-proxy adds it correctly once.
     """
-    for header, v in response.headers.get_all():
-        if header == "Location":
+    for header, v in list(response.headers.items()):
+        if header.lower() == "location":
             u = urlparse(v)
             match = re.match(r"^/user/[^/]+/positron(/.*)?$", u.path)
             if match:
                 fixed_path = match.group(1) if match.group(1) else "/"
-                logger.info(f"rewrite_response: {u.path} -> {fixed_path}")
+                logger.debug(f"rewrite_response: {u.path} -> {fixed_path}")
                 response.headers[header] = urlunparse(u._replace(path=fixed_path))
     return response
 
@@ -137,7 +137,7 @@ def setup_positron_server():
     dict
         Configuration dictionary containing:
 
-        - `new_browser_window` (bool): Whether to open in a new browser window
+        - `new_browser_tab` (bool): Whether to open in a new browser tab
         - `timeout` (int): Server startup timeout in seconds
         - `launcher_entry` (dict): JupyterLab launcher configuration
         - `command` (list): Command to start server (empty if connecting to existing)
