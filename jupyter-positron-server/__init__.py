@@ -252,6 +252,4 @@ def setup_positron_server():
     )
 
     logger.info(f"Positron server command: {' '.join(full_command)}")
-    logger.info(f"Positron connection token: {_CONNECTION_TOKEN}")
-    logger.info(f"Access Positron at: <base_url>/positron/?tkn={_CONNECTION_TOKEN}")
     return proxy_config_dict
