@@ -1,5 +1,105 @@
 import os
 import pytest
+from unittest.mock import MagicMock
+
+
+class MockHeaders(dict):
+    """Mock HTTP headers that supports items() like tornado HTTPHeaders."""
+
+    def items(self):
+        return list(super().items())
+
+
+class TestRewriteResponse:
+    """Tests for the rewrite_response() function."""
+
+    def test_rewrite_location_strips_user_prefix(self):
+        """Test that Location header with /user/X/positron prefix is stripped."""
+        from jupyter_positron_server import rewrite_response
+
+        response = MagicMock()
+        response.headers = MockHeaders({"Location": "/user/admin/positron/"})
+        request = MagicMock()
+
+        result = rewrite_response(response, request)
+
+        assert result.headers["Location"] == "/"
+
+    def test_rewrite_location_with_path(self):
+        """Test that Location header preserves path after prefix."""
+        from jupyter_positron_server import rewrite_response
+
+        response = MagicMock()
+        response.headers = MockHeaders({"Location": "/user/admin/positron/some/path"})
+        request = MagicMock()
+
+        result = rewrite_response(response, request)
+
+        assert result.headers["Location"] == "/some/path"
+
+    def test_rewrite_location_different_usernames(self):
+        """Test that rewrite works with various usernames."""
+        from jupyter_positron_server import rewrite_response
+
+        for username in ["testuser", "user-123", "admin"]:
+            response = MagicMock()
+            response.headers = MockHeaders({"Location": f"/user/{username}/positron/api/v1"})
+            request = MagicMock()
+
+            result = rewrite_response(response, request)
+
+            assert result.headers["Location"] == "/api/v1"
+
+    def test_rewrite_location_case_insensitive_header(self):
+        """Test that Location header matching is case-insensitive."""
+        from jupyter_positron_server import rewrite_response
+
+        response = MagicMock()
+        response.headers = MockHeaders({"location": "/user/admin/positron/test"})
+        request = MagicMock()
+
+        result = rewrite_response(response, request)
+
+        assert result.headers["location"] == "/test"
+
+    def test_rewrite_preserves_absolute_url_components(self):
+        """Test that absolute URLs preserve scheme/host, only path is modified."""
+        from jupyter_positron_server import rewrite_response
+
+        response = MagicMock()
+        response.headers = MockHeaders({
+            "Location": "http://localhost:8080/user/admin/positron/dashboard?foo=bar"
+        })
+        request = MagicMock()
+
+        result = rewrite_response(response, request)
+
+        assert result.headers["Location"] == "http://localhost:8080/dashboard?foo=bar"
+
+    def test_rewrite_no_match_unchanged(self):
+        """Test that non-matching Location headers are unchanged."""
+        from jupyter_positron_server import rewrite_response
+
+        response = MagicMock()
+        response.headers = MockHeaders({"Location": "/api/contents"})
+        request = MagicMock()
+
+        result = rewrite_response(response, request)
+
+        assert result.headers["Location"] == "/api/contents"
+
+    def test_rewrite_no_location_header(self):
+        """Test that responses without Location header are unchanged."""
+        from jupyter_positron_server import rewrite_response
+
+        response = MagicMock()
+        response.headers = MockHeaders({"Content-Type": "text/html"})
+        request = MagicMock()
+
+        result = rewrite_response(response, request)
+
+        assert "Location" not in result.headers
+        assert result.headers["Content-Type"] == "text/html"
 
 
 class TestMakeMappath:

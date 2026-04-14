@@ -6,6 +6,7 @@ Positron Server within JupyterHub.
 """
 
 from shutil import which
+from urllib.parse import urlparse, urlunparse
 import logging
 import os
 import platform
@@ -13,6 +14,11 @@ import re
 import secrets
 
 logger = logging.getLogger(__name__)
+
+_HERE = os.path.dirname(os.path.abspath(__file__))
+
+# Generate token once at module load so it is consistent
+_CONNECTION_TOKEN = os.environ.get("POSITRON_CONNECTION_TOKEN", secrets.token_hex(16))
 
 
 def _make_mappath():
@@ -43,10 +49,24 @@ def _make_mappath():
     return mappath
 
 
-_HERE = os.path.dirname(os.path.abspath(__file__))
+def rewrite_response(response, request):
+    """
+    Fix positron-server redirect Location headers.
 
-# Generate token once at module load so it is consistent
-_CONNECTION_TOKEN = os.environ.get("POSITRON_CONNECTION_TOKEN", secrets.token_hex(16))
+    positron-server returns Location: /user/X/positron when it should return /
+    Then jupyter-server-proxy adds the prefix, causing doubling.
+
+    This strips the prefix so jupyter-server-proxy adds it correctly once.
+    """
+    for header, v in list(response.headers.items()):
+        if header.lower() == "location":
+            u = urlparse(v)
+            match = re.match(r"^/user/[^/]+/positron(/.*)?$", u.path)
+            if match:
+                fixed_path = match.group(1) if match.group(1) else "/"
+                logger.debug(f"rewrite_response: {u.path} -> {fixed_path}")
+                response.headers[header] = urlunparse(u._replace(path=fixed_path))
+    return response
 
 
 def which_positron_server():
@@ -117,7 +137,7 @@ def setup_positron_server():
     dict
         Configuration dictionary containing:
 
-        - `new_browser_window` (bool): Whether to open in a new browser window
+        - `new_browser_tab` (bool): Whether to open in a new browser tab
         - `timeout` (int): Server startup timeout in seconds
         - `launcher_entry` (dict): JupyterLab launcher configuration
         - `command` (list): Command to start server (empty if connecting to existing)
@@ -129,16 +149,19 @@ def setup_positron_server():
     which_positron_server : Locates the positron-server executable.
     """
     proxy_config_dict = {
-        "new_browser_window": True,
+        "new_browser_tab": True,
         "timeout": 120,
         "mappath": _make_mappath(),
+        "rewrite_response": rewrite_response,
+        # Clear X-Forwarded-Prefix to prevent positron-server from doubling URLs
+        "request_headers_override": {"X-Forwarded-Prefix": ""},
         "launcher_entry": {
             "enabled": False
             if os.environ.get("JSP_POSITRON_LAUNCHER_DISABLED")
             else True,
             "title": "Positron",
-            "path_info": f"positron?tkn={_CONNECTION_TOKEN}",
             "icon_path": os.path.join(_HERE, "icons/positron.svg"),
+            "path_info": f"positron/?tkn={_CONNECTION_TOKEN}",
         },
     }
 
@@ -186,9 +209,6 @@ def setup_positron_server():
         "{port}",
         "--connection-token",
         _CONNECTION_TOKEN,
-        # Note: --server-base-path is omitted. The proxy sends X-Forwarded-Prefix
-        # which positron-server uses, but it generates relative URLs that are doubled.
-        # We use mappath to fix the doubled paths instead.
     ]
 
     # Only pass license file if one was found
