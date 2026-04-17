@@ -14,18 +14,11 @@
     "text": "Prerequisites\nBefore installing, ensure you have:\n\nPython 3.9 or later\nPositron Server installed and accessible in your system’s PATH\nA valid Positron license key file"
   },
   {
-    "objectID": "get_started.html#install-the-jupyter-positron-server-package",
-    "href": "get_started.html#install-the-jupyter-positron-server-package",
-    "title": "Get Started",
-    "section": "Install the jupyter-positron-server package",
-    "text": "Install the jupyter-positron-server package\nInstall from PyPI:\npip install jupyter-positron-server\nOr install from source:\ngit clone https://github.com/posit-dev/jupyter-positron-server.git\ncd jupyter-positron-server\npip install -e ."
-  },
-  {
     "objectID": "get_started.html#server-setup",
     "href": "get_started.html#server-setup",
     "title": "Get Started",
     "section": "Server Setup",
-    "text": "Server Setup\n\n1. Download Positron Server\nDownload the Positron Server binary for your Linux architecture and add it to your PATH. For the latest release of Positron (April 2026), you can find the downloads here:\n\nx64: https://cdn.posit.co/positron/releases/server/x86_64/positron-server-linux-x64-2026.04.0-269.tar.gz\narm64: https://cdn.posit.co/positron/releases/server/arm64/positron-server-linux-arm64-2026.04.0-269.tar.gz\n\nAfter downloading, untar the archive and add it to your PATH.\n\n\n2. Set the License Key\nSet the POSITRON_LICENSE_KEY_FILE environment variable to point to your license file:\nexport POSITRON_LICENSE_KEY_FILE=/path/to/your/license.lic\n\n\n3. Start JupyterHub\nLog into JupyterHub.\n\n\n4. Open Positron\nClick the “Positron” icon in the JupyterLab launcher to start Positron Server."
+    "text": "Server Setup\n\n1. Get a License\nPositron Server is available for educational use only. Free licenses are available for currently enrolled students using Positron for coursework. Review the Positron Education License Rider for full eligibility terms.\nTo request a license, email academic-licenses@posit.co.\n\n\n2. Download Positron Server\nDownload the Positron Server binary for your Linux architecture. For the latest release of Positron (April 2026), you can find the downloads here:\n\nx64: https://cdn.posit.co/positron/releases/server/x86_64/positron-server-linux-x64-2026.04.0-269.tar.gz\narm64: https://cdn.posit.co/positron/releases/server/arm64/positron-server-linux-arm64-2026.04.0-269.tar.gz\n\nAfter downloading, untar the archive and add it to your PATH.\nIf you’re using curl, this step might look something like:\n# Download Positron server to temporary directory\n# Note: this is the url for arm64 architecture machines, \n# x64 machines should use the link provided above\ncurl -L \"https://cdn.posit.co/positron/releases/server/arm64/positron-server-linux-arm64-2026.04.0-269.tar.gz\" -o /tmp/positron-server.tar.gz\n\n# Create directory\nmkdir -p /opt/positron-server\n\n# Unpack Positron Server into newly created directory\ntar -xzf /tmp/positron-server.tar.gz -C /opt/positron-server --strip-components=1\n\n\n3. Set the License Key\nSet the POSITRON_LICENSE_KEY_FILE environment variable to the path of your license key file. If POSITRON_LICENSE_KEY_FILE is unset, Positron will look for a license file at /opt/license.lic, so place your license file there or set the environment variable to the location where your license file actually lives:\nexport POSITRON_LICENSE_KEY_FILE=/path/to/your/license.lic\n\n\n4. Install the jupyter-positron-server package\nInstall jupyter-positron-server in an environment that is available to all users of your JupyterHub server.\npip install jupyter-positron-server\n\n\n5. Restart your Jupyter server\n\nStart or restart your Jupyter server. In JupyterHub, you can do this by selecting File &gt; Hub Control Panel, then clicking Stop My Server and Start My Server.\nClick the “Positron” icon in the JupyterLab launcher."
   },
   {
     "objectID": "get_started.html#how-it-works",

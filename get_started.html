@@ -161,13 +161,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
    
   <ul>
   <li><a href="#prerequisites" id="toc-prerequisites" class="nav-link active" data-scroll-target="#prerequisites">Prerequisites</a></li>
-  <li><a href="#install-the-jupyter-positron-server-package" id="toc-install-the-jupyter-positron-server-package" class="nav-link" data-scroll-target="#install-the-jupyter-positron-server-package">Install the <code>jupyter-positron-server</code> package</a></li>
   <li><a href="#server-setup" id="toc-server-setup" class="nav-link" data-scroll-target="#server-setup">Server Setup</a>
   <ul class="collapse">
-  <li><a href="#download-positron-server" id="toc-download-positron-server" class="nav-link" data-scroll-target="#download-positron-server">1. Download Positron Server</a></li>
-  <li><a href="#set-the-license-key" id="toc-set-the-license-key" class="nav-link" data-scroll-target="#set-the-license-key">2. Set the License Key</a></li>
-  <li><a href="#start-jupyterhub" id="toc-start-jupyterhub" class="nav-link" data-scroll-target="#start-jupyterhub">3. Start JupyterHub</a></li>
-  <li><a href="#open-positron" id="toc-open-positron" class="nav-link" data-scroll-target="#open-positron">4. Open Positron</a></li>
+  <li><a href="#get-a-license" id="toc-get-a-license" class="nav-link" data-scroll-target="#get-a-license">1. Get a License</a></li>
+  <li><a href="#download-positron-server" id="toc-download-positron-server" class="nav-link" data-scroll-target="#download-positron-server">2. Download Positron Server</a></li>
+  <li><a href="#set-the-license-key" id="toc-set-the-license-key" class="nav-link" data-scroll-target="#set-the-license-key">3. Set the License Key</a></li>
+  <li><a href="#install-the-jupyter-positron-server-package" id="toc-install-the-jupyter-positron-server-package" class="nav-link" data-scroll-target="#install-the-jupyter-positron-server-package">4. Install the <code>jupyter-positron-server</code> package</a></li>
+  <li><a href="#restart-your-jupyter-server" id="toc-restart-your-jupyter-server" class="nav-link" data-scroll-target="#restart-your-jupyter-server">5. Restart your Jupyter server</a></li>
   </ul></li>
   <li><a href="#how-it-works" id="toc-how-it-works" class="nav-link" data-scroll-target="#how-it-works">How It Works</a></li>
   <li><a href="#next-steps" id="toc-next-steps" class="nav-link" data-scroll-target="#next-steps">Next Steps</a></li>
@@ -206,38 +206,49 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li><strong>A valid Positron license key file</strong></li>
 </ol>
 </section>
-<section id="install-the-jupyter-positron-server-package" class="level2">
-<h2 class="anchored" data-anchor-id="install-the-jupyter-positron-server-package">Install the <code>jupyter-positron-server</code> package</h2>
-<p>Install from PyPI:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">pip</span> install jupyter-positron-server</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>Or install from source:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> clone https://github.com/posit-dev/jupyter-positron-server.git</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> jupyter-positron-server</span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="ex">pip</span> install <span class="at">-e</span> .</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</section>
 <section id="server-setup" class="level2">
 <h2 class="anchored" data-anchor-id="server-setup">Server Setup</h2>
+<section id="get-a-license" class="level3">
+<h3 class="anchored" data-anchor-id="get-a-license">1. Get a License</h3>
+<p>Positron Server is available for educational use only. Free licenses are available for currently enrolled students using Positron for coursework. Review the <a href="https://github.com/posit-dev/positron/blob/main/LICENSE.txt">Positron Education License Rider</a> for full eligibility terms.</p>
+<p>To request a license, email <a href="mailto:academic-licenses@posit.co">academic-licenses@posit.co</a>.</p>
+</section>
 <section id="download-positron-server" class="level3">
-<h3 class="anchored" data-anchor-id="download-positron-server">1. Download Positron Server</h3>
-<p>Download the Positron Server binary for your Linux architecture and add it to your PATH. For the latest release of Positron (April 2026), you can find the downloads here:</p>
+<h3 class="anchored" data-anchor-id="download-positron-server">2. Download Positron Server</h3>
+<p>Download the Positron Server binary for your Linux architecture. For the latest release of Positron (April 2026), you can find the downloads here:</p>
 <ul>
-<li><strong>x64</strong>: <a href="https://cdn.posit.co/positron/releases/server/x86_64/positron-server-linux-x64-2026.04.0-269.tar.gz" class="uri">https://cdn.posit.co/positron/releases/server/x86_64/positron-server-linux-x64-2026.04.0-269.tar.gz</a></li>
-<li><strong>arm64</strong>: <a href="https://cdn.posit.co/positron/releases/server/arm64/positron-server-linux-arm64-2026.04.0-269.tar.gz" class="uri">https://cdn.posit.co/positron/releases/server/arm64/positron-server-linux-arm64-2026.04.0-269.tar.gz</a></li>
+<li><strong>x64</strong>: https://cdn.posit.co/positron/releases/server/x86_64/positron-server-linux-x64-2026.04.0-269.tar.gz</li>
+<li><strong>arm64</strong>: https://cdn.posit.co/positron/releases/server/arm64/positron-server-linux-arm64-2026.04.0-269.tar.gz</li>
 </ul>
 <p>After downloading, untar the archive and add it to your PATH.</p>
+<p>If you’re using <code>curl</code>, this step might look something like:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode zsh code-with-copy"><code class="sourceCode zsh"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Download Positron server to temporary directory</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Note: this is the url for arm64 architecture machines, </span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="co"># x64 machines should use the link provided above</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-L</span> <span class="st">"https://cdn.posit.co/positron/releases/server/arm64/positron-server-linux-arm64-2026.04.0-269.tar.gz"</span> <span class="at">-o</span> /tmp/positron-server.tar.gz</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Create directory</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="fu">mkdir</span> <span class="at">-p</span> /opt/positron-server</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Unpack Positron Server into newly created directory</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="fu">tar</span> <span class="at">-xzf</span> /tmp/positron-server.tar.gz <span class="at">-C</span> /opt/positron-server <span class="at">--strip-components</span><span class="op">=</span>1</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
 <section id="set-the-license-key" class="level3">
-<h3 class="anchored" data-anchor-id="set-the-license-key">2. Set the License Key</h3>
-<p>Set the <code>POSITRON_LICENSE_KEY_FILE</code> environment variable to point to your license file:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="bu">export</span> <span class="va">POSITRON_LICENSE_KEY_FILE</span><span class="op">=</span>/path/to/your/license.lic</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<h3 class="anchored" data-anchor-id="set-the-license-key">3. Set the License Key</h3>
+<p>Set the <code>POSITRON_LICENSE_KEY_FILE</code> environment variable to the path of your license key file. If <code>POSITRON_LICENSE_KEY_FILE</code> is unset, Positron will look for a license file at <code>/opt/license.lic</code>, so place your license file there or set the environment variable to the location where your license file actually lives:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="bu">export</span> <span class="va">POSITRON_LICENSE_KEY_FILE</span><span class="op">=</span>/path/to/your/license.lic</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
-<section id="start-jupyterhub" class="level3">
-<h3 class="anchored" data-anchor-id="start-jupyterhub">3. Start JupyterHub</h3>
-<p>Log into JupyterHub.</p>
+<section id="install-the-jupyter-positron-server-package" class="level3">
+<h3 class="anchored" data-anchor-id="install-the-jupyter-positron-server-package">4. Install the <code>jupyter-positron-server</code> package</h3>
+<p>Install <code>jupyter-positron-server</code> in an environment that is available to all users of your JupyterHub server.</p>
+<pre class="shell"><code>pip install jupyter-positron-server</code></pre>
 </section>
-<section id="open-positron" class="level3">
-<h3 class="anchored" data-anchor-id="open-positron">4. Open Positron</h3>
-<p>Click the “Positron” icon in the JupyterLab launcher to start Positron Server.</p>
+<section id="restart-your-jupyter-server" class="level3">
+<h3 class="anchored" data-anchor-id="restart-your-jupyter-server">5. Restart your Jupyter server</h3>
+<ol type="1">
+<li><p>Start or restart your Jupyter server. In JupyterHub, you can do this by selecting <code>File</code> &gt; <code>Hub Control Panel</code>, then clicking <code>Stop My Server</code> and <code>Start My Server</code>.</p></li>
+<li><p>Click the “Positron” icon in the JupyterLab launcher.</p></li>
+</ol>
 </section>
 </section>
 <section id="how-it-works" class="level2">
