@@ -12,22 +12,6 @@ Before installing, ensure you have:
 2. **Positron Server** installed and accessible in your system's PATH
 3. **A valid Positron license key file**
 
-## Install the `jupyter-positron-server` package
-
-Install from PyPI:
-
-```bash
-pip install jupyter-positron-server
-```
-
-Or install from source:
-
-```bash
-git clone https://github.com/posit-dev/jupyter-positron-server.git
-cd jupyter-positron-server
-pip install -e .
-```
-
 ## Server Setup
 
 ### 1. Get a License
@@ -49,6 +33,8 @@ If you're using `curl`, this step might look something like:
 
 ```zsh
 # Download Positron server to temporary directory
+# Note: this is the url for arm64 architecture machines, 
+# x64 machines should use the link provided above
 curl -L "https://cdn.posit.co/positron/releases/server/arm64/positron-server-linux-arm64-2026.04.0-269.tar.gz" -o /tmp/positron-server.tar.gz
 
 # Create directory

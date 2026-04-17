@@ -37,6 +37,8 @@ If you're using `curl`, this step might look something like:
 
 ```zsh
 # Download Positron server to temporary directory
+# Note: this is the url for arm64 architecture machines, 
+# x64 machines should use the link provided above
 curl -L "https://cdn.posit.co/positron/releases/server/arm64/positron-server-linux-arm64-2026.04.0-269.tar.gz" -o /tmp/positron-server.tar.gz
 
 # Create directory
@@ -54,7 +56,8 @@ To request a license, email [academic-licenses@posit.co](mailto:academic-license
 
 ### Set the License Key
 
-Set the `POSITRON_LICENSE_KEY_FILE` environment variable to the path of your license key file (defaults to `/opt/license.lic` if not set):
+Set the `POSITRON_LICENSE_KEY_FILE` environment variable to the path of your license key file. 
+If `POSITRON_LICENSE_KEY_FILE` is unset, Positron will look for a license file at `/opt/license.lic`, so place your license file there or set the environment variable to the location where your license file actually lives:
 
 ```bash
 export POSITRON_LICENSE_KEY_FILE=/path/to/your/license.lic
@@ -70,6 +73,6 @@ pip install jupyter-positron-server
 
 ### Start your Jupyter server
 
-1. Start or restart your Jupyter server. One way to do this is by going to (in JupyterHub) File > Hub Control Panel >  press "Stop My Server" > press "Start My Server"
+1. Start or restart your Jupyter server. In JupyterHub, you can do this by selecting `File` > `Hub Control Panel`, then clicking `Stop My Server` and `Start My Server`.
 
 2. Click the "Positron" icon in the JupyterLab launcher.
