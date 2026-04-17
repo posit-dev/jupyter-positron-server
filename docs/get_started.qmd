@@ -60,7 +60,7 @@ tar -xzf /tmp/positron-server.tar.gz -C /opt/positron-server --strip-components=
 
 ### 3. Set the License Key
 
-Set the `POSITRON_LICENSE_KEY_FILE` environment variable to the path of your license key file (defaults to `/opt/license.lic` if not set):
+Set the `POSITRON_LICENSE_KEY_FILE` environment variable to the path of your license key file. If `POSITRON_LICENSE_KEY_FILE` is unset, Positron will look for a license file at `/opt/license.lic`, so place your license file there or set the environment variable to the location where your license file actually lives:
 
 ```bash
 export POSITRON_LICENSE_KEY_FILE=/path/to/your/license.lic
@@ -76,7 +76,7 @@ pip install jupyter-positron-server
 
 ### 5. Restart your Jupyter server
 
-1. Start or restart your Jupyter server. One way to do this is by going to (in JupyterHub) File > Hub Control Panel >  press "Stop My Server" > press "Start My Server"
+1. Start or restart your Jupyter server. In JupyterHub, you can do this by selecting `File` > `Hub Control Panel`, then clicking `Stop My Server` and `Start My Server`.
 
 2. Click the "Positron" icon in the JupyterLab launcher.
 
