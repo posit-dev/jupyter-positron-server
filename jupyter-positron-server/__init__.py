@@ -34,8 +34,11 @@ def _make_mappath():
 
     This function strips that extra prefix to get: /oss-dev/...
     """
-    # Match /user/USERNAME/positron at the start, capture everything after
-    pattern = re.compile(r"^/user/[^/]+/positron(/.*)$")
+    base_url = os.environ.get("JUPYTERHUB_BASE_URL", "").strip("/")
+    prefix = f"/{base_url}" if base_url else ""
+    pattern = re.compile(
+        rf"^{re.escape(prefix)}/user/[^/]+/positron(/.*)?$"
+    )
 
     def mappath(path):
         match = pattern.match(path)
@@ -58,10 +61,15 @@ def rewrite_response(response, request):
 
     This strips the prefix so jupyter-server-proxy adds it correctly once.
     """
+    base_url = os.environ.get("JUPYTERHUB_BASE_URL", "").strip("/")
+    prefix = f"/{base_url}" if base_url else ""
+    rewrite_pattern = re.compile(
+        rf"^{re.escape(prefix)}/user/[^/]+/positron(/.*)?$"
+    )
     for header, v in list(response.headers.items()):
         if header.lower() == "location":
             u = urlparse(v)
-            match = re.match(r"^/user/[^/]+/positron(/.*)?$", u.path)
+            match = rewrite_pattern.match(u.path)
             if match:
                 fixed_path = match.group(1) if match.group(1) else "/"
                 logger.debug(f"rewrite_response: {u.path} -> {fixed_path}")
@@ -100,8 +108,9 @@ def which_positron_server():
     ]
 
     # First check if it's in PATH
-    if which(prog):
-        return prog
+    found = which(prog)
+    if found:
+        return found
 
     # Fall back to known locations
     for path in known_paths:
@@ -201,6 +210,9 @@ def setup_positron_server():
                 "No license file found, positron-server will use system license"
             )
 
+    service_prefix = os.environ.get("JUPYTERHUB_SERVICE_PREFIX", "/").rstrip("/")
+    server_base_path = service_prefix + "/positron"
+
     command_arguments = [
         "--accept-server-license-terms",
         "--host",
@@ -209,6 +221,8 @@ def setup_positron_server():
         "{port}",
         "--connection-token",
         _CONNECTION_TOKEN,
+        "--server-base-path",
+        server_base_path,
     ]
 
     # Only pass license file if one was found
