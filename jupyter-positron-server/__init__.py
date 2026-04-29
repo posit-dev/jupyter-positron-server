@@ -12,6 +12,7 @@ import os
 import platform
 import re
 import secrets
+import shlex
 
 logger = logging.getLogger(__name__)
 
@@ -132,6 +133,11 @@ def setup_positron_server():
     - If `JSP_POSITRON_SOCKET` is set, connects to an existing server via UNIX socket
     - Otherwise, starts a new positron-server process
 
+    Working Directory Configuration:
+    - `POSITRON_WORKSPACE`: Explicit workspace directory (highest priority)
+    - `JUPYTER_SERVER_ROOT`: Jupyter server's root directory
+    - Falls back to current working directory if neither is set
+
     Returns
     -------
     dict
@@ -178,6 +184,22 @@ def setup_positron_server():
         return proxy_config_dict
 
     host = os.environ.get("POSITRON_HOST", "127.0.0.1")
+
+    # Determine working directory for positron-server
+    # Priority: POSITRON_WORKSPACE > JUPYTER_SERVER_ROOT > current directory
+    workspace_dir = os.environ.get(
+        "POSITRON_WORKSPACE",
+        os.environ.get("JUPYTER_SERVER_ROOT", os.getcwd())
+    )
+    # Expand ~ and resolve to absolute path
+    workspace_dir = os.path.abspath(os.path.expanduser(workspace_dir))
+
+    # Ensure workspace directory exists
+    if not os.path.exists(workspace_dir):
+        logger.info(f"Creating workspace directory: {workspace_dir}")
+        os.makedirs(workspace_dir, exist_ok=True)
+
+    logger.info(f"Positron will launch in workspace: {workspace_dir}")
 
     # Find license file: check env var first, then default location
     # If no license file found, let positron-server use system license
@@ -238,12 +260,18 @@ def setup_positron_server():
 
     ld_library_path = f"/usr/local/lib:{activation_path}"
 
-    # Use env command to set LD_LIBRARY_PATH reliably
-    full_command = [
-        "/usr/bin/env",
-        f"LD_LIBRARY_PATH={ld_library_path}",
-        positron_server_path,
-    ] + command_arguments
+    # Build the positron-server command
+    positron_command = [positron_server_path] + command_arguments
+
+    # Use shell to change directory and set environment before running positron-server
+    # This ensures positron-server starts from the correct working directory
+    shell_command = (
+        f"cd {shlex.quote(workspace_dir)} && "
+        f"LD_LIBRARY_PATH={shlex.quote(ld_library_path)} "
+        f"{shlex.join(positron_command)}"
+    )
+
+    full_command = ["/bin/bash", "-c", shell_command]
 
     proxy_config_dict.update(
         {
