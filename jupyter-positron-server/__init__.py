@@ -200,14 +200,9 @@ def setup_positron_server():
                 f"to the correct path."
             )
     else:
-        default_license_path = "/opt/license.lic"
-        if os.path.exists(default_license_path):
-            license_key_file = default_license_path
-            logger.info(f"Using default license file: {license_key_file}")
-        else:
-            logger.info(
-                "No license file found, positron-server will use system license"
-            )
+        logger.info(
+            "No POSITRON_LICENSE_KEY_FILE set; positron-server will attempt to locate a license"
+        )
 
     # JUPYTERHUB_SERVICE_PREFIX (e.g. /jh/user/alice/) already includes
     # JUPYTERHUB_BASE_URL as a leading segment — JupyterHub guarantees this.
