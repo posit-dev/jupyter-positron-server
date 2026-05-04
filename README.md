@@ -26,10 +26,10 @@ pip install -e .
 
 ### Download Positron Server
 
-Download the Positron Server binary for your Linux architecture. For the latest release of Positron (April 2026), you can find the downloads here:
+Download the Positron Server binary for your Linux architecture. For the latest release of Positron (May 2026), you can find the downloads here:
 
-- **x64**: https://cdn.posit.co/positron/releases/server/x86_64/positron-server-linux-x64-2026.04.0-269.tar.gz
-- **arm64**: https://cdn.posit.co/positron/releases/server/arm64/positron-server-linux-arm64-2026.04.0-269.tar.gz
+- [Download Linux x64 build](https://github.com/posit-dev/positron-builds/releases/download/2026.05.0-179/positron-server-linux-x64-2026.05.0-179.tar.gz)
+- [Download Linux arm64 build](https://github.com/posit-dev/positron-builds/releases/download/2026.05.0-179/positron-server-linux-arm64-2026.05.0-179.tar.gz)
 
 After downloading, untar the archive and add it to your PATH.
 
@@ -37,9 +37,8 @@ If you're using `curl`, this step might look something like:
 
 ```zsh
 # Download Positron server to temporary directory
-# Note: this is the url for arm64 architecture machines, 
-# x64 machines should use the link provided above
-curl -L "https://cdn.posit.co/positron/releases/server/arm64/positron-server-linux-arm64-2026.04.0-269.tar.gz" -o /tmp/positron-server.tar.gz
+# Note: this is the url for x64 architecture machines
+curl -L "https://github.com/posit-dev/positron-builds/releases/download/2026.05.0-179/positron-server-linux-x64-2026.05.0-179.tar.gz" -o /tmp/positron-server.tar.gz
 
 # Create directory
 mkdir -p /opt/positron-server
@@ -57,7 +56,7 @@ To request a license, email [academic-licenses@posit.co](mailto:academic-license
 ### Set the License Key
 
 Set the `POSITRON_LICENSE_KEY_FILE` environment variable to the path of your license key file. 
-If `POSITRON_LICENSE_KEY_FILE` is unset, Positron will look for a license file at `/opt/license.lic`, so place your license file there or set the environment variable to the location where your license file actually lives:
+If `POSITRON_LICENSE_KEY_FILE` is unset, Positron will look for a license file at `/opt/positron-server/resources/activation/linux/{ARCH}/license.lic` (where `{ARCH}` is `x86_64` or `aarch64` depending on your Linux server's architecture), so place your license file there or set the environment variable to the location where your license file actually lives:
 
 ```bash
 export POSITRON_LICENSE_KEY_FILE=/path/to/your/license.lic

@@ -10,13 +10,14 @@ title: "Configuration"
 
 | Variable | Description |
 |----------|-------------|
-| `POSITRON_LICENSE_KEY_FILE` | Path to your Positron license key file. Defaults to `/opt/license.lic` if not set. |
+| `POSITRON_LICENSE_KEY_FILE` | Path to your Positron license key file. Defaults to `/opt/positron-server/resources/activation/linux/{ARCH}/license.lic` (where `{ARCH}` is `x86_64` or `aarch64`) if not set. |
 
 ### Optional
 
 | Variable | Description |
 |----------|-------------|
 | `POSITRON_CONNECTION_TOKEN` | Custom connection token for authentication. If not set, a secure random token is generated automatically. |
+| `POSITRON_ENFORCED_SETTINGS` | A single-line JSON object of Positron settings to lock at the application level. Users cannot override enforced settings via the Settings UI or `settings.json`. Requires `jupyter-positron-server >= 0.0.4` and Positron Server `>= 2026.05.179`. |
 | `POSITRON_HOST` | Host address for Positron Server to bind to. Defaults to `127.0.0.1`. |
 | `JSP_POSITRON_LAUNCHER_DISABLED` | Set to any value to hide the Positron launcher entry in JupyterLab. |
 
@@ -30,6 +31,33 @@ If you have Positron Server already running, you can connect to it instead of st
 | `JSP_POSITRON_SOCKET` | Path to a UNIX socket of an already-running Positron Server instance. |
 
 When either `JSP_POSITRON_PORT` or `JSP_POSITRON_SOCKET` is set, no new server process will be started.
+
+## Admin-Enforced Settings
+
+`POSITRON_ENFORCED_SETTINGS` lets administrators lock Positron settings so users cannot override them via the Settings UI or by editing `settings.json` directly. Locked settings appear grayed out with a policy indicator in the UI. Enforced settings survive profile changes, workspace switches, and direct edits to `~/.positron-server/data/User/settings.json`.
+
+**Requirements:** `jupyter-positron-server >= 0.0.4`, Positron Server `>= 2026.06.0`
+
+The value must be a single-line JSON object:
+
+```
+POSITRON_ENFORCED_SETTINGS='{"workbench.colorTheme":"Default Positron Dark","extensions.autoUpdate":false,"telemetry.telemetryLevel":"off"}'
+```
+
+### Enforcing Settings on The Littlest JupyterHub (TLJH)
+
+**Step 1 — Create the config file**
+
+```bash
+cat > /opt/tljh/config/jupyterhub_config.d/positron_enforced.py << 'EOF'
+c.Spawner.environment = {
+    'POSITRON_ENFORCED_SETTINGS': '{"workbench.colorTheme":"Default Positron Dark","extensions.autoUpdate":false}'
+}
+EOF
+```
+
+Existing user sessions are not affected until they start a new session.
+
 
 ## Configuration Examples
 
