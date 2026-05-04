@@ -166,16 +166,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#optional" id="toc-optional" class="nav-link" data-scroll-target="#optional">Optional</a></li>
   <li><a href="#connecting-to-an-existing-server" id="toc-connecting-to-an-existing-server" class="nav-link" data-scroll-target="#connecting-to-an-existing-server">Connecting to an Existing Server</a></li>
   </ul></li>
-  <li><a href="#configuration-examples" id="toc-configuration-examples" class="nav-link" data-scroll-target="#configuration-examples">Configuration Examples</a>
-  <ul class="collapse">
-  <li><a href="#basic-setup" id="toc-basic-setup" class="nav-link" data-scroll-target="#basic-setup">Basic Setup</a></li>
-  <li><a href="#custom-host-binding" id="toc-custom-host-binding" class="nav-link" data-scroll-target="#custom-host-binding">Custom Host Binding</a></li>
-  <li><a href="#connect-to-existing-server-on-tcp-port" id="toc-connect-to-existing-server-on-tcp-port" class="nav-link" data-scroll-target="#connect-to-existing-server-on-tcp-port">Connect to Existing Server on TCP Port</a></li>
-  <li><a href="#connect-to-existing-server-via-unix-socket" id="toc-connect-to-existing-server-via-unix-socket" class="nav-link" data-scroll-target="#connect-to-existing-server-via-unix-socket">Connect to Existing Server via UNIX Socket</a></li>
-  <li><a href="#disable-launcher-entry" id="toc-disable-launcher-entry" class="nav-link" data-scroll-target="#disable-launcher-entry">Disable Launcher Entry</a></li>
-  </ul></li>
-  <li><a href="#server-command-arguments" id="toc-server-command-arguments" class="nav-link" data-scroll-target="#server-command-arguments">Server Command Arguments</a></li>
-  <li><a href="#server-discovery" id="toc-server-discovery" class="nav-link" data-scroll-target="#server-discovery">Server Discovery</a></li>
+  <li><a href="#admin-enforced-settings" id="toc-admin-enforced-settings" class="nav-link" data-scroll-target="#admin-enforced-settings">Admin-Enforced Settings</a></li>
   </ul>
 </nav>
     </div>
@@ -220,7 +211,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <tbody>
 <tr class="odd">
 <td><code>POSITRON_LICENSE_KEY_FILE</code></td>
-<td>Path to your Positron license key file. Defaults to <code>/opt/license.lic</code> if not set.</td>
+<td>Path to your Positron license key file. Defaults to <code>/opt/positron-server/resources/activation/linux/{ARCH}/license.lic</code> (where <code>{ARCH}</code> is <code>x86_64</code> or <code>aarch64</code>) if not set.</td>
 </tr>
 </tbody>
 </table>
@@ -244,10 +235,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td>Custom connection token for authentication. If not set, a secure random token is generated automatically.</td>
 </tr>
 <tr class="even">
+<td><code>POSITRON_ENFORCED_SETTINGS</code></td>
+<td>A single-line JSON object of Positron settings to lock at the application level. Users cannot override enforced settings via the Settings UI or <code>settings.json</code>. Requires <code>jupyter-positron-server &gt;= 0.0.4</code> and Positron Server <code>&gt;= 2026.05.0-179</code>.</td>
+</tr>
+<tr class="odd">
 <td><code>POSITRON_HOST</code></td>
 <td>Host address for Positron Server to bind to. Defaults to <code>127.0.0.1</code>.</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><code>JSP_POSITRON_LAUNCHER_DISABLED</code></td>
 <td>Set to any value to hide the Positron launcher entry in JupyterLab.</td>
 </tr>
@@ -282,55 +277,17 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>When either <code>JSP_POSITRON_PORT</code> or <code>JSP_POSITRON_SOCKET</code> is set, no new server process will be started.</p>
 </section>
 </section>
-<section id="configuration-examples" class="level2">
-<h2 class="anchored" data-anchor-id="configuration-examples">Configuration Examples</h2>
-<section id="basic-setup" class="level3">
-<h3 class="anchored" data-anchor-id="basic-setup">Basic Setup</h3>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="bu">export</span> <span class="va">POSITRON_LICENSE_KEY_FILE</span><span class="op">=</span>/opt/positron/license.lic</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="ex">jupyter</span> lab</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</section>
-<section id="custom-host-binding" class="level3">
-<h3 class="anchored" data-anchor-id="custom-host-binding">Custom Host Binding</h3>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="bu">export</span> <span class="va">POSITRON_LICENSE_KEY_FILE</span><span class="op">=</span>/opt/positron/license.lic</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="bu">export</span> <span class="va">POSITRON_HOST</span><span class="op">=</span>0.0.0.0</span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="ex">jupyter</span> lab</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</section>
-<section id="connect-to-existing-server-on-tcp-port" class="level3">
-<h3 class="anchored" data-anchor-id="connect-to-existing-server-on-tcp-port">Connect to Existing Server on TCP Port</h3>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="bu">export</span> <span class="va">JSP_POSITRON_PORT</span><span class="op">=</span>8787</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="ex">jupyter</span> lab</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</section>
-<section id="connect-to-existing-server-via-unix-socket" class="level3">
-<h3 class="anchored" data-anchor-id="connect-to-existing-server-via-unix-socket">Connect to Existing Server via UNIX Socket</h3>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="bu">export</span> <span class="va">JSP_POSITRON_SOCKET</span><span class="op">=</span>/tmp/positron.sock</span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="ex">jupyter</span> lab</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</section>
-<section id="disable-launcher-entry" class="level3">
-<h3 class="anchored" data-anchor-id="disable-launcher-entry">Disable Launcher Entry</h3>
-<p>If you want to install the package but not show the launcher icon:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="bu">export</span> <span class="va">JSP_POSITRON_LAUNCHER_DISABLED</span><span class="op">=</span>1</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="ex">jupyter</span> lab</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</section>
-</section>
-<section id="server-command-arguments" class="level2">
-<h2 class="anchored" data-anchor-id="server-command-arguments">Server Command Arguments</h2>
-<p>When starting a new Positron Server process, the following arguments are passed automatically:</p>
-<ul>
-<li><code>--accept-server-license-terms</code> - Accepts the license terms</li>
-<li><code>--host &lt;POSITRON_HOST&gt;</code> - Binds to the configured host (default: <code>127.0.0.1</code>)</li>
-<li><code>--port &lt;port&gt;</code> - Uses the port assigned by jupyter-server-proxy</li>
-<li><code>--connection-token &lt;token&gt;</code> - Uses the generated or configured connection token</li>
-<li><code>--server-base-path /positron/</code> - Sets the base path for the proxy</li>
-</ul>
-</section>
-<section id="server-discovery" class="level2">
-<h2 class="anchored" data-anchor-id="server-discovery">Server Discovery</h2>
-<p>The package looks for the <code>positron-server</code> executable in the following order:</p>
-<ol type="1">
-<li>In the system PATH (via <code>which positron-server</code>)</li>
-<li>At the default location: <code>/opt/vscode-reh-web-server-linux-arm64/bin/positron-server</code></li>
-</ol>
-<p>If neither is found, a <code>FileNotFoundError</code> is raised.</p>
+<section id="admin-enforced-settings" class="level2">
+<h2 class="anchored" data-anchor-id="admin-enforced-settings">Admin-Enforced Settings</h2>
+<p><code>POSITRON_ENFORCED_SETTINGS</code> lets administrators lock Positron settings so users cannot override them via the Settings UI or by editing <code>settings.json</code> directly. Locked settings appear grayed out with a policy indicator in the UI. Enforced settings survive profile changes, workspace switches, and direct edits to <code>~/.positron-server/data/User/settings.json</code>.</p>
+<p><strong>Requirements:</strong> <code>jupyter-positron-server &gt;= 0.0.4</code>, Positron Server <code>&gt;= 2026.05.0-179</code></p>
+<p><strong>Step 1 — Create the config file</strong></p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span> <span class="op">&gt;</span> /opt/tljh/config/jupyterhub_config.d/positron_enforced.py <span class="op">&lt;&lt; 'EOF'</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="st">c.Spawner.environment = {</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="st">    'POSITRON_ENFORCED_SETTINGS': '{"workbench.colorTheme":"Default Positron Dark","extensions.autoUpdate":false}'</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="st">}</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="op">EOF</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Existing user sessions are not affected until they start a new session.</p>
 
 
 </section>

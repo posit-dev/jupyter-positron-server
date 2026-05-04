@@ -200,15 +200,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="quick-start" class="level2">
 <h2 class="anchored" data-anchor-id="quick-start">Quick Start</h2>
 <ol type="1">
-<li><a href="#getting-a-license">Request a free educational license</a></li>
-<li><a href="./get_started.html#download-positron-server">Download Positron Server</a> and add it to your PATH</li>
-<li>Set your license file path (defaults to <code>/opt/license.lic</code> if not set):</li>
+<li><p><a href="#getting-a-license">Request a free educational license</a></p></li>
+<li><p><a href="./get_started.html#download-positron-server">Download Positron Server</a> and add it to your PATH</p></li>
+<li><p>Place your license at <code>&lt;positron_root&gt;/resources/activation/linux/{ARCH}/license.lic</code>, where <code>{ARCH}</code> is <code>x86_64</code> or <code>aarch64</code>.</p></li>
+<li><p>Install the package:</p></li>
 </ol>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="bu">export</span> <span class="va">POSITRON_LICENSE_KEY_FILE</span><span class="op">=</span>/path/to/your/license.lic</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<ol start="4" type="1">
-<li>Install the package:</li>
-</ol>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">pip</span> install jupyter-positron-server</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">pip</span> install jupyter-positron-server</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>After setup, start JupyterLab and click the “Positron” icon in the launcher to open Positron Server.</p>
 <p>See the <a href="./get_started.html">Get Started</a> guide for detailed setup instructions.</p>
 </section>
