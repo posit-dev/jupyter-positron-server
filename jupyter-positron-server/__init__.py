@@ -201,7 +201,7 @@ def setup_positron_server():
             )
     else:
         logger.info(
-            "No license file found, positron-server will attempt to find license"
+            "No POSITRON_LICENSE_KEY_FILE set; positron-server will attempt to locate a license"
         )
 
     # JUPYTERHUB_SERVICE_PREFIX (e.g. /jh/user/alice/) already includes
