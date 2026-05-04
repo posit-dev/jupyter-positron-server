@@ -55,7 +55,7 @@ To request a license, email [academic-licenses@posit.co](mailto:academic-license
 
 ### Set the License Key
 
-Positron will look for a license file at `/opt/positron-server/resources/activation/linux/{ARCH}/license.lic` (where `{ARCH}` is `x86_64` or `aarch64` depending on your Linux server's architecture).
+Assuming you have downloaded `positron-server` into `/opt/positron-server`,Positron will look for a license file at `/opt/positron-server/resources/activation/linux/{ARCH}/license.lic` (where `{ARCH}` is `x86_64` or `aarch64` depending on your Linux server's architecture).
 
 ### Install the `jupyter-positron-server` package
 

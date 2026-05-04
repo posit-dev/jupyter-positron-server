@@ -14,7 +14,7 @@ This project draws inspiration from [jupyter-rsession-proxy](https://github.com/
 
 1. [Request a free educational license](#getting-a-license)
 2. [Download Positron Server](get_started.qmd#download-positron-server) and add it to your PATH
-3. Place your license at `/opt/positron-server/resources/activation/linux/{ARCH}/license.lic`, where `{ARCH}` is `x86_64` or `aarch64` depending on your server's architecture.
+3. Assuming Positron Server was downloaded to `/opt/`, place your license at `/opt/positron-server/resources/activation/linux/{ARCH}/license.lic`, where `{ARCH}` is `x86_64` or `aarch64` depending on your server's architecture.
 
 4. Install the package:
 

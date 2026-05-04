@@ -17,7 +17,7 @@ title: "Configuration"
 | Variable | Description |
 |----------|-------------|
 | `POSITRON_CONNECTION_TOKEN` | Custom connection token for authentication. If not set, a secure random token is generated automatically. |
-| `POSITRON_ENFORCED_SETTINGS` | A single-line JSON object of Positron settings to lock at the application level. Users cannot override enforced settings via the Settings UI or `settings.json`. Requires `jupyter-positron-server >= 0.0.4` and Positron Server `>= 2026.05.179`. |
+| `POSITRON_ENFORCED_SETTINGS` | A single-line JSON object of Positron settings to lock at the application level. Users cannot override enforced settings via the Settings UI or `settings.json`. Requires `jupyter-positron-server >= 0.0.4` and Positron Server `>= 2026.05.0-179`. |
 | `POSITRON_HOST` | Host address for Positron Server to bind to. Defaults to `127.0.0.1`. |
 | `JSP_POSITRON_LAUNCHER_DISABLED` | Set to any value to hide the Positron launcher entry in JupyterLab. |
 
@@ -36,7 +36,7 @@ When either `JSP_POSITRON_PORT` or `JSP_POSITRON_SOCKET` is set, no new server p
 
 `POSITRON_ENFORCED_SETTINGS` lets administrators lock Positron settings so users cannot override them via the Settings UI or by editing `settings.json` directly. Locked settings appear grayed out with a policy indicator in the UI. Enforced settings survive profile changes, workspace switches, and direct edits to `~/.positron-server/data/User/settings.json`.
 
-**Requirements:** `jupyter-positron-server >= 0.0.4`, Positron Server `>= 2026.06.0`
+**Requirements:** `jupyter-positron-server >= 0.0.4`, Positron Server `>= 2026.05.0-179`
 
 The value must be a single-line JSON object:
 
