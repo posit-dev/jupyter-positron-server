@@ -160,12 +160,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#environment-variables" id="toc-environment-variables" class="nav-link active" data-scroll-target="#environment-variables">Environment Variables</a>
-  <ul class="collapse">
-  <li><a href="#required" id="toc-required" class="nav-link" data-scroll-target="#required">Required</a></li>
-  <li><a href="#optional" id="toc-optional" class="nav-link" data-scroll-target="#optional">Optional</a></li>
-  <li><a href="#connecting-to-an-existing-server" id="toc-connecting-to-an-existing-server" class="nav-link" data-scroll-target="#connecting-to-an-existing-server">Connecting to an Existing Server</a></li>
-  </ul></li>
+  <li><a href="#optional-environment-variables" id="toc-optional-environment-variables" class="nav-link active" data-scroll-target="#optional-environment-variables">Optional: Environment Variables</a></li>
   <li><a href="#admin-enforced-settings" id="toc-admin-enforced-settings" class="nav-link" data-scroll-target="#admin-enforced-settings">Admin-Enforced Settings</a></li>
   </ul>
 </nav>
@@ -193,10 +188,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 
 <p><code>jupyter-positron-server</code> can be configured using environment variables to customize how Positron Server runs within your Jupyter environment.</p>
-<section id="environment-variables" class="level2">
-<h2 class="anchored" data-anchor-id="environment-variables">Environment Variables</h2>
-<section id="required" class="level3">
-<h3 class="anchored" data-anchor-id="required">Required</h3>
+<section id="optional-environment-variables" class="level2">
+<h2 class="anchored" data-anchor-id="optional-environment-variables">Optional: Environment Variables</h2>
 <table class="caption-top table">
 <colgroup>
 <col style="width: 43%">
@@ -211,71 +204,18 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <tbody>
 <tr class="odd">
 <td><code>POSITRON_LICENSE_KEY_FILE</code></td>
-<td>Path to your Positron license key file. Defaults to <code>/opt/positron-server/resources/activation/linux/{ARCH}/license.lic</code> (where <code>{ARCH}</code> is <code>x86_64</code> or <code>aarch64</code>) if not set.</td>
-</tr>
-</tbody>
-</table>
-</section>
-<section id="optional" class="level3">
-<h3 class="anchored" data-anchor-id="optional">Optional</h3>
-<table class="caption-top table">
-<colgroup>
-<col style="width: 43%">
-<col style="width: 56%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>Variable</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><code>POSITRON_CONNECTION_TOKEN</code></td>
-<td>Custom connection token for authentication. If not set, a secure random token is generated automatically.</td>
+<td>Path to your Positron license key file. The user starting Positron must have write access to the Positron Server’s installation directory, as Positron will copy the license file to the location where Positron Server expects to find it. Positron Server will look for a license at <code>&lt;positron-server-path&gt;/resources/activation/linux/{ARCH}/license.lic</code> (where <code>{ARCH}</code> is <code>x86_64</code> or <code>aarch64</code>) if not set.</td>
 </tr>
 <tr class="even">
-<td><code>POSITRON_ENFORCED_SETTINGS</code></td>
-<td>A single-line JSON object of Positron settings to lock at the application level. Users cannot override enforced settings via the Settings UI or <code>settings.json</code>. Requires <code>jupyter-positron-server &gt;= 0.0.4</code> and Positron Server <code>&gt;= 2026.05.0-179</code>.</td>
-</tr>
-<tr class="odd">
 <td><code>POSITRON_HOST</code></td>
 <td>Host address for Positron Server to bind to. Defaults to <code>127.0.0.1</code>.</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><code>JSP_POSITRON_LAUNCHER_DISABLED</code></td>
 <td>Set to any value to hide the Positron launcher entry in JupyterLab.</td>
 </tr>
 </tbody>
 </table>
-</section>
-<section id="connecting-to-an-existing-server" class="level3">
-<h3 class="anchored" data-anchor-id="connecting-to-an-existing-server">Connecting to an Existing Server</h3>
-<p>If you have Positron Server already running, you can connect to it instead of starting a new process:</p>
-<table class="caption-top table">
-<colgroup>
-<col style="width: 43%">
-<col style="width: 56%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>Variable</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><code>JSP_POSITRON_PORT</code></td>
-<td>TCP port of an already-running Positron Server instance.</td>
-</tr>
-<tr class="even">
-<td><code>JSP_POSITRON_SOCKET</code></td>
-<td>Path to a UNIX socket of an already-running Positron Server instance.</td>
-</tr>
-</tbody>
-</table>
-<p>When either <code>JSP_POSITRON_PORT</code> or <code>JSP_POSITRON_SOCKET</code> is set, no new server process will be started.</p>
-</section>
 </section>
 <section id="admin-enforced-settings" class="level2">
 <h2 class="anchored" data-anchor-id="admin-enforced-settings">Admin-Enforced Settings</h2>

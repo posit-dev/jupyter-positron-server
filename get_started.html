@@ -196,7 +196,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<p>This guide walks you through installing and configuring <code>jupyter-positron-server</code> to run Positron Server in your Jupyter environment.</p>
+<p>This guide walks you through installing and configuring <code>jupyter-positron-server</code> to run Positron Server in your Jupyter environment. Check out the below screencast for a walkthrough of getting started, or read on for instructions.</p>
+<div style="position: relative; padding-bottom: 56.25%; height: 0;">
+<iframe src="https://www.loom.com/embed/9a8c760a4d4e45b2ac78d62ba3e1d0b3" frameborder="0" webkitallowfullscreen="" mozallowfullscreen="" allowfullscreen="" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;">
+</iframe>
+</div>
 <section id="prerequisites" class="level2">
 <h2 class="anchored" data-anchor-id="prerequisites">Prerequisites</h2>
 <p>Before installing, ensure you have:</p>
@@ -217,14 +221,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h3 class="anchored" data-anchor-id="download-positron-server">2. Download Positron Server</h3>
 <p>Download the Positron Server binary for your Linux architecture. For the latest release of Positron (May 2026), you can find the downloads here:</p>
 <ul>
-<li><a href="https://github.com/posit-dev/positron-builds/releases/download/2026.05.0-179/positron-server-linux-x64-2026.05.0-179.tar.gz">Download Linux x64 build</a></li>
-<li><a href="https://github.com/posit-dev/positron-builds/releases/download/2026.05.0-179/positron-server-linux-arm64-2026.05.0-179.tar.gz">Download Linux arm64 build</a></li>
+<li>Download Linux x64 build: https://cdn.posit.co/positron/releases/server/x86_64/positron-server-linux-x64-2026.05.0-179.tar.gz</li>
+<li>Download Linux arm64 build: https://cdn.posit.co/positron/releases/server/arm64/positron-server-linux-arm64-2026.05.0-179.tar.gz</li>
 </ul>
 <p>After downloading, untar the archive and add it to your PATH.</p>
 <p>If you’re using <code>curl</code>, this step might look something like:</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode zsh code-with-copy"><code class="sourceCode zsh"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Download Positron server to temporary directory</span></span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Note: this is the url for x64 architecture machines</span></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-L</span> <span class="st">"https://github.com/posit-dev/positron-builds/releases/download/2026.05.0-179/positron-server-linux-x64-2026.05.0-179.tar.gz"</span> <span class="at">-o</span> /tmp/positron-server.tar.gz</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-L</span> <span class="st">"https://cdn.posit.co/positron/releases/server/x86_64/positron-server-linux-x64-2026.05.0-179.tar.gz"</span> <span class="at">-o</span> /tmp/positron-server.tar.gz</span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Create directory</span></span>
 <span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="fu">mkdir</span> <span class="at">-p</span> /opt/positron-server</span>
@@ -234,8 +238,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="set-the-license-key" class="level3">
 <h3 class="anchored" data-anchor-id="set-the-license-key">3. Set the License Key</h3>
-<p>Set the <code>POSITRON_LICENSE_KEY_FILE</code> environment variable to the path of your license key file. If <code>POSITRON_LICENSE_KEY_FILE</code> is unset, Positron will look for a license file at <code>/opt/positron-server/resources/activation/linux/{ARCH}/license.lic</code> (where <code>{ARCH}</code> is <code>x86_64</code> or <code>aarch64</code> depending on your Linux server’s architecture), so place your license file there or set the environment variable to the location where your license file actually lives:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="bu">export</span> <span class="va">POSITRON_LICENSE_KEY_FILE</span><span class="op">=</span>/path/to/your/license.lic</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Place your license file at <code>/opt/positron-server/resources/activation/linux/{ARCH}/license.lic</code> (where <code>{ARCH}</code> is <code>x86_64</code> or <code>aarch64</code> depending on your Linux server’s architecture). Positron will automatically detect and activate your license if needed from this location.</p>
 </section>
 <section id="install-the-jupyter-positron-server-package" class="level3">
 <h3 class="anchored" data-anchor-id="install-the-jupyter-positron-server-package">4. Install the <code>jupyter-positron-server</code> package</h3>
