@@ -47,7 +47,7 @@ tar -xzf /tmp/positron-server.tar.gz -C /opt/positron-server --strip-components=
 
 ### 3. Set the License Key
 
-Positron will look for a license file at `/opt/positron-server/resources/activation/linux/{ARCH}/license.lic` (where `{ARCH}` is `x86_64` or `aarch64` depending on your Linux server's architecture). It is recommended to place your license there.
+Place your license file at `/opt/positron-server/resources/activation/linux/{ARCH}/license.lic` (where `{ARCH}` is `x86_64` or `aarch64` depending on your Linux server's architecture). Positron will automatically detect and activate your license if needed from this location.
 
 
 ### 4. Install the `jupyter-positron-server` package
