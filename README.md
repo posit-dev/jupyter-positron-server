@@ -38,7 +38,7 @@ If you're using `curl`, this step might look something like:
 ```zsh
 # Download Positron server to temporary directory
 # Note: this is the url for x64 architecture machines
-curl -L "https://cdn.posit.co/positron/dailies/server/arm64/positron-server-linux-arm64-2026.05.0-179.tar.gz" -o /tmp/positron-server.tar.gz
+curl -L "https://cdn.posit.co/positron/releases/server/x86_64/positron-server-linux-x64-2026.05.0-179.tar.gz" -o /tmp/positron-server.tar.gz
 
 # Create directory
 mkdir -p /opt/positron-server
