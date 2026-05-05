@@ -187,8 +187,9 @@ def setup_positron_server():
 
     host = os.environ.get("POSITRON_HOST", "127.0.0.1")
 
-    # Find license file: check env var first, then default location
     # If no license file found, let positron-server use system license
+    # note that path set for POSITRON_LICENSE_KEY_FILE will get copied to
+    # <path>/resources/activation/linux/<arch>/license.lic by the activation script
     license_key_file = os.environ.get("POSITRON_LICENSE_KEY_FILE")
     if license_key_file:
         logger.info(f"POSITRON_LICENSE_KEY_FILE set to: {license_key_file}")

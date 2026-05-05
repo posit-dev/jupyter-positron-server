@@ -4,33 +4,12 @@ title: "Configuration"
 
 `jupyter-positron-server` can be configured using environment variables to customize how Positron Server runs within your Jupyter environment.
 
-## Environment Variables
-
-### Required
+## Optional: Environment Variables
 
 | Variable | Description |
 |----------|-------------|
-| `POSITRON_LICENSE_KEY_FILE` | Path to your Positron license key file. Defaults to `/opt/positron-server/resources/activation/linux/{ARCH}/license.lic` (where `{ARCH}` is `x86_64` or `aarch64`) if not set. |
-
-### Optional
-
-| Variable | Description |
-|----------|-------------|
-| `POSITRON_CONNECTION_TOKEN` | Custom connection token for authentication. If not set, a secure random token is generated automatically. |
-| `POSITRON_ENFORCED_SETTINGS` | A single-line JSON object of Positron settings to lock at the application level. Users cannot override enforced settings via the Settings UI or `settings.json`. Requires `jupyter-positron-server >= 0.0.4` and Positron Server `>= 2026.05.0-179`. |
 | `POSITRON_HOST` | Host address for Positron Server to bind to. Defaults to `127.0.0.1`. |
 | `JSP_POSITRON_LAUNCHER_DISABLED` | Set to any value to hide the Positron launcher entry in JupyterLab. |
-
-### Connecting to an Existing Server
-
-If you have Positron Server already running, you can connect to it instead of starting a new process:
-
-| Variable | Description |
-|----------|-------------|
-| `JSP_POSITRON_PORT` | TCP port of an already-running Positron Server instance. |
-| `JSP_POSITRON_SOCKET` | Path to a UNIX socket of an already-running Positron Server instance. |
-
-When either `JSP_POSITRON_PORT` or `JSP_POSITRON_SOCKET` is set, no new server process will be started.
 
 ## Admin-Enforced Settings
 

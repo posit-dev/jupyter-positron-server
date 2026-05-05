@@ -6,7 +6,7 @@ Run Positron Server inside your Jupyter environment using [jupyter-server-proxy]
 
 - Python >= 3.9
 - [positron-server](https://github.com/posit-dev/positron) installed and available in your PATH
-- A valid Positron license key file, set as a `POSITRON_LICENSE_KEY_FILE` environment variable
+- A valid Positron license key file
 
 ## Installation
 
@@ -28,8 +28,8 @@ pip install -e .
 
 Download the Positron Server binary for your Linux architecture. For the latest release of Positron (May 2026), you can find the downloads here:
 
-- [Download Linux x64 build](https://github.com/posit-dev/positron-builds/releases/download/2026.05.0-179/positron-server-linux-x64-2026.05.0-179.tar.gz)
-- [Download Linux arm64 build](https://github.com/posit-dev/positron-builds/releases/download/2026.05.0-179/positron-server-linux-arm64-2026.05.0-179.tar.gz)
+- [Download Linux x64 build](https://cdn.posit.co/positron/releases/server/x86_64/positron-server-linux-x64-2026.05.0-179.tar.gz)
+- [Download Linux arm64 build](https://cdn.posit.co/positron/releases/server/arm64/positron-server-linux-arm64-2026.05.0-179.tar.gz)
 
 After downloading, untar the archive and add it to your PATH.
 
@@ -38,7 +38,7 @@ If you're using `curl`, this step might look something like:
 ```zsh
 # Download Positron server to temporary directory
 # Note: this is the url for x64 architecture machines
-curl -L "https://github.com/posit-dev/positron-builds/releases/download/2026.05.0-179/positron-server-linux-x64-2026.05.0-179.tar.gz" -o /tmp/positron-server.tar.gz
+curl -L "https://cdn.posit.co/positron/dailies/server/arm64/positron-server-linux-arm64-2026.05.0-179.tar.gz" -o /tmp/positron-server.tar.gz
 
 # Create directory
 mkdir -p /opt/positron-server
