@@ -8,7 +8,7 @@ title: "Configuration"
 
 | Variable | Description |
 |----------|-------------|
-| `POSITRON_LICENSE_KEY_FILE` | Path to your Positron license key file. This environment variable requires the user who is starting Positron to have write access to wherever Positron Server located, since it will place the license in a location where Positron Server expects it. Positron Server will look for a license at `<positron-server-path>/resources/activation/linux/{ARCH}/license.lic` (where `{ARCH}` is `x86_64` or `aarch64`) if not set. |
+| `POSITRON_LICENSE_KEY_FILE` | Path to your Positron license key file. The user starting Positron must have write access to the Positron Server's installation directory, as Positron will copy the license file to the location where Positron Server expects to find it. Positron Server will look for a license at `<positron-server-path>/resources/activation/linux/{ARCH}/license.lic` (where `{ARCH}` is `x86_64` or `aarch64`) if not set. |
 | `POSITRON_HOST` | Host address for Positron Server to bind to. Defaults to `127.0.0.1`. |
 | `JSP_POSITRON_LAUNCHER_DISABLED` | Set to any value to hide the Positron launcher entry in JupyterLab. |
 
