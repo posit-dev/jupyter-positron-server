@@ -671,3 +671,184 @@ def test_setup_positron_server_tcp_mode(monkeypatch):
     assert config["command"] == []
     assert config["timeout"] == 120
     assert "launcher_entry" in config
+
+
+class TestHubMintedLicense:
+    """Tests for POSITRON_LICENSE_MINTING_ENDPOINT / Hub-minted license path."""
+
+    def _base_monkeypatch(self, monkeypatch):
+        """Set up minimal mocks for setup_positron_server() to succeed."""
+        from importlib import reload
+        import jupyter_positron_server
+
+        monkeypatch.delenv("JSP_POSITRON_PORT", raising=False)
+        monkeypatch.delenv("JSP_POSITRON_SOCKET", raising=False)
+        monkeypatch.delenv("POSITRON_LICENSE_KEY_FILE", raising=False)
+        reload(jupyter_positron_server)
+        monkeypatch.setattr(
+            jupyter_positron_server,
+            "which_positron_server",
+            lambda: "/opt/positron-server/bin/positron-server",
+        )
+        monkeypatch.setattr(os.path, "isdir", lambda path: True)
+        monkeypatch.setattr(os.path, "realpath", lambda path: path)
+        return jupyter_positron_server
+
+    def test_minting_endpoint_makes_command_callable(self, monkeypatch):
+        """When POSITRON_LICENSE_MINTING_ENDPOINT is set, command should be callable."""
+        monkeypatch.setenv(
+            "POSITRON_LICENSE_MINTING_ENDPOINT",
+            "http://hub:8081/services/positron-license/mint",
+        )
+        jsp = self._base_monkeypatch(monkeypatch)
+
+        config = jsp.setup_positron_server()
+
+        assert callable(config["command"])
+
+    def test_legacy_path_command_is_list(self, monkeypatch):
+        """Without POSITRON_LICENSE_MINTING_ENDPOINT, command should be a list."""
+        monkeypatch.delenv("POSITRON_LICENSE_MINTING_ENDPOINT", raising=False)
+        jsp = self._base_monkeypatch(monkeypatch)
+
+        config = jsp.setup_positron_server()
+
+        assert isinstance(config["command"], list)
+
+    def test_hub_minted_command_injects_license_key(self, monkeypatch):
+        """The callable command should inject POSITRON_LICENSE_KEY when fetch succeeds."""
+        monkeypatch.setenv(
+            "POSITRON_LICENSE_MINTING_ENDPOINT",
+            "http://hub:8081/services/positron-license/mint",
+        )
+        jsp = self._base_monkeypatch(monkeypatch)
+        monkeypatch.setattr(
+            jsp,
+            "_fetch_license_from_hub",
+            lambda endpoint, token: '{"connection_token":"t","issuer":"Hub","licensee":"Corp","timestamp":"2026-06-10T00:00:00.000Z","signature":"sig"}',
+        )
+
+        config = jsp.setup_positron_server()
+        cmd = config["command"]()
+
+        assert any("POSITRON_LICENSE_KEY=" in part for part in cmd)
+
+    def test_hub_minted_command_no_license_key_on_failure(self, monkeypatch):
+        """The callable command should proceed without license key when fetch fails."""
+        monkeypatch.setenv(
+            "POSITRON_LICENSE_MINTING_ENDPOINT",
+            "http://hub:8081/services/positron-license/mint",
+        )
+        jsp = self._base_monkeypatch(monkeypatch)
+        monkeypatch.setattr(
+            jsp,
+            "_fetch_license_from_hub",
+            lambda endpoint, token: None,
+        )
+
+        config = jsp.setup_positron_server()
+        cmd = config["command"]()
+
+        assert not any("POSITRON_LICENSE_KEY=" in part for part in cmd)
+        assert "/opt/positron-server/bin/positron-server" in cmd
+
+    def test_hub_minted_command_no_license_key_file_arg(self, monkeypatch):
+        """Hub minting path must not include --license-key-file in the command."""
+        monkeypatch.setenv(
+            "POSITRON_LICENSE_MINTING_ENDPOINT",
+            "http://hub:8081/services/positron-license/mint",
+        )
+        monkeypatch.setenv("POSITRON_LICENSE_KEY_FILE", "/some/license.lic")
+        jsp = self._base_monkeypatch(monkeypatch)
+        monkeypatch.setattr(
+            jsp,
+            "_fetch_license_from_hub",
+            lambda endpoint, token: None,
+        )
+
+        config = jsp.setup_positron_server()
+        cmd = config["command"]()
+
+        assert "--license-key-file" not in cmd
+
+    def test_hub_minted_command_includes_connection_token(self, monkeypatch):
+        """The callable command must include --connection-token."""
+        monkeypatch.setenv(
+            "POSITRON_LICENSE_MINTING_ENDPOINT",
+            "http://hub:8081/services/positron-license/mint",
+        )
+        jsp = self._base_monkeypatch(monkeypatch)
+        monkeypatch.setattr(
+            jsp,
+            "_fetch_license_from_hub",
+            lambda endpoint, token: None,
+        )
+
+        config = jsp.setup_positron_server()
+        cmd = config["command"]()
+
+        assert "--connection-token" in cmd
+
+
+class TestFetchLicenseFromHub:
+    """Tests for _fetch_license_from_hub."""
+
+    def test_returns_none_without_api_token(self, monkeypatch):
+        """Returns None when JUPYTERHUB_API_TOKEN is not set."""
+        monkeypatch.delenv("JUPYTERHUB_API_TOKEN", raising=False)
+        from jupyter_positron_server import _fetch_license_from_hub
+
+        result = _fetch_license_from_hub("http://hub/mint", "test-token")
+
+        assert result is None
+
+    def test_returns_license_on_success(self, monkeypatch):
+        """Returns the license string from the Hub response."""
+        import io
+        from unittest.mock import MagicMock, patch
+
+        monkeypatch.setenv("JUPYTERHUB_API_TOKEN", "test-api-token")
+
+        mock_response = MagicMock()
+        mock_response.read.return_value = b'{"license": "{\\"connection_token\\":\\"tok\\"}"}'
+        mock_response.__enter__ = lambda s: s
+        mock_response.__exit__ = MagicMock(return_value=False)
+
+        from jupyter_positron_server import _fetch_license_from_hub
+
+        with patch("urllib.request.urlopen", return_value=mock_response):
+            result = _fetch_license_from_hub("http://hub/mint", "tok")
+
+        assert result == '{"connection_token":"tok"}'
+
+    def test_returns_none_on_network_error(self, monkeypatch):
+        """Returns None when URLError is raised."""
+        import urllib.error
+        from unittest.mock import patch
+
+        monkeypatch.setenv("JUPYTERHUB_API_TOKEN", "test-api-token")
+
+        from jupyter_positron_server import _fetch_license_from_hub
+
+        with patch("urllib.request.urlopen", side_effect=urllib.error.URLError("connection refused")):
+            result = _fetch_license_from_hub("http://hub/mint", "tok")
+
+        assert result is None
+
+    def test_returns_none_when_no_license_field(self, monkeypatch):
+        """Returns None when the response has no 'license' field."""
+        from unittest.mock import MagicMock, patch
+
+        monkeypatch.setenv("JUPYTERHUB_API_TOKEN", "test-api-token")
+
+        mock_response = MagicMock()
+        mock_response.read.return_value = b'{"error": "not licensed"}'
+        mock_response.__enter__ = lambda s: s
+        mock_response.__exit__ = MagicMock(return_value=False)
+
+        from jupyter_positron_server import _fetch_license_from_hub
+
+        with patch("urllib.request.urlopen", return_value=mock_response):
+            result = _fetch_license_from_hub("http://hub/mint", "tok")
+
+        assert result is None

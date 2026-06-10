@@ -1126,7 +1126,7 @@ wheels = [
 
 [[package]]
 name = "jupyter-positron-server"
-version = "0.0.1"
+version = "0.0.4"
 source = { virtual = "." }
 dependencies = [
     { name = "jupyter-server-proxy" },

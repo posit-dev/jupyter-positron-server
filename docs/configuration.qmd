@@ -9,6 +9,7 @@ title: "Configuration"
 | Variable | Description |
 |----------|-------------|
 | `POSITRON_LICENSE_KEY_FILE` | Path to your Positron license key file. The user starting Positron must have write access to the Positron Server's installation directory, as Positron will copy the license file to the location where Positron Server expects to find it. Positron Server will look for a license at `<positron-server-path>/resources/activation/linux/{ARCH}/license.lic` (where `{ARCH}` is `x86_64` or `aarch64`) if not set. |
+| `POSITRON_LICENSE_MINTING_ENDPOINT` | URL of the JupyterHub minting endpoint that issues short-lived signed license tokens. When set, `jupyter-positron-server` calls this endpoint (authenticated with `JUPYTERHUB_API_TOKEN`) at each Positron Server launch instead of reading a static license file. Takes precedence over `POSITRON_LICENSE_KEY_FILE`. See the Hub minting endpoint setup section below. |
 | `POSITRON_HOST` | Host address for Positron Server to bind to. Defaults to `127.0.0.1`. |
 | `JSP_POSITRON_LAUNCHER_DISABLED` | Set to any value to hide the Positron launcher entry in JupyterLab. |
 
@@ -29,4 +30,34 @@ EOF
 ```
 
 Existing user sessions are not affected until they start a new session.
+
+## Hub License Minting (JupyterHub orchestrated deployments)
+
+In a JupyterHub deployment, end users run as `jovyan` and can read any file or environment variable their process can access. A static `POSITRON_LICENSE_KEY_FILE` (long-lived `.lic`) is therefore visible to users.
+
+To avoid exposing the raw license, use a **Hub minting endpoint**: a privileged JupyterHub service that holds the signing key and issues short-lived, session-bound tokens on demand.
+
+**How it works**
+
+1. The Hub minting service runs in the Hub context (not in the single-user server).
+2. When Positron Server is launched (via jupyter-server-proxy), `jupyter-positron-server` calls the minting endpoint with `JUPYTERHUB_API_TOKEN` as credentials.
+3. The endpoint verifies the caller, checks the LimeLM entitlement, and returns a signed license JSON bound to the current session token.
+4. `jupyter-positron-server` injects the license JSON as `POSITRON_LICENSE_KEY` into the `positron-server` process environment.
+5. Positron Server validates the license offline (RSA signature + timestamp + connection-token match) and starts.
+
+The license is valid for +-5 minutes and is bound to a single connection token, so a captured license cannot authorize any other session.
+
+**Configuration**
+
+Set `POSITRON_LICENSE_MINTING_ENDPOINT` to the URL of the Hub minting service, for example in `jupyterhub_config.py`:
+
+```python
+c.Spawner.environment = {
+    'POSITRON_LICENSE_MINTING_ENDPOINT': 'http://hub:8081/services/positron-license/mint',
+}
+```
+
+`JUPYTERHUB_API_TOKEN` is set automatically by JupyterHub for each single-user server and is used to authenticate requests to the minting endpoint.
+
+When `POSITRON_LICENSE_MINTING_ENDPOINT` is set, `POSITRON_LICENSE_KEY_FILE` is ignored.
 

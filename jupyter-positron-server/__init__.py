@@ -7,11 +7,14 @@ Positron Server within JupyterHub.
 
 from shutil import which
 from urllib.parse import urlparse, urlunparse
+import json
 import logging
 import os
 import platform
 import re
 import secrets
+import urllib.request
+import urllib.error
 
 logger = logging.getLogger(__name__)
 
@@ -128,6 +131,46 @@ def which_positron_server():
     )
 
 
+def _fetch_license_from_hub(minting_endpoint: str, connection_token: str) -> "str | None":
+    """
+    Fetch a signed Positron license from the Hub minting endpoint.
+
+    Calls the endpoint authenticated with JUPYTERHUB_API_TOKEN, sending the
+    connection token so the Hub can sign a license bound to this session.
+    Returns the license JSON string, or None if the fetch fails.
+    """
+    api_token = os.environ.get("JUPYTERHUB_API_TOKEN")
+    if not api_token:
+        logger.warning(
+            "JUPYTERHUB_API_TOKEN not set; cannot fetch license from Hub minting endpoint"
+        )
+        return None
+
+    payload = json.dumps({"connection_token": connection_token}).encode()
+    req = urllib.request.Request(
+        minting_endpoint,
+        data=payload,
+        headers={
+            "Authorization": f"token {api_token}",
+            "Content-Type": "application/json",
+        },
+        method="POST",
+    )
+
+    try:
+        with urllib.request.urlopen(req, timeout=10) as response:
+            data = json.loads(response.read())
+            license_json = data.get("license")
+            if not license_json:
+                logger.error("Hub minting endpoint returned no 'license' field")
+                return None
+            logger.info("Successfully fetched signed license from Hub minting endpoint")
+            return license_json
+    except urllib.error.URLError as e:
+        logger.error(f"Failed to fetch license from Hub minting endpoint: {e}")
+        return None
+
+
 def setup_positron_server():
     """
     Configure jupyter-server-proxy to run Positron Server.
@@ -187,23 +230,27 @@ def setup_positron_server():
 
     host = os.environ.get("POSITRON_HOST", "127.0.0.1")
 
-    # If no license file found, let positron-server use system license
-    # note that path set for POSITRON_LICENSE_KEY_FILE will get copied to
-    # <path>/resources/activation/linux/<arch>/license.lic by the activation script
-    license_key_file = os.environ.get("POSITRON_LICENSE_KEY_FILE")
-    if license_key_file:
-        logger.info(f"POSITRON_LICENSE_KEY_FILE set to: {license_key_file}")
-        if not os.path.exists(license_key_file):
-            raise FileNotFoundError(
-                f"Positron license file not found at '{license_key_file}' "
-                f"(specified by POSITRON_LICENSE_KEY_FILE environment variable). "
-                f"Please ensure the license file exists or set POSITRON_LICENSE_KEY_FILE "
-                f"to the correct path."
-            )
+    minting_endpoint = os.environ.get("POSITRON_LICENSE_MINTING_ENDPOINT")
+
+    if minting_endpoint:
+        logger.info(f"Hub license minting enabled: {minting_endpoint}")
+        license_key_file = None
     else:
-        logger.info(
-            "No POSITRON_LICENSE_KEY_FILE set; positron-server will attempt to locate a license"
-        )
+        # Legacy path: POSITRON_LICENSE_KEY_FILE or system license
+        license_key_file = os.environ.get("POSITRON_LICENSE_KEY_FILE")
+        if license_key_file:
+            logger.info(f"POSITRON_LICENSE_KEY_FILE set to: {license_key_file}")
+            if not os.path.exists(license_key_file):
+                raise FileNotFoundError(
+                    f"Positron license file not found at '{license_key_file}' "
+                    f"(specified by POSITRON_LICENSE_KEY_FILE environment variable). "
+                    f"Please ensure the license file exists or set POSITRON_LICENSE_KEY_FILE "
+                    f"to the correct path."
+                )
+        else:
+            logger.info(
+                "No POSITRON_LICENSE_KEY_FILE set; positron-server will attempt to locate a license"
+            )
 
     # JUPYTERHUB_SERVICE_PREFIX (e.g. /jh/user/alice/) already includes
     # JUPYTERHUB_BASE_URL as a leading segment — JupyterHub guarantees this.
@@ -221,10 +268,6 @@ def setup_positron_server():
         "--server-base-path",
         server_base_path,
     ]
-
-    # Only pass license file if one was found
-    if license_key_file:
-        command_arguments.extend(["--license-key-file", license_key_file])
 
     # Determine LD_LIBRARY_PATH from positron-server location
     positron_server_path = which_positron_server()
@@ -249,18 +292,42 @@ def setup_positron_server():
 
     ld_library_path = f"/usr/local/lib:{activation_path}"
 
-    # Use env command to set LD_LIBRARY_PATH reliably
-    full_command = [
-        "/usr/bin/env",
-        f"LD_LIBRARY_PATH={ld_library_path}",
-        positron_server_path,
-    ] + command_arguments
+    if minting_endpoint:
+        # Hub minting path: fetch a fresh signed license just before launch.
+        # Capture variables for the closure.
+        _ld_library_path = ld_library_path
+        _positron_server_path = positron_server_path
+        _command_arguments = command_arguments
+        _minting_endpoint = minting_endpoint
+        _connection_token = _CONNECTION_TOKEN
 
-    proxy_config_dict.update(
-        {
-            "command": full_command,
-        }
-    )
+        def _get_hub_minted_command():
+            license_json = _fetch_license_from_hub(_minting_endpoint, _connection_token)
+            cmd = ["/usr/bin/env", f"LD_LIBRARY_PATH={_ld_library_path}"]
+            if license_json:
+                cmd.append(f"POSITRON_LICENSE_KEY={license_json}")
+            else:
+                logger.warning(
+                    "Hub minting endpoint returned no license; "
+                    "positron-server may fail license validation"
+                )
+            return cmd + [_positron_server_path] + _command_arguments
 
-    logger.info(f"Positron server command: {' '.join(full_command)}")
+        proxy_config_dict["command"] = _get_hub_minted_command
+        logger.info("Positron server command: Hub-minted license (callable)")
+    else:
+        # Legacy path: static command with optional --license-key-file.
+        if license_key_file:
+            command_arguments = command_arguments + ["--license-key-file", license_key_file]
+
+        # Use env command to set LD_LIBRARY_PATH reliably
+        full_command = [
+            "/usr/bin/env",
+            f"LD_LIBRARY_PATH={ld_library_path}",
+            positron_server_path,
+        ] + command_arguments
+
+        proxy_config_dict["command"] = full_command
+        logger.info(f"Positron server command: {' '.join(full_command)}")
+
     return proxy_config_dict
