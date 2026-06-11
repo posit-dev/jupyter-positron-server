@@ -305,7 +305,10 @@ def setup_positron_server():
             license_json = _fetch_license_from_hub(_minting_endpoint, _connection_token)
             cmd = ["/usr/bin/env", f"LD_LIBRARY_PATH={_ld_library_path}"]
             if license_json:
-                cmd.append(f"POSITRON_LICENSE_KEY={license_json}")
+                # Escape braces so jupyter-server-proxy's format_map() doesn't
+                # interpret the JSON's { } as template variables.
+                license_escaped = license_json.replace("{", "{{").replace("}", "}}")
+                cmd.append(f"POSITRON_LICENSE_KEY={license_escaped}")
             else:
                 logger.warning(
                     "Hub minting endpoint returned no license; "
