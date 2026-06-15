@@ -727,6 +727,37 @@ class TestDefaultFolder:
         config = self._make_config(monkeypatch)
         assert "--default-folder" not in config["command"]
 
+    def test_empty_string_env_var_falls_through(self, monkeypatch):
+        """An empty JSP_DEFAULT_FOLDER should fall through to JUPYTERHUB_ROOT_DIR."""
+        monkeypatch.setenv("JSP_DEFAULT_FOLDER", "")
+        monkeypatch.setenv("JUPYTERHUB_ROOT_DIR", "/home/jovyan")
+        monkeypatch.delenv("HOME", raising=False)
+        config = self._make_config(monkeypatch)
+        cmd = config["command"]
+        idx = cmd.index("--default-folder")
+        assert cmd[idx + 1] == "/home/jovyan"
+
+    def test_nonexistent_folder_omits_flag(self, monkeypatch):
+        """If the resolved folder does not exist, --default-folder should be omitted."""
+        from importlib import reload
+        import jupyter_positron_server
+
+        monkeypatch.setenv("JSP_DEFAULT_FOLDER", "/nonexistent/path")
+        monkeypatch.delenv("JUPYTERHUB_ROOT_DIR", raising=False)
+        monkeypatch.delenv("HOME", raising=False)
+        monkeypatch.delenv("JSP_POSITRON_PORT", raising=False)
+        monkeypatch.delenv("JSP_POSITRON_SOCKET", raising=False)
+        reload(jupyter_positron_server)
+        monkeypatch.setattr(
+            jupyter_positron_server,
+            "which_positron_server",
+            lambda: "/opt/positron-server/bin/positron-server",
+        )
+        monkeypatch.setattr(os.path, "isdir", lambda path: path != "/nonexistent/path")
+        monkeypatch.setattr(os.path, "realpath", lambda path: path)
+        config = jupyter_positron_server.setup_positron_server()
+        assert "--default-folder" not in config["command"]
+
 
 def test_setup_positron_server_tcp_mode(monkeypatch):
     """Test setup returns correct config when JSP_POSITRON_PORT is set."""

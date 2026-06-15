@@ -235,7 +235,13 @@ def setup_positron_server():
         or os.environ.get("HOME")
     )
     if default_folder:
-        command_arguments.extend(["--default-folder", default_folder])
+        if not os.path.isdir(default_folder):
+            logger.warning(
+                f"Default folder '{default_folder}' does not exist; "
+                "--default-folder will not be passed to positron-server."
+            )
+        else:
+            command_arguments.extend(["--default-folder", default_folder])
 
     # Determine LD_LIBRARY_PATH from positron-server location
     positron_server_path = which_positron_server()
