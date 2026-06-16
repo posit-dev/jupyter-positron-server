@@ -70,3 +70,11 @@ pip install jupyter-positron-server
 1. Start or restart your Jupyter server. In JupyterHub, you can do this by selecting `File` > `Hub Control Panel`, then clicking `Stop My Server` and `Start My Server`.
 
 2. Click the "Positron" icon in the JupyterLab launcher.
+
+## Environment Variables
+
+| Variable | Description |
+|---|---|
+| `POSITRON_LICENSE_KEY_FILE` | Path to the Positron license key file. Defaults to `<positron_root>/resources/activation/linux/{ARCH}/license.lic`. |
+| `JSP_DEFAULT_FOLDER` | Directory Positron opens on startup. Overrides `JUPYTERHUB_ROOT_DIR` and `HOME`. If unset, falls back to `JUPYTERHUB_ROOT_DIR`, then `HOME`. |
+| `JSP_POSITRON_LAUNCHER_DISABLED` | Set to any non-empty value to hide the Positron launcher tile in JupyterLab. |
