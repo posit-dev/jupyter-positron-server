@@ -162,6 +162,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <ul>
   <li><a href="#optional-environment-variables" id="toc-optional-environment-variables" class="nav-link active" data-scroll-target="#optional-environment-variables">Optional: Environment Variables</a></li>
   <li><a href="#admin-enforced-settings" id="toc-admin-enforced-settings" class="nav-link" data-scroll-target="#admin-enforced-settings">Admin-Enforced Settings</a></li>
+  <li><a href="#hub-license-minting-jupyterhub-orchestrated-deployments" id="toc-hub-license-minting-jupyterhub-orchestrated-deployments" class="nav-link" data-scroll-target="#hub-license-minting-jupyterhub-orchestrated-deployments">Hub License Minting (JupyterHub orchestrated deployments)</a></li>
   </ul>
 </nav>
     </div>
@@ -207,10 +208,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td>Path to your Positron license key file. The user starting Positron must have write access to the Positron Server’s installation directory, as Positron will copy the license file to the location where Positron Server expects to find it. Positron Server will look for a license at <code>&lt;positron-server-path&gt;/resources/activation/linux/{ARCH}/license.lic</code> (where <code>{ARCH}</code> is <code>x86_64</code> or <code>aarch64</code>) if not set.</td>
 </tr>
 <tr class="even">
+<td><code>POSITRON_LICENSE_MINTING_ENDPOINT</code></td>
+<td>URL of the JupyterHub minting endpoint that issues short-lived signed license tokens. When set, <code>jupyter-positron-server</code> calls this endpoint (authenticated with <code>JUPYTERHUB_API_TOKEN</code>) at each Positron Server launch instead of reading a static license file. Takes precedence over <code>POSITRON_LICENSE_KEY_FILE</code>. See the Hub minting endpoint setup section below.</td>
+</tr>
+<tr class="odd">
 <td><code>POSITRON_HOST</code></td>
 <td>Host address for Positron Server to bind to. Defaults to <code>127.0.0.1</code>.</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><code>JSP_POSITRON_LAUNCHER_DISABLED</code></td>
 <td>Set to any value to hide the Positron launcher entry in JupyterLab.</td>
 </tr>
@@ -228,6 +233,17 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="st">}</span></span>
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="op">EOF</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Existing user sessions are not affected until they start a new session.</p>
+</section>
+<section id="hub-license-minting-jupyterhub-orchestrated-deployments" class="level2">
+<h2 class="anchored" data-anchor-id="hub-license-minting-jupyterhub-orchestrated-deployments">Hub License Minting (JupyterHub orchestrated deployments)</h2>
+<p>The <strong>Hub minting endpoint</strong> is a privileged JupyterHub service that holds the signing key and issues short-lived, session-bound tokens on demand.</p>
+<p><strong>Configuration</strong></p>
+<p>Set <code>POSITRON_LICENSE_MINTING_ENDPOINT</code> to the URL of the Hub minting service, for example in <code>jupyterhub_config.py</code>:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>c.Spawner.environment <span class="op">=</span> {</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">'POSITRON_LICENSE_MINTING_ENDPOINT'</span>: <span class="st">'http://hub:8081/services/positron-license/mint'</span>,</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><code>JUPYTERHUB_API_TOKEN</code> is set automatically by JupyterHub for each single-user server and is used to authenticate requests to the minting endpoint.</p>
+<p>When <code>POSITRON_LICENSE_MINTING_ENDPOINT</code> is set, <code>POSITRON_LICENSE_KEY_FILE</code> is ignored.</p>
 
 
 </section>
