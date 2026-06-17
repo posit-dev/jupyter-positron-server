@@ -2,37 +2,49 @@
 title: "Get Started"
 ---
 
-This guide walks a JupyterHub administrator through deploying Positron Server with secure per-session license tokens.
+This guide walks an **administrator** through deploying Positron Server on JupyterHub.
 
 ## What you will need from Posit
 
 Before starting, make sure you have received:
 
-- **Positron Server binary** -- the JupyterHub-targeted build for your architecture (x86_64 or aarch64)
+- **Positron Server binary** -- the JupyterHub-targeted build for your architecture (the download is named `linux-x64` or `linux-arm64`)
 - **Signing key** (`signing-key.pem`) -- the RSA private key used to mint per-session license tokens
 - **License file** (`license.lic`) -- proof of entitlement
+
+Throughout this guide, `<arch>` refers to the activation directory name, which is `x86_64` or `aarch64` (this differs from the `x64`/`arm64` suffix in the download filename).
 
 ## Architecture overview
 
 ```
 Hub (privileged)
-  license.lic  -- stays here, never reaches users
-  signing-key.pem  -- stays here, never reaches users
-  jupyter-positron-verifier  -- mints a fresh token at each session start
+  signing-key.pem            -- /etc/positron/, root-only, never reaches users
+  jupyter-positron-verifier  -- verifies entitlement (via license-manager) and mints
+                                a fresh signed license at each session start
 
 Single-user server
-  jupyter-positron-server  -- requests a token from the Hub, passes it to Positron
-  positron-server  -- verifies the token and starts
+  jupyter-positron-server    -- requests a license from the Hub, passes it to positron-server
+  positron-server            -- verifies the signed license and starts
+  license.lic                -- sits next to license-manager inside the positron-server
+                                install; chmod 600 so only the Hub/verifier can read it
 ```
 
 ## Step 1: Install Positron Server in the single-user image
 
-Extract the Positron Server binary to `/usr/lib/positron-server` in the image or environment your users run in.
+Extract the Positron Server binary to `/opt/positron-server` in the image or environment your users run in.
 
 ```bash
-mkdir -p /usr/lib/positron-server
-tar -xzf positron-server-linux-x64-*.tar.gz -C /usr/lib/positron-server --strip-components=1
+mkdir -p /opt/positron-server
+tar -xzf positron-server-linux-x64-*.tar.gz -C /opt/positron-server --strip-components=1
 ```
+
+Place the license file next to `license-manager` inside the install, and lock it down so only root (the Hub/verifier) can read it -- user sessions must not:
+
+```bash
+install -m 600 license.lic /opt/positron-server/resources/activation/linux/<arch>/license.lic
+```
+
+The `.lic` is entitlement only. It is read by the Hub-side verifier (via `license-manager`), **not** by user sessions. When Hub minting is configured (below), `positron-server` validates a short-lived signed token instead of reading the `.lic`.
 
 ## Step 2: Install `jupyter-positron-server` in the single-user image
 
@@ -40,7 +52,7 @@ tar -xzf positron-server-linux-x64-*.tar.gz -C /usr/lib/positron-server --strip-
 pip install jupyter-positron-server
 ```
 
-This is the proxy extension that runs as a user. It requests a token from the Hub at session start and passes it to `positron-server`.
+This is the proxy extension that runs as a user. It requests a license from the Hub at session start and passes it to `positron-server`.
 
 ## Step 3: Install `jupyter-positron-verifier` on the Hub
 
@@ -50,17 +62,14 @@ Install the minting service in the Hub's Python environment (not the single-user
 pip install jupyter-positron-verifier
 ```
 
-Store the signing key where the Hub service account can read it but `users cannot:
+Store the signing key where the Hub service account can read it but users cannot:
 
 ```bash
-install -m 600 -o <hub-user> signing-key.pem /etc/jupyterhub/positron-signing-key.pem
+mkdir -p /etc/positron
+install -m 600 -o <hub-user> signing-key.pem /etc/positron/signing-key.pem
 ```
 
-Do the same for the license file:
-
-```bash
-install -m 600 -o <hub-user> license.lic /etc/jupyterhub/positron-license.lic
-```
+The signing key must pair with the public key embedded in `positron-server`. The license file is already in place from Step 1 -- the verifier reads it through `license-manager`, so it does not need a separate copy on the Hub.
 
 ## Step 4: Register `jupyter-positron-verifier` as a JupyterHub service
 
@@ -70,14 +79,12 @@ Add the following to `jupyterhub_config.py`:
 c.JupyterHub.services = [
     {
         "name": "positron-license",
-        "url": "http://127.0.0.1:8099",
+        "url": "http://127.0.0.1:10101",
         "command": ["positron-verifier"],
         "environment": {
-            "POSITRON_MINTING_KEY_FILE": "/etc/jupyterhub/positron-signing-key.pem",
-            "POSITRON_LICENSE_ISSUER": "Posit JupyterHub",
-            "POSITRON_LICENSE_LICENSEE": "Your Organization",
-            "POSITRON_LICENSE_MANAGER_PATH": "/usr/local/bin/license-manager",
-            "PORT": "8099",
+            "POSITRON_MINTING_KEY_FILE": "/etc/positron/signing-key.pem",
+            "POSITRON_LICENSE_MANAGER_PATH": "/opt/positron-server/resources/activation/linux/<arch>/license-manager",
+            "PORT": "10101",
         },
     }
 ]
@@ -91,15 +98,18 @@ c.JupyterHub.load_roles = [
 ]
 ```
 
-Replace `"Your Organization"` with your organization name. This value is embedded in every license token for auditing.
+`POSITRON_MINTING_KEY_FILE` points at the signing key from Step 3. `POSITRON_LICENSE_MANAGER_PATH` points at the `license-manager` binary inside the Positron Server install, which the verifier runs to confirm entitlement against `license.lic`.
 
 ## Step 5: Point single-user servers at the minting endpoint
 
-Tell `jupyter-positron-server` where to fetch tokens by adding to `jupyterhub_config.py`:
+Tell `jupyter-positron-server` where to fetch licenses, and make sure `positron-server` is on the session `PATH`, by adding to `jupyterhub_config.py`:
 
 ```python
+import os
+
 c.Spawner.environment = {
-    "POSITRON_LICENSE_MINTING_ENDPOINT": "http://127.0.0.1:8099/services/positron-license/mint",
+    "PATH": "/opt/positron-server/bin:" + os.environ.get("PATH", "/usr/local/bin:/usr/bin:/bin"),
+    "POSITRON_LICENSE_MINTING_ENDPOINT": "http://127.0.0.1:10101/services/positron-license/mint",
 }
 ```
 
@@ -117,8 +127,8 @@ The `jupyter-positron-verifier` service starts automatically as a managed Jupyte
 
 When a user opens Positron:
 
-1. `jupyter-positron-server` calls the Hub minting endpoint, authenticated with its `JUPYTERHUB_API_TOKEN`.
-2. `jupyter-positron-verifier` verifies the token and returns a signed license JSON bound to this session's connection token.
+1. `jupyter-positron-server` calls the Hub minting endpoint, authenticated with its `JUPYTERHUB_API_TOKEN`, sending this session's connection token.
+2. `jupyter-positron-verifier` verifies the user token, confirms entitlement via `license-manager` (which reads `license.lic`), and returns a signed license JSON bound to this session's connection token.
 3. `jupyter-positron-server` starts `positron-server` with the license in its environment (`POSITRON_LICENSE_KEY`).
 4. `positron-server` verifies the RSA signature using its embedded public key and starts.
 

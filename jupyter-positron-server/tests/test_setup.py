@@ -818,6 +818,19 @@ class TestHubMintedLicense:
 
         assert isinstance(config["command"], list)
 
+    def test_direct_license_key_file_added_once(self, monkeypatch):
+        """Non-minting launch includes --license-key-file exactly once (no dup)."""
+        monkeypatch.delenv("POSITRON_LICENSE_MINTING_ENDPOINT", raising=False)
+        jsp = self._base_monkeypatch(monkeypatch)
+        monkeypatch.setenv("POSITRON_LICENSE_KEY_FILE", "/tokens/license.token")
+        monkeypatch.setattr(os.path, "exists", lambda p: True)
+
+        config = jsp.setup_positron_server()
+        cmd = config["command"]
+
+        assert cmd.count("--license-key-file") == 1
+        assert "/tokens/license.token" in cmd
+
     def test_hub_minted_command_injects_license_key(self, monkeypatch):
         """The callable command should inject POSITRON_LICENSE_KEY when fetch succeeds."""
         monkeypatch.setenv(

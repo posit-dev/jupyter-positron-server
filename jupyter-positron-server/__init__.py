@@ -173,6 +173,109 @@ def _fetch_license_from_hub(
         return None
 
 
+def _resolve_license_source(minting_endpoint):
+    """Resolve the license source for a direct launch.
+
+    Returns the path to a signed-token file (``POSITRON_LICENSE_KEY_FILE``) or
+    ``None`` when Hub minting is enabled (the token is fetched at launch instead).
+    positron-server only accepts signed JSON license tokens; it no longer locates
+    or validates a raw ``.lic`` file.
+    """
+    if minting_endpoint:
+        logger.info(f"Hub license minting enabled: {minting_endpoint}")
+        return None
+
+    license_key_file = os.environ.get("POSITRON_LICENSE_KEY_FILE")
+    if license_key_file:
+        logger.info(f"POSITRON_LICENSE_KEY_FILE set to: {license_key_file}")
+        if not os.path.exists(license_key_file):
+            raise FileNotFoundError(
+                f"Positron license token file not found at '{license_key_file}' "
+                f"(specified by POSITRON_LICENSE_KEY_FILE environment variable). "
+                f"Point POSITRON_LICENSE_KEY_FILE at a file containing a signed "
+                f"license token, or set POSITRON_LICENSE_MINTING_ENDPOINT to mint "
+                f"one from the Hub."
+            )
+    else:
+        logger.warning(
+            "Neither POSITRON_LICENSE_MINTING_ENDPOINT nor POSITRON_LICENSE_KEY_FILE "
+            "is set; positron-server requires a signed license token and will fail "
+            "to start without one."
+        )
+    return license_key_file
+
+
+def _build_command_args(host, license_key_file):
+    """Build the positron-server CLI arguments (excluding the binary and env)."""
+    # JUPYTERHUB_SERVICE_PREFIX (e.g. /jh/user/alice/) already includes
+    # JUPYTERHUB_BASE_URL as a leading segment — JupyterHub guarantees this.
+    service_prefix = os.environ.get("JUPYTERHUB_SERVICE_PREFIX", "/").rstrip("/")
+    server_base_path = service_prefix + "/positron"
+
+    command_arguments = [
+        "--accept-server-license-terms",
+        "--host",
+        host,
+        "--port",
+        "{port}",
+        "--connection-token",
+        _CONNECTION_TOKEN,
+        "--server-base-path",
+        server_base_path,
+    ]
+
+    # Only pass license file if one was found
+    if license_key_file:
+        command_arguments.extend(["--license-key-file", license_key_file])
+
+    # Open Positron in the user's workspace directory.
+    # JSP_DEFAULT_FOLDER overrides; JUPYTERHUB_ROOT_DIR is the standard JupyterHub
+    # notebook directory env var; HOME is the fallback.
+    default_folder = (
+        os.environ.get("JSP_DEFAULT_FOLDER")
+        or os.environ.get("JUPYTERHUB_ROOT_DIR")
+        or os.environ.get("HOME")
+    )
+    if default_folder:
+        if not os.path.isdir(default_folder):
+            logger.warning(
+                f"Default folder '{default_folder}' does not exist; "
+                "--default-folder will not be passed to positron-server."
+            )
+        else:
+            command_arguments.extend(["--default-folder", default_folder])
+
+    return command_arguments
+
+
+def _resolve_activation_path(positron_server_path):
+    """Return the ``LD_LIBRARY_PATH`` positron-server needs for license validation.
+
+    positron-server's bundled activation/validation libraries live at
+    ``<root>/resources/activation/linux/<arch>/``, where ``<root>`` is two levels
+    up from the binary.
+    """
+    # Resolve symlinks to get the real path
+    real_path = os.path.realpath(positron_server_path)
+    # positron-server is at <root>/bin/positron-server, so go up two levels
+    positron_root = os.path.dirname(os.path.dirname(real_path))
+    arch = platform.machine()
+    activation_path = os.path.join(
+        positron_root, "resources", "activation", "linux", arch
+    )
+
+    # Validate activation libraries exist (required for license validation)
+    if not os.path.isdir(activation_path):
+        raise FileNotFoundError(
+            f"Positron activation libraries not found at '{activation_path}'.\n\n"
+            f"This usually means positron-server is not installed correctly for "
+            f"your architecture ({arch}).\n"
+            f"Expected directory structure: {positron_root}/resources/activation/linux/{arch}/"
+        )
+
+    return f"/usr/local/lib:{activation_path}"
+
+
 def setup_positron_server():
     """
     Configure jupyter-server-proxy to run Positron Server.
@@ -231,89 +334,13 @@ def setup_positron_server():
         return proxy_config_dict
 
     host = os.environ.get("POSITRON_HOST", "127.0.0.1")
-
     minting_endpoint = os.environ.get("POSITRON_LICENSE_MINTING_ENDPOINT")
 
-    if minting_endpoint:
-        logger.info(f"Hub license minting enabled: {minting_endpoint}")
-        license_key_file = None
-    else:
-        # Legacy path: POSITRON_LICENSE_KEY_FILE or system license
-        license_key_file = os.environ.get("POSITRON_LICENSE_KEY_FILE")
-        if license_key_file:
-            logger.info(f"POSITRON_LICENSE_KEY_FILE set to: {license_key_file}")
-            if not os.path.exists(license_key_file):
-                raise FileNotFoundError(
-                    f"Positron license file not found at '{license_key_file}' "
-                    f"(specified by POSITRON_LICENSE_KEY_FILE environment variable). "
-                    f"Please ensure the license file exists or set POSITRON_LICENSE_KEY_FILE "
-                    f"to the correct path."
-                )
-        else:
-            logger.info(
-                "No POSITRON_LICENSE_KEY_FILE set; positron-server will attempt to locate a license"
-            )
+    license_key_file = _resolve_license_source(minting_endpoint)
+    command_arguments = _build_command_args(host, license_key_file)
 
-    # JUPYTERHUB_SERVICE_PREFIX (e.g. /jh/user/alice/) already includes
-    # JUPYTERHUB_BASE_URL as a leading segment — JupyterHub guarantees this.
-    service_prefix = os.environ.get("JUPYTERHUB_SERVICE_PREFIX", "/").rstrip("/")
-    server_base_path = service_prefix + "/positron"
-
-    command_arguments = [
-        "--accept-server-license-terms",
-        "--host",
-        host,
-        "--port",
-        "{port}",
-        "--connection-token",
-        _CONNECTION_TOKEN,
-        "--server-base-path",
-        server_base_path,
-    ]
-
-    # Only pass license file if one was found
-    if license_key_file:
-        command_arguments.extend(["--license-key-file", license_key_file])
-
-    # Open Positron in the user's workspace directory.
-    # JSP_DEFAULT_FOLDER overrides; JUPYTERHUB_ROOT_DIR is the standard JupyterHub
-    # notebook directory env var; HOME is the fallback.
-    default_folder = (
-        os.environ.get("JSP_DEFAULT_FOLDER")
-        or os.environ.get("JUPYTERHUB_ROOT_DIR")
-        or os.environ.get("HOME")
-    )
-    if default_folder:
-        if not os.path.isdir(default_folder):
-            logger.warning(
-                f"Default folder '{default_folder}' does not exist; "
-                "--default-folder will not be passed to positron-server."
-            )
-        else:
-            command_arguments.extend(["--default-folder", default_folder])
-
-    # Determine LD_LIBRARY_PATH from positron-server location
     positron_server_path = which_positron_server()
-    # Resolve symlinks to get the real path
-    real_path = os.path.realpath(positron_server_path)
-    # positron-server is at <root>/bin/positron-server, so go up two levels
-    positron_root = os.path.dirname(os.path.dirname(real_path))
-    # Determine architecture
-    arch = platform.machine()
-    activation_path = os.path.join(
-        positron_root, "resources", "activation", "linux", arch
-    )
-
-    # Validate activation libraries exist (required for license validation)
-    if not os.path.isdir(activation_path):
-        raise FileNotFoundError(
-            f"Positron activation libraries not found at '{activation_path}'.\n\n"
-            f"This usually means positron-server is not installed correctly for "
-            f"your architecture ({arch}).\n"
-            f"Expected directory structure: {positron_root}/resources/activation/linux/{arch}/"
-        )
-
-    ld_library_path = f"/usr/local/lib:{activation_path}"
+    ld_library_path = _resolve_activation_path(positron_server_path)
 
     if minting_endpoint:
         # Hub minting path: fetch a fresh signed license just before launch.
@@ -342,14 +369,8 @@ def setup_positron_server():
         proxy_config_dict["command"] = _get_hub_minted_command
         logger.info("Positron server command: Hub-minted license (callable)")
     else:
-        # Legacy path: static command with optional --license-key-file.
-        if license_key_file:
-            command_arguments = command_arguments + [
-                "--license-key-file",
-                license_key_file,
-            ]
-
-        # Use env command to set LD_LIBRARY_PATH reliably
+        # Direct launch: any signed-token --license-key-file is already included in
+        # command_arguments. Use env to set LD_LIBRARY_PATH reliably.
         full_command = [
             "/usr/bin/env",
             f"LD_LIBRARY_PATH={ld_library_path}",
