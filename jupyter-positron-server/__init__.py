@@ -131,7 +131,9 @@ def which_positron_server():
     )
 
 
-def _fetch_license_from_hub(minting_endpoint: str, connection_token: str) -> "str | None":
+def _fetch_license_from_hub(
+    minting_endpoint: str, connection_token: str
+) -> "str | None":
     """
     Fetch a signed Positron license from the Hub minting endpoint.
 
@@ -269,6 +271,27 @@ def setup_positron_server():
         server_base_path,
     ]
 
+    # Only pass license file if one was found
+    if license_key_file:
+        command_arguments.extend(["--license-key-file", license_key_file])
+
+    # Open Positron in the user's workspace directory.
+    # JSP_DEFAULT_FOLDER overrides; JUPYTERHUB_ROOT_DIR is the standard JupyterHub
+    # notebook directory env var; HOME is the fallback.
+    default_folder = (
+        os.environ.get("JSP_DEFAULT_FOLDER")
+        or os.environ.get("JUPYTERHUB_ROOT_DIR")
+        or os.environ.get("HOME")
+    )
+    if default_folder:
+        if not os.path.isdir(default_folder):
+            logger.warning(
+                f"Default folder '{default_folder}' does not exist; "
+                "--default-folder will not be passed to positron-server."
+            )
+        else:
+            command_arguments.extend(["--default-folder", default_folder])
+
     # Determine LD_LIBRARY_PATH from positron-server location
     positron_server_path = which_positron_server()
     # Resolve symlinks to get the real path
@@ -321,7 +344,10 @@ def setup_positron_server():
     else:
         # Legacy path: static command with optional --license-key-file.
         if license_key_file:
-            command_arguments = command_arguments + ["--license-key-file", license_key_file]
+            command_arguments = command_arguments + [
+                "--license-key-file",
+                license_key_file,
+            ]
 
         # Use env command to set LD_LIBRARY_PATH reliably
         full_command = [
