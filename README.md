@@ -75,6 +75,6 @@ pip install jupyter-positron-server
 
 | Variable | Description |
 |---|---|
-| `POSITRON_LICENSE_KEY_FILE` | Path to the Positron license key file. Defaults to `<positron_root>/resources/activation/linux/{ARCH}/license.lic`. |
+| `POSITRON_LICENSE_KEY_FILE` | Path to a file containing a signed Positron license token. Used for direct launches when not minting tokens from the Hub via `POSITRON_LICENSE_MINTING_ENDPOINT`. positron-server accepts only signed tokens — a raw `.lic` file is rejected. |
 | `JSP_DEFAULT_FOLDER` | Directory Positron opens on startup. Overrides `JUPYTERHUB_ROOT_DIR` and `HOME`. If unset, falls back to `JUPYTERHUB_ROOT_DIR`, then `HOME`. |
 | `JSP_POSITRON_LAUNCHER_DISABLED` | Set to any non-empty value to hide the Positron launcher tile in JupyterLab. |
