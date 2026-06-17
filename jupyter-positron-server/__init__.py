@@ -168,7 +168,7 @@ def _fetch_license_from_hub(
                 return None
             logger.info("Successfully fetched signed license from Hub minting endpoint")
             return license_json
-    except urllib.error.URLError as e:
+    except (urllib.error.URLError, json.JSONDecodeError, AttributeError) as e:
         logger.error(f"Failed to fetch license from Hub minting endpoint: {e}")
         return None
 
