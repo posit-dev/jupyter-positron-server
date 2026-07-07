@@ -1,9 +1,9 @@
 ---
-title: "Get Started (versions 2026.06.0 and older)"
+title: "Get Started (versions 2026.05.0 and older)"
 ---
 
 ::: callout-important
-This is the getting started workflow for versions of Positron 2026.06.0 and older. 
+This is the getting started workflow for versions of Positron 2026.05.0 and older. 
 It is no longer the recommended workflow.
 To update to the latest version, check out the [Get Started page](get_started.qmd).
 :::
