@@ -6,75 +6,17 @@ Run Positron Server inside your Jupyter environment using [jupyter-server-proxy]
 
 - Python >= 3.9
 - [positron-server](https://github.com/posit-dev/positron) installed and available in your PATH
-- A valid Positron license key file
-
-## Installation
-
-```bash
-pip install jupyter-positron-server
-```
-
-Or install from source:
-
-```bash
-git clone https://github.com/posit-dev/jupyter-positron-server.git
-cd jupyter-positron-server
-pip install -e .
-```
+- A valid Positron license key file and signing key
 
 ## Configuration
 
-### Download Positron Server
+Setup includes installing a proxy for running Positron and a verifier service to check license validity. The setup flow looks like:
 
-Download the Positron Server binary for your Linux architecture. For the latest release of Positron (May 2026), you can find the downloads here:
+1. Email [academic-licenses@posit.co](mailto:academic-licenses@posit.co) to request a **signing key** (`signing-key.pem`) and **license file** (`license.lic`). Free for currently enrolled students using Positron for coursework — see the [Positron Education License Rider](https://github.com/posit-dev/positron/blob/main/LICENSE.txt) for eligibility.
+2. Download the Positron Server binary and extract it to `/opt/positron-server` in the single-user image, then place `license.lic` at `resources/activation/linux/<arch>/license.lic` (`chmod 600`, root-only).
+3. Install `jupyter-positron-server` in the single-user image.
+4. Install `jupyter-positron-verifier` in the Hub's Python environment, and store `signing-key.pem` at `/etc/positron/signing-key.pem` (root-only).
+5. Register `jupyter-positron-verifier` as a JupyterHub service in `jupyterhub_config.py`, and point `c.Spawner.environment` at its minting endpoint.
+6. Restart JupyterHub, then click the "Positron" icon in the JupyterLab launcher.
 
-- [Download Linux x64 build](https://cdn.posit.co/positron/releases/server/x86_64/positron-server-linux-x64-2026.05.0-179.tar.gz)
-- [Download Linux arm64 build](https://cdn.posit.co/positron/releases/server/arm64/positron-server-linux-arm64-2026.05.0-179.tar.gz)
-
-After downloading, untar the archive and add it to your PATH.
-
-If you're using `curl`, this step might look something like:
-
-```zsh
-# Download Positron server to temporary directory
-# Note: this is the url for x64 architecture machines
-curl -L "https://cdn.posit.co/positron/releases/server/x86_64/positron-server-linux-x64-2026.05.0-179.tar.gz" -o /tmp/positron-server.tar.gz
-
-# Create directory
-mkdir -p /opt/positron-server
-
-# Unpack Positron Server into newly created directory
-tar -xzf /tmp/positron-server.tar.gz -C /opt/positron-server --strip-components=1
-```
-
-### Get a License
-
-Positron Server is available for educational use only. Free licenses are available for currently enrolled students using Positron for coursework. Review the [Positron Education License Rider](https://github.com/posit-dev/positron/blob/main/LICENSE.txt) for full eligibility terms.
-
-To request a license, email [academic-licenses@posit.co](mailto:academic-licenses@posit.co).
-
-### Set the License Key
-
-Place your license at `<positron_root>/resources/activation/linux/{ARCH}/license.lic`, where `{ARCH}` is `x86_64` or `aarch64`.
-
-### Install the `jupyter-positron-server` package
-
-Install `jupyter-positron-server` in an environment that is available to all users of your JupyterHub server.
-
-```shell
-pip install jupyter-positron-server
-```
-
-### Start your Jupyter server
-
-1. Start or restart your Jupyter server. In JupyterHub, you can do this by selecting `File` > `Hub Control Panel`, then clicking `Stop My Server` and `Start My Server`.
-
-2. Click the "Positron" icon in the JupyterLab launcher.
-
-## Environment Variables
-
-| Variable | Description |
-|---|---|
-| `POSITRON_LICENSE_KEY_FILE` | Path to a file containing a signed Positron license token. Used for direct launches when not minting tokens from the Hub via `POSITRON_LICENSE_MINTING_ENDPOINT`. positron-server accepts only signed tokens — a raw `.lic` file is rejected. |
-| `JSP_DEFAULT_FOLDER` | Directory Positron opens on startup. Overrides `JUPYTERHUB_ROOT_DIR` and `HOME`. If unset, falls back to `JUPYTERHUB_ROOT_DIR`, then `HOME`. |
-| `JSP_POSITRON_LAUNCHER_DISABLED` | Set to any non-empty value to hide the Positron launcher tile in JupyterLab. |
+See the [Get Started guide](https://posit-dev.github.io/jupyter-positron-server/get_started.html) for the full walkthrough, including the exact `jupyterhub_config.py` snippets.
