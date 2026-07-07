@@ -48,10 +48,12 @@ install -m 600 license.lic /opt/positron-server/resources/activation/linux/<arch
 
 ```bash
 # for example, in The Littlest JupyterHub
-/opt/tljh/user/bin/pip install jupyter-positron-server
+/opt/tljh/user/bin/pip install 'jupyter-positron-server>=0.0.5'
 ```
 
-This is the proxy extension that runs as a user. It requests a license from the Hub at session start and passes it to `positron-server`.
+This is the proxy extension that runs as a user. 
+It requests a license from the Hub at session start and passes it to `positron-server`.
+You will need version `0.0.5` or greater to have compatibility with the latest Positron Server releases.
 
 ## Step 3: Install `jupyter-positron-verifier` on the Hub
 
