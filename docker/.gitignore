@@ -1,0 +1,4 @@
+# Local env overrides and real secrets must never be committed.
+.env
+secrets/*
+!secrets/.gitkeep
