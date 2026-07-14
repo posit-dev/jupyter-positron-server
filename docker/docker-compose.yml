@@ -1,0 +1,50 @@
+# Positron Server on JupyterHub — docker-compose deployment template.
+#
+# Before `up`: copy .env.example to .env, then drop license.lic and
+# signing-key.pem into secrets/ (see README.md). The single-user image is built
+# but never run here — DockerSpawner launches it on demand.
+
+services:
+  hub:
+    build:
+      context: ./hub
+      args:
+        POSITRON_VERSION: ${POSITRON_VERSION}
+        POSITRON_ARCH: ${POSITRON_ARCH}
+        POSITRON_VERIFIER_PKG: ${POSITRON_VERIFIER_PKG}
+    image: ${HUB_IMAGE}
+    hostname: hub
+    restart: unless-stopped
+    ports:
+      - "${HUB_PORT}:8000"
+    environment:
+      VERIFIER_PORT: ${VERIFIER_PORT}
+      SINGLEUSER_IMAGE: ${SINGLEUSER_IMAGE}
+      DOCKER_NETWORK: ${DOCKER_NETWORK}
+      POSITRON_ACTIVATION_ARCH: ${POSITRON_ACTIVATION_ARCH}
+    volumes:
+      # DockerSpawner launches single-user containers via the host docker daemon.
+      - /var/run/docker.sock:/var/run/docker.sock
+      # Secrets — mounted read-only, never baked into image layers. These files
+      # must exist in ./secrets before `up` (see README).
+      - ./secrets/signing-key.pem:/etc/positron/signing-key.pem:ro
+      - ./secrets/license.lic:/opt/positron-server/resources/activation/linux/${POSITRON_ACTIVATION_ARCH}/license.lic:ro
+
+  # Built by `docker compose build singleuser` (or with --profile build-only);
+  # never started by `up`. DockerSpawner runs it on demand.
+  singleuser:
+    build:
+      context: ./singleuser
+      args:
+        POSITRON_VERSION: ${POSITRON_VERSION}
+        POSITRON_ARCH: ${POSITRON_ARCH}
+        POSITRON_SERVER_PKG: ${POSITRON_SERVER_PKG}
+    image: ${SINGLEUSER_IMAGE}
+    profiles:
+      - build-only
+
+# Explicit name (no compose project prefix) so DockerSpawner's network_name
+# matches and spawned containers can resolve the hub by service name.
+networks:
+  default:
+    name: ${DOCKER_NETWORK}
