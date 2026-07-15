@@ -70,19 +70,23 @@ POSITRON_CONFIG_NAME="${POSITRON_CONFIG_NAME:-positron-license.py}"
 # Derived values
 # ---------------------------------------------------------------------------
 
-# The license-manager lives under an arch-specific activation dir. Positron
-# names the arm64 dir "aarch64"; x64 stays "x64". Override with ACTIVATION_ARCH
-# if your layout differs.
+# Positron spells the CPU arch three different ways, so a single POSITRON_ARCH
+# is not enough:
+#   * download filename infix -> POSITRON_ARCH   (x64    | arm64)
+#   * CDN path segment        -> CDN_ARCH        (x86_64 | arm64)
+#   * activation dir name      -> ACTIVATION_ARCH (x86_64 | aarch64)
+# Derive the other two from POSITRON_ARCH (matching the docker/ template).
+# Override CDN_ARCH/ACTIVATION_ARCH if your layout differs.
 case "$POSITRON_ARCH" in
-    arm64) ACTIVATION_ARCH="${ACTIVATION_ARCH:-aarch64}" ;;
-    x64)   ACTIVATION_ARCH="${ACTIVATION_ARCH:-x64}" ;;
-    *)     ACTIVATION_ARCH="${ACTIVATION_ARCH:-$POSITRON_ARCH}" ;;
+    arm64) CDN_ARCH="${CDN_ARCH:-arm64}";  ACTIVATION_ARCH="${ACTIVATION_ARCH:-aarch64}" ;;
+    x64)   CDN_ARCH="${CDN_ARCH:-x86_64}"; ACTIVATION_ARCH="${ACTIVATION_ARCH:-x86_64}" ;;
+    *)     CDN_ARCH="${CDN_ARCH:-$POSITRON_ARCH}"; ACTIVATION_ARCH="${ACTIVATION_ARCH:-$POSITRON_ARCH}" ;;
 esac
 
 ACTIVATION_DIR="$POSITRON_SERVER_DIR/resources/activation/linux/$ACTIVATION_ARCH"
 LICENSE_DEST="$ACTIVATION_DIR/license.lic"
 LICENSE_MANAGER="$ACTIVATION_DIR/license-manager"
-CDN_URL="https://cdn.posit.co/positron/releases/server/${POSITRON_ARCH}/positron-server-linux-${POSITRON_ARCH}-${POSITRON_VERSION}.tar.gz"
+CDN_URL="https://cdn.posit.co/positron/releases/server/${CDN_ARCH}/positron-server-linux-${POSITRON_ARCH}-${POSITRON_VERSION}.tar.gz"
 
 # Bin dirs derived from the pip paths, used to locate positron-verifier and to
 # build the spawner PATH.
@@ -161,8 +165,8 @@ esac
 # ---------------------------------------------------------------------------
 
 [ "$(id -u)" -eq 0 ] || die "Run as root (JupyterHub admin), e.g. via sudo."
-[ -f "$LICENSE_SRC" ]      || die "License not found: $LICENSE_SRC (set LICENSE_SRC)"
-[ -f "$SIGNING_KEY_SRC" ]  || die "Signing key not found: $SIGNING_KEY_SRC (set SIGNING_KEY_SRC)"
+[ -s "$LICENSE_SRC" ]      || die "License not found or empty: $LICENSE_SRC (set LICENSE_SRC; request one from academic-licenses@posit.co)"
+[ -s "$SIGNING_KEY_SRC" ]  || die "Signing key not found or empty: $SIGNING_KEY_SRC (set SIGNING_KEY_SRC; request one from academic-licenses@posit.co)"
 [ -z "$POSITRON_CONFIG_SRC" ] || [ -f "$POSITRON_CONFIG_SRC" ] || die "Config not found: $POSITRON_CONFIG_SRC (set POSITRON_CONFIG_SRC or leave empty to generate inline)"
 [ -x "$TLJH_HUB_PIP" ]     || die "TLJH hub pip not found: $TLJH_HUB_PIP ‚Äî is TLJH installed?"
 [ -x "$TLJH_USER_PIP" ]    || die "TLJH user pip not found: $TLJH_USER_PIP ‚Äî is TLJH installed?"

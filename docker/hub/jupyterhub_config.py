@@ -11,8 +11,22 @@ activation_arch = os.environ.get("POSITRON_ACTIVATION_ARCH", "x86_64")
 positron_server_dir = os.environ.get("POSITRON_SERVER_DIR", "/opt/positron-server")
 
 signing_key_file = "/etc/positron/signing-key.pem"
-license_manager = f"{positron_server_dir}/resources/activation/linux/{activation_arch}/license-manager"
+activation_dir = f"{positron_server_dir}/resources/activation/linux/{activation_arch}"
+license_file = f"{activation_dir}/license.lic"
+license_manager = f"{activation_dir}/license-manager"
 minting_endpoint = f"http://hub:{verifier_port}/services/positron-license/mint"
+
+# --- 0. Fail fast if secrets are missing ------------------------------------
+# A missing bind-mount source makes Docker create an EMPTY DIRECTORY at the
+# target, so a forgotten secret would otherwise surface much later as a cryptic
+# mint-time failure. Check at hub boot instead and stop with a clear message.
+for _label, _path in (("signing key", signing_key_file), ("license", license_file)):
+    if not os.path.isfile(_path) or os.path.getsize(_path) == 0:
+        raise RuntimeError(
+            f"Positron {_label} not found or empty at {_path}. Add it to "
+            "./secrets/ before `docker compose up` (see docker/README.md). "
+            "Request a signing key + license from academic-licenses@posit.co."
+        )
 
 # --- 1. positron-license minting service ------------------------------------
 # Runs in the Hub container, holds the signing key, mints per-session tokens.
