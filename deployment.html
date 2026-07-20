@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Configuration – jupyter-positron-server</title>
+<title>Deployment templates – jupyter-positron-server</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -130,11 +130,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span class="menu-text">Get Started</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link" href="./deployment.html"> 
+    <a class="nav-link active" href="./deployment.html" aria-current="page"> 
 <span class="menu-text">Deployment</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link active" href="./configuration.html" aria-current="page"> 
+    <a class="nav-link" href="./configuration.html"> 
 <span class="menu-text">Configuration</span></a>
   </li>  
   <li class="nav-item">
@@ -168,9 +168,15 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#optional-environment-variables" id="toc-optional-environment-variables" class="nav-link active" data-scroll-target="#optional-environment-variables">Optional: Environment Variables</a></li>
-  <li><a href="#admin-enforced-settings" id="toc-admin-enforced-settings" class="nav-link" data-scroll-target="#admin-enforced-settings">Admin-Enforced Settings</a></li>
-  <li><a href="#hub-license-minting-jupyterhub-orchestrated-deployments" id="toc-hub-license-minting-jupyterhub-orchestrated-deployments" class="nav-link" data-scroll-target="#hub-license-minting-jupyterhub-orchestrated-deployments">Hub License Minting (JupyterHub orchestrated deployments)</a></li>
+  <li><a href="#tljh-one-shot-install-script" id="toc-tljh-one-shot-install-script" class="nav-link active" data-scroll-target="#tljh-one-shot-install-script">TLJH: one-shot install script</a>
+  <ul class="collapse">
+  <li><a href="#prerequisites" id="toc-prerequisites" class="nav-link" data-scroll-target="#prerequisites">Prerequisites</a></li>
+  <li><a href="#usage" id="toc-usage" class="nav-link" data-scroll-target="#usage">Usage</a></li>
+  <li><a href="#common-options" id="toc-common-options" class="nav-link" data-scroll-target="#common-options">Common options</a></li>
+  <li><a href="#verify-the-install" id="toc-verify-the-install" class="nav-link" data-scroll-target="#verify-the-install">Verify the install</a></li>
+  </ul></li>
+  <li><a href="#docker-compose-template" id="toc-docker-compose-template" class="nav-link" data-scroll-target="#docker-compose-template">docker-compose template</a></li>
+  <li><a href="#next-steps" id="toc-next-steps" class="nav-link" data-scroll-target="#next-steps">Next steps</a></li>
   </ul>
 </nav>
     </div>
@@ -179,7 +185,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Configuration</h1>
+<h1 class="title">Deployment templates</h1>
 </div>
 
 
@@ -196,62 +202,185 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<p><code>jupyter-positron-server</code> can be configured using environment variables to customize how Positron Server runs within your Jupyter environment.</p>
-<section id="optional-environment-variables" class="level2">
-<h2 class="anchored" data-anchor-id="optional-environment-variables">Optional: Environment Variables</h2>
+<p>The repository ships ready-made deployment helpers so you don’t have to run the <a href="./get_started.html">Get Started</a> steps by hand. Pick the one that matches your JupyterHub:</p>
 <table class="caption-top table">
-<colgroup>
-<col style="width: 43%">
-<col style="width: 56%">
-</colgroup>
 <thead>
 <tr class="header">
-<th>Variable</th>
-<th>Description</th>
+<th>Your JupyterHub</th>
+<th>Use</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td><code>POSITRON_LICENSE_KEY_FILE</code></td>
-<td>Path to your Positron license key file. The user starting Positron must have write access to the Positron Server’s installation directory, as Positron will copy the license file to the location where Positron Server expects to find it. Positron Server will look for a license at <code>&lt;positron-server-path&gt;/resources/activation/linux/{ARCH}/license.lic</code> (where <code>{ARCH}</code> is <code>x86_64</code> or <code>aarch64</code>) if not set.</td>
+<td><a href="#tljh-one-shot-install-script">The Littlest JupyterHub (TLJH)</a></td>
+<td><code>scripts/install-positron.sh</code></td>
 </tr>
 <tr class="even">
-<td><code>POSITRON_LICENSE_MINTING_ENDPOINT</code></td>
-<td>URL of the JupyterHub minting endpoint that issues short-lived signed license tokens. When set, <code>jupyter-positron-server</code> calls this endpoint (authenticated with <code>JUPYTERHUB_API_TOKEN</code>) at each Positron Server launch instead of reading a static license file. Takes precedence over <code>POSITRON_LICENSE_KEY_FILE</code>. See the Hub minting endpoint setup section below.</td>
-</tr>
-<tr class="odd">
-<td><code>POSITRON_HOST</code></td>
-<td>Host address for Positron Server to bind to. Defaults to <code>127.0.0.1</code>.</td>
-</tr>
-<tr class="even">
-<td><code>JSP_POSITRON_LAUNCHER_DISABLED</code></td>
-<td>Set to any value to hide the Positron launcher entry in JupyterLab.</td>
+<td><a href="#docker-compose-template">Single-host docker-compose</a></td>
+<td><code>docker/</code> template</td>
 </tr>
 </tbody>
 </table>
+<p>All three need the same two files from Posit (email <a href="mailto:academic-licenses@posit.co">academic-licenses@posit.co</a>):</p>
+<ul>
+<li><strong>Signing key</strong> (<code>signing-key.pem</code>) — the RSA key used to mint per-session tokens</li>
+<li><strong>License file</strong> (<code>license.lic</code>) — proof of entitlement</li>
+</ul>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Positron spells the CPU architecture three ways: the download filename uses <code>x64</code>/<code>arm64</code>, the CDN path uses <code>x86_64</code>/<code>arm64</code>, and the activation directory uses <code>x86_64</code>/<code>aarch64</code>. The scripts derive all three from a single <code>POSITRON_ARCH</code> (<code>x64</code> or <code>arm64</code>), so you only set one value.</p>
+</div>
+</div>
+<section id="tljh-one-shot-install-script" class="level2">
+<h2 class="anchored" data-anchor-id="tljh-one-shot-install-script">TLJH: one-shot install script</h2>
+<p><a href="https://github.com/posit-dev/jupyter-positron-server/blob/main/scripts/install-positron.sh"><code>scripts/install-positron.sh</code></a> performs every step of the <a href="./get_started.html">Get Started</a> guide in one run: downloads and unpacks Positron Server, installs the license and signing key, installs <code>jupyter-positron-server</code> (user env) and <code>jupyter-positron-verifier</code> (hub env), generates the JupyterHub config that registers the verifier service, and reloads TLJH.</p>
+<section id="prerequisites" class="level3">
+<h3 class="anchored" data-anchor-id="prerequisites">Prerequisites</h3>
+<ul>
+<li>An existing TLJH deployment (run the script <strong>once</strong>, as root, on the TLJH host).</li>
+<li><code>signing-key.pem</code> and <code>license.lic</code> on that host.</li>
+</ul>
 </section>
-<section id="admin-enforced-settings" class="level2">
-<h2 class="anchored" data-anchor-id="admin-enforced-settings">Admin-Enforced Settings</h2>
-<p><code>POSITRON_ENFORCED_SETTINGS</code> lets administrators lock Positron settings so users cannot override them via the Settings UI or by editing <code>settings.json</code> directly. Locked settings appear grayed out with a policy indicator in the UI. Enforced settings survive profile changes, workspace switches, and direct edits to <code>~/.positron-server/data/User/settings.json</code>.</p>
-<p><strong>Requirements:</strong> <code>jupyter-positron-server &gt;= 0.0.4</code>, Positron Server <code>&gt;= 2026.07.0-365</code></p>
-<p><strong>Step 1 — Create the config file</strong></p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span> <span class="op">&gt;</span> /opt/tljh/config/jupyterhub_config.d/positron_enforced.py <span class="op">&lt;&lt; 'EOF'</span></span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="st">c.Spawner.environment = {</span></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="st">    'POSITRON_ENFORCED_SETTINGS': '{"workbench.colorTheme":"Default Positron Dark","extensions.autoUpdate":false}'</span></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="st">}</span></span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="op">EOF</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>Existing user sessions are not affected until they start a new session.</p>
+<section id="usage" class="level3">
+<h3 class="anchored" data-anchor-id="usage">Usage</h3>
+<p>Run as root, configuring everything through environment variables:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> POSITRON_VERSION=2026.07.0-365 POSITRON_ARCH=x64 <span class="dt">\</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>     LICENSE_SRC=./license.lic SIGNING_KEY_SRC=./signing-key.pem <span class="dt">\</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>     ./scripts/install-positron.sh</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The script is self-contained, it needs no files other than your license and signing key, so you can copy just this one script onto the host.</p>
 </section>
-<section id="hub-license-minting-jupyterhub-orchestrated-deployments" class="level2">
-<h2 class="anchored" data-anchor-id="hub-license-minting-jupyterhub-orchestrated-deployments">Hub License Minting (JupyterHub orchestrated deployments)</h2>
-<p>The <strong>Hub minting endpoint</strong> is a privileged JupyterHub service that holds the signing key and issues short-lived, session-bound tokens on demand.</p>
-<p><strong>Configuration</strong></p>
-<p>Set <code>POSITRON_LICENSE_MINTING_ENDPOINT</code> to the URL of the Hub minting service, for example in <code>jupyterhub_config.py</code>:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>c.Spawner.environment <span class="op">=</span> {</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">'POSITRON_LICENSE_MINTING_ENDPOINT'</span>: <span class="st">'http://hub:8081/services/positron-license/mint'</span>,</span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p><code>JUPYTERHUB_API_TOKEN</code> is set automatically by JupyterHub for each single-user server and is used to authenticate requests to the minting endpoint.</p>
-<p>When <code>POSITRON_LICENSE_MINTING_ENDPOINT</code> is set, <code>POSITRON_LICENSE_KEY_FILE</code> is ignored.</p>
+<section id="common-options" class="level3">
+<h3 class="anchored" data-anchor-id="common-options">Common options</h3>
+<p>Every setting is an environment variable with a sensible TLJH default. Run <code>./scripts/install-positron.sh --help</code> to see them all with current values. The ones you’ll reach for most:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Variable</th>
+<th>Purpose</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>POSITRON_VERSION</code></td>
+<td>Positron Server release to install</td>
+<td><code>2026.05.0-179</code></td>
+</tr>
+<tr class="even">
+<td><code>POSITRON_ARCH</code></td>
+<td>CPU arch: <code>x64</code> or <code>arm64</code></td>
+<td><code>arm64</code></td>
+</tr>
+<tr class="odd">
+<td><code>LICENSE_SRC</code></td>
+<td>Path to your license file</td>
+<td><code>./positron.lic</code></td>
+</tr>
+<tr class="even">
+<td><code>SIGNING_KEY_SRC</code></td>
+<td>Path to your RSA signing key</td>
+<td><code>./signing-key.pem</code></td>
+</tr>
+<tr class="odd">
+<td><code>POSITRON_TARBALL</code></td>
+<td>Use a pre-downloaded tarball instead of the CDN</td>
+<td><em>(download)</em></td>
+</tr>
+<tr class="even">
+<td><code>VERIFIER_PORT</code></td>
+<td>Port for the license minting service</td>
+<td><code>10101</code></td>
+</tr>
+<tr class="odd">
+<td><code>POSITRON_SERVER_PKG</code></td>
+<td><code>jupyter-positron-server</code> spec (PyPI or <code>git+https://…@branch</code>)</td>
+<td>latest</td>
+</tr>
+<tr class="even">
+<td><code>POSITRON_VERIFIER_PKG</code></td>
+<td><code>jupyter-positron-verifier</code> spec</td>
+<td>latest</td>
+</tr>
+</tbody>
+</table>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Tip
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>To install without network access to the CDN, download the tarball elsewhere and pass <code>POSITRON_TARBALL=./positron-server.tar.gz</code>.</p>
+</div>
+</div>
+<p>The script stops early with a clear message if the license or signing key is missing, so a forgotten file fails before any changes are made.</p>
+</section>
+<section id="verify-the-install" class="level3">
+<h3 class="anchored" data-anchor-id="verify-the-install">Verify the install</h3>
+<p>When it finishes, the script prints the checks to run. Confirm the license and the verifier service:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># License status</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="ex">/opt/positron-server/resources/activation/linux/</span><span class="op">&lt;</span>arch<span class="op">&gt;</span>/license-manager status</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Verifier service came up</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="ex">journalctl</span> <span class="at">-u</span> jupyterhub <span class="at">--no-pager</span> <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-i</span> positron-license</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>(<code>&lt;arch&gt;</code> is the activation dir name — <code>x86_64</code> or <code>aarch64</code>.) Users can then launch Positron from the JupyterLab launcher.</p>
+</section>
+</section>
+<section id="docker-compose-template" class="level2">
+<h2 class="anchored" data-anchor-id="docker-compose-template">docker-compose template</h2>
+<p>The <a href="https://github.com/posit-dev/jupyter-positron-server/tree/main/docker"><code>docker/</code></a> directory is the Docker-native counterpart: a JupyterHub + DockerSpawner <strong>hub</strong> image (which runs the verifier and holds the secrets) and a <strong>single-user</strong> Positron image, wired together with <code>docker-compose</code>. It’s a <em>deployment template</em> — copy and adapt it, don’t treat it as a finished product.</p>
+<p>From the <code>docker/</code> directory:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 1. Configure: copy the example env and edit arch/version/ports</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">cp</span> .env.example .env</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="co"># 2. Add secrets (git-ignored, bind-mounted read-only, never baked into images)</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="fu">cp</span> /path/to/signing-key.pem secrets/signing-key.pem</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="fu">cp</span> /path/to/license.lic     secrets/license.lic</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="co"># 3. Build both images (single-user is behind a build-only profile, name it explicitly)</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="ex">docker</span> compose build hub singleuser</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="co"># 4. Start the hub</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="ex">docker</span> compose up <span class="at">-d</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Then open <code>http://localhost:8000</code> (or your <code>HUB_PORT</code>). If a secret is missing, the hub now <strong>fails fast at boot</strong> with a clear message instead of erroring later at license-mint time.</p>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Warning
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>The template ships with <code>DummyAuthenticator</code>, which accepts <strong>any username and password</strong>. Replace it with a real authenticator (OAuth, native, LDAP, …) in <code>hub/jupyterhub_config.py</code> and rebuild before exposing the hub to anyone.</p>
+</div>
+</div>
+<p>See <a href="https://github.com/posit-dev/jupyter-positron-server/blob/main/docker/README.md"><code>docker/README.md</code></a> for the full configuration reference and the token-flow diagram.</p>
+</section>
+<section id="next-steps" class="level2">
+<h2 class="anchored" data-anchor-id="next-steps">Next steps</h2>
+<ul>
+<li><a href="./configuration.html">Configuration</a> — environment variables and admin-enforced settings</li>
+<li><a href="./troubleshooting.html">Troubleshooting</a> — when Positron won’t start for a user</li>
+<li><a href="./get_started.html">Get Started</a> — the manual, step-by-step version of the TLJH install</li>
+</ul>
 
 
 </section>
