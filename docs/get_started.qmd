@@ -2,7 +2,14 @@
 title: "Get Started"
 ---
 
-This guide walks an **administrator** through deploying Positron Server on JupyterHub.
+This guide walks an **administrator** through deploying Positron Server on JupyterHub, step by step and by hand.
+
+::: callout-tip
+Prefer not to run these steps manually? The
+[Deployment templates](deployment.qmd) page covers ready-made helpers: a
+one-shot TLJH install script (`scripts/install-positron.sh`) and a
+docker-compose template.
+:::
 
 ::: callout-important
 This getting started guide is for Positron version 2026.07.0 and newer.
@@ -152,3 +159,4 @@ Single-user server
 
 - See [Configuration](configuration.qmd) for additional environment variables
 - To lock Positron settings for all users, see the Admin-Enforced Settings section in [Configuration](configuration.qmd)
+- If Positron won't start for a user, see [Troubleshooting](troubleshooting.qmd)

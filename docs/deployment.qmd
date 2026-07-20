@@ -1,0 +1,137 @@
+---
+title: "Deployment templates"
+---
+
+The repository ships ready-made deployment helpers so you don't have to run the
+[Get Started](get_started.qmd) steps by hand. Pick the one that matches your
+JupyterHub:
+
+| Your JupyterHub | Use |
+|---|---|
+| [The Littlest JupyterHub (TLJH)](#tljh-one-shot-install-script) | `scripts/install-positron.sh` |
+| [Single-host docker-compose](#docker-compose-template) | `docker/` template |
+
+All three need the same two files from Posit (email
+[academic-licenses@posit.co](mailto:academic-licenses@posit.co)):
+
+- **Signing key** (`signing-key.pem`) — the RSA key used to mint per-session tokens
+- **License file** (`license.lic`) — proof of entitlement
+
+::: callout-note
+Positron spells the CPU architecture three ways: the download filename uses
+`x64`/`arm64`, the CDN path uses `x86_64`/`arm64`, and the activation directory
+uses `x86_64`/`aarch64`. The scripts derive all three from a single
+`POSITRON_ARCH` (`x64` or `arm64`), so you only set one value.
+:::
+
+## TLJH: one-shot install script
+
+[`scripts/install-positron.sh`](https://github.com/posit-dev/jupyter-positron-server/blob/main/scripts/install-positron.sh)
+performs every step of the [Get Started](get_started.qmd) guide in one run:
+downloads and unpacks Positron Server, installs the license and signing key,
+installs `jupyter-positron-server` (user env) and `jupyter-positron-verifier`
+(hub env), generates the JupyterHub config that registers the verifier service,
+and reloads TLJH.
+
+### Prerequisites
+
+- An existing TLJH deployment (run the script **once**, as root, on the TLJH host).
+- `signing-key.pem` and `license.lic` on that host.
+
+### Usage
+
+Run as root, configuring everything through environment variables:
+
+```bash
+sudo POSITRON_VERSION=2026.07.0-365 POSITRON_ARCH=x64 \
+     LICENSE_SRC=./license.lic SIGNING_KEY_SRC=./signing-key.pem \
+     ./scripts/install-positron.sh
+```
+
+The script is self-contained, it needs no files other than your license and
+signing key, so you can copy just this one script onto the host.
+
+### Common options
+
+Every setting is an environment variable with a sensible TLJH default. Run
+`./scripts/install-positron.sh --help` to see them all with current values. The
+ones you'll reach for most:
+
+| Variable | Purpose | Default |
+|---|---|---|
+| `POSITRON_VERSION` | Positron Server release to install | `2026.05.0-179` |
+| `POSITRON_ARCH` | CPU arch: `x64` or `arm64` | `arm64` |
+| `LICENSE_SRC` | Path to your license file | `./positron.lic` |
+| `SIGNING_KEY_SRC` | Path to your RSA signing key | `./signing-key.pem` |
+| `POSITRON_TARBALL` | Use a pre-downloaded tarball instead of the CDN | *(download)* |
+| `VERIFIER_PORT` | Port for the license minting service | `10101` |
+| `POSITRON_SERVER_PKG` | `jupyter-positron-server` spec (PyPI or `git+https://…@branch`) | latest |
+| `POSITRON_VERIFIER_PKG` | `jupyter-positron-verifier` spec | latest |
+
+::: callout-tip
+To install without network access to the CDN, download the tarball elsewhere
+and pass `POSITRON_TARBALL=./positron-server.tar.gz`.
+:::
+
+The script stops early with a clear message if the license or signing key is
+missing, so a forgotten file fails before any changes are made.
+
+### Verify the install
+
+When it finishes, the script prints the checks to run. Confirm the license and
+the verifier service:
+
+```bash
+# License status
+/opt/positron-server/resources/activation/linux/<arch>/license-manager status
+
+# Verifier service came up
+journalctl -u jupyterhub --no-pager | grep -i positron-license
+```
+
+(`<arch>` is the activation dir name — `x86_64` or `aarch64`.) Users can then
+launch Positron from the JupyterLab launcher.
+
+## docker-compose template
+
+The [`docker/`](https://github.com/posit-dev/jupyter-positron-server/tree/main/docker)
+directory is the Docker-native counterpart: a JupyterHub + DockerSpawner **hub**
+image (which runs the verifier and holds the secrets) and a **single-user**
+Positron image, wired together with `docker-compose`. It's a *deployment
+template* — copy and adapt it, don't treat it as a finished product.
+
+From the `docker/` directory:
+
+```bash
+# 1. Configure: copy the example env and edit arch/version/ports
+cp .env.example .env
+
+# 2. Add secrets (git-ignored, bind-mounted read-only, never baked into images)
+cp /path/to/signing-key.pem secrets/signing-key.pem
+cp /path/to/license.lic     secrets/license.lic
+
+# 3. Build both images (single-user is behind a build-only profile, name it explicitly)
+docker compose build hub singleuser
+
+# 4. Start the hub
+docker compose up -d
+```
+
+Then open `http://localhost:8000` (or your `HUB_PORT`). If a secret is missing,
+the hub now **fails fast at boot** with a clear message instead of erroring
+later at license-mint time.
+
+::: callout-warning
+The template ships with `DummyAuthenticator`, which accepts **any username and
+password**. Replace it with a real authenticator (OAuth, native, LDAP, …) in
+`hub/jupyterhub_config.py` and rebuild before exposing the hub to anyone.
+:::
+
+See [`docker/README.md`](https://github.com/posit-dev/jupyter-positron-server/blob/main/docker/README.md)
+for the full configuration reference and the token-flow diagram.
+
+## Next steps
+
+- [Configuration](configuration.qmd) — environment variables and admin-enforced settings
+- [Troubleshooting](troubleshooting.qmd) — when Positron won't start for a user
+- [Get Started](get_started.qmd) — the manual, step-by-step version of the TLJH install
