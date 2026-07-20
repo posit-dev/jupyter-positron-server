@@ -1,0 +1,157 @@
+---
+title: "Troubleshooting"
+---
+
+When Positron won't start for a user, the cause is almost always in one of four
+places: the **launcher extension** (user env), the **verifier service** (Hub),
+the **license/signing key**, or the **install itself** (arch/version). This page
+is organized by symptom.
+
+## Where to look first
+
+Most answers are in the logs. The verifier runs as a managed JupyterHub service,
+so its output lands in the Hub log:
+
+::: {.panel-tabset}
+### TLJH / systemd
+```bash
+# Hub + verifier service (the verifier logs with the "positron-license" name)
+journalctl -u jupyterhub --no-pager | grep -i positron-license
+
+# Full Hub log (spawn errors, service registration)
+journalctl -u jupyterhub --no-pager -n 200
+```
+
+### docker-compose
+```bash
+# Hub + verifier
+docker compose logs hub | grep -i positron-license
+
+# A user's single-user container (name shown by `docker ps`)
+docker logs <jupyter-USERNAME-container>
+```
+:::
+
+The single-user server's log (available from the JupyterHub UI under the user's
+server, or the spawner logs) shows what `jupyter-positron-server` and
+`positron-server` reported at launch.
+
+## The Positron launcher tile doesn't appear
+
+The tile is provided by `jupyter-positron-server` via `jupyter-server-proxy`, in
+the **user** environment.
+
+**Check** — in the user env:
+```bash
+# Is the extension installed and jupyter_server_proxy enabled?
+/opt/tljh/user/bin/pip show jupyter-positron-server
+/opt/tljh/user/bin/jupyter server extension list
+```
+
+**Fixes:**
+
+- Extension missing → install it in the user env and enable the proxy:
+  ```bash
+  /opt/tljh/user/bin/pip install 'jupyter-positron-server>=0.0.5'
+  /opt/tljh/user/bin/jupyter server extension enable --sys-prefix jupyter_server_proxy
+  ```
+- Installed but no tile → confirm `JSP_POSITRON_LAUNCHER_DISABLED` is **not** set
+  in the spawner environment (any value hides the tile).
+- Restart the user's server (stop and start it from the JupyterHub UI) — the
+  extension is picked up on server start, not on Hub reload.
+
+## The tile is there, but Positron never loads
+
+The launcher runs, but `positron-server` fails to start.
+
+**Check** the single-user server log for the failing step, then:
+
+- **`positron-server: command not found` / binary not found** — `positron-server`
+  isn't on the session `PATH`. Confirm the spawner sets it:
+  ```python
+  # TLJH: jupyterhub_config.py
+  c.Spawner.environment = {
+      "PATH": "/opt/positron-server/bin:" + os.environ.get("PATH", "/usr/local/bin:/usr/bin:/bin"),
+      ...
+  }
+  ```
+  In the docker template the binary is on `PATH` via the single-user image's
+  `ENV`, and the spawner intentionally does **not** override `PATH`.
+- **Hangs or license error** — the mint step is failing. See the two sections
+  below.
+
+## The verifier service isn't running or registered
+
+**Check** whether the Hub registered the `positron-license` service and it is
+listening:
+```bash
+journalctl -u jupyterhub --no-pager | grep -i positron-license
+# Should show the service starting; if there is nothing, it was never registered.
+```
+
+**Fixes:**
+
+- No mention at all → the service config wasn't loaded. Confirm your
+  `jupyterhub_config.py` (or the generated `positron-license.py` in
+  `jupyterhub_config.d/`) contains the `c.JupyterHub.services` block, then reload:
+  ```bash
+  tljh-config reload        # TLJH
+  # or: systemctl restart jupyterhub
+  # docker: docker compose restart hub
+  ```
+- Service starts then dies → check the command exists in the **Hub** env:
+  ```bash
+  /opt/tljh/hub/bin/pip show jupyter-positron-verifier
+  ls -l /opt/tljh/hub/bin/positron-verifier
+  ```
+- **Port conflict** on `VERIFIER_PORT` (default `10101`) → another process holds
+  the port; change `VERIFIER_PORT` and update
+  `POSITRON_LICENSE_MINTING_ENDPOINT` to match.
+
+## License / mint errors
+
+The verifier confirms entitlement with `license-manager` and mints a signed,
+session-bound token. Common failures:
+
+- **Signing key not readable** — the verifier runs as the Hub service account and
+  reads `POSITRON_MINTING_KEY_FILE`. Confirm the file exists and is readable by
+  that account:
+  ```bash
+  ls -l /etc/positron/signing-key.pem   # mode 600, owned by the Hub user
+  ```
+- **Minting endpoint unreachable / wrong URL** — `POSITRON_LICENSE_MINTING_ENDPOINT`
+  must point at the Hub-proxied service path. TLJH:
+  `http://127.0.0.1:10101/services/positron-license/mint`; docker:
+  `http://hub:${VERIFIER_PORT}/services/positron-license/mint`.
+- **`403` / authorization errors from the mint call** — the service role is
+  missing scopes. Confirm the `c.JupyterHub.load_roles` block grants the
+  `positron-license` service `read:users`.
+
+## Install-time failures
+
+- **Download fails (`curl` 403/404)** — the `POSITRON_VERSION`/`POSITRON_ARCH`
+  combination doesn't exist on the CDN. Verify the version string, or download
+  the tarball yourself and pass `POSITRON_TARBALL=./positron-server.tar.gz`.
+
+## docker-compose specifics
+
+- **Hub container exits at boot with `Positron … not found or empty at …`** — a
+  secret wasn't placed. Copy `signing-key.pem` and `license.lic` into
+  `docker/secrets/` (a missing bind-mount source makes Docker create an empty
+  directory, which is why the Hub checks at boot):
+  ```bash
+  cp /path/to/signing-key.pem secrets/signing-key.pem
+  cp /path/to/license.lic     secrets/license.lic
+  docker compose up -d
+  ```
+- **Single-user containers fail to spawn** — the single-user image must be built
+  (`docker compose build hub singleuser`) and its `jupyterhub-singleuser`
+  version must be compatible with the Hub's JupyterHub (see below).
+- **Anyone can log in** — that's `DummyAuthenticator`, the template default.
+  Replace it in `hub/jupyterhub_config.py` and rebuild before any real use.
+
+## Still stuck?
+
+Open an issue at
+[github.com/posit-dev/jupyter-positron-server](https://github.com/posit-dev/jupyter-positron-server/issues)
+with the relevant Hub and single-user log excerpts, your Positron version, and which deployment path you used.

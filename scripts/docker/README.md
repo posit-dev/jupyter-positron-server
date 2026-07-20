@@ -2,7 +2,7 @@
 
 The Docker-native counterpart to [`scripts/install-positron.sh`](../scripts/install-positron.sh)
 (which targets The Littlest JupyterHub). This is a **deployment template**: a
-starting point you copy and adapt for a real deployment, not a throwaway demo.
+starting point you copy and adapt for a real deployment.
 
 Two images run as separate containers on a shared docker network:
 
@@ -61,7 +61,7 @@ any password**. Edit `hub/jupyterhub_config.py` to use a real authenticator
 (OAuth, native, LDAP, …) and rebuild the hub image before exposing this to
 anyone.
 
-## How it works (token flow — unchanged from the TLJH install)
+## How it works
 
 1. `jupyter-positron-server` (single-user) calls
    `http://hub:${VERIFIER_PORT}/services/positron-license/mint`, authenticated
@@ -90,13 +90,3 @@ All values live in `.env` (see `.env.example` for defaults and comments):
 | `HUB_IMAGE` / `SINGLEUSER_IMAGE` | Image tags |
 | `DOCKER_NETWORK` | Shared network name (must match DockerSpawner's `network_name`) |
 
-## Trade-offs & TODOs (out of scope for this template)
-
-- Both images bake the full Positron Server tarball; the hub strictly needs only
-  `license-manager`. Image-size optimization (multi-stage / shared base) is a
-  documented TODO.
-- No TLS/HTTPS termination — add a reverse proxy for production.
-- No persistent volume for user home directories — add one as needed.
-- The single-user image's bundled `jupyterhub-singleuser` must be version-
-  compatible with the hub's JupyterHub. If you hit a mismatch, pin `jupyterhub`
-  in `singleuser/Dockerfile`.
