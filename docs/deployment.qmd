@@ -43,7 +43,7 @@ and reloads TLJH.
 Run as root, configuring everything through environment variables:
 
 ```bash
-sudo POSITRON_VERSION=2026.07.0-365 POSITRON_ARCH=x64 \
+sudo POSITRON_VERSION=2026.07.1-5 POSITRON_ARCH=x64 \
      LICENSE_SRC=./license.lic SIGNING_KEY_SRC=./signing-key.pem \
      ./scripts/install-positron.sh
 ```

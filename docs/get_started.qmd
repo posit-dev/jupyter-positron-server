@@ -30,13 +30,13 @@ Throughout this guide, `<arch>` refers to the activation directory name, which i
 
 Download the Positron Server binary for your Linux architecture. For the latest release of Positron (July 2026), you can find the downloads here:
 
-- Download Linux x64 build: https://cdn.posit.co/positron/releases/server/x86_64/positron-server-linux-x64-2026.07.0-365.tar.gz
-- Download Linux arm64 build: https://cdn.posit.co/positron/releases/server/arm64/positron-server-linux-arm64-2026.07.0-365.tar.gz
+- Download Linux x64 build: https://cdn.posit.co/positron/releases/server/x86_64/positron-server-linux-x64-2026.07.1-5.tar.gz
+- Download Linux arm64 build: https://cdn.posit.co/positron/releases/server/arm64/positron-server-linux-arm64-2026.07.1-5.tar.gz
 
 ```bash
 # Download Positron server to temporary directory
 # Note: this is the url for x64 architecture machines
-curl -L "https://cdn.posit.co/positron/releases/server/x86_64/positron-server-linux-x64-2026.07.0-365.tar.gz" -o /tmp/positron-server.tar.gz
+curl -L "https://cdn.posit.co/positron/releases/server/x86_64/positron-server-linux-x64-2026.07.1-5.tar.gz" -o /tmp/positron-server.tar.gz
 
 # Create directory
 mkdir -p /opt/positron-server
