@@ -33,9 +33,13 @@ Existing user sessions are not affected until they start a new session.
 
 ## Memory requirements
 
-A Positron Server session has the same baseline memory needs as a Positron Pro session. Allocate at least 2.5 GB of RAM per session. 
+It is recommended to allocate at least 2.5 GB of RAM per Positron Server session. The right amount depends on the size of workload:
 
-The right amount depends on the workload:
+- **Light**: single console, few extensions, simple scripts, basic app development
+- **Standard**: runtime switching, multiple consoles, multiple extensions, app development
+- **Heavy**: memory-intensive extensions such as file watchers or language servers, multiple concurrent apps, large datasets
+
+Use the table below to match each workload level to its minimum and recommended memory allocation.
 
 | Workload | Minimum | Recommended |
 |----------|---------|-------------|
@@ -43,18 +47,11 @@ The right amount depends on the workload:
 | Standard | 2.5 GB | 4 GB |
 | Heavy | 4 GB | 6 GB or more |
 
-Workload examples are approximate, but may look something like this:
-
-- **Light**: single console, few extensions, simple scripts, basic app development
-- **Standard**: runtime switching, multiple consoles, multiple extensions, app development
-- **Heavy**: memory-intensive extensions such as file watchers or language servers, multiple concurrent apps, large datasets
-
 Signs of insufficient memory include slow runtime switching, extensions that fail to install, degraded app performance, and crashes during memory-intensive operations.
 
 ::: callout-note
 See the Positron Pro [memory allocation FAQ](https://docs.posit.co/ide/server-pro/user/positron/reference/faq.html#allocate-sufficient-memory-for-your-positron-pro-session) for the full guidance this section summarizes.
 :::
-
 ## Hub License Minting (JupyterHub orchestrated deployments)
 
 The **Hub minting endpoint** is a privileged JupyterHub service that holds the signing key and issues short-lived, session-bound tokens on demand.
