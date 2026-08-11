@@ -21,6 +21,13 @@
     "text": "Admin-Enforced Settings\nPOSITRON_ENFORCED_SETTINGS lets administrators lock Positron settings so users cannot override them via the Settings UI or by editing settings.json directly. Locked settings appear grayed out with a policy indicator in the UI. Enforced settings survive profile changes, workspace switches, and direct edits to ~/.positron-server/data/User/settings.json.\nRequirements: jupyter-positron-server &gt;= 0.0.4, Positron Server &gt;= 2026.07.1-5\nStep 1 — Create the config file\ncat &gt; /opt/tljh/config/jupyterhub_config.d/positron_enforced.py &lt;&lt; 'EOF'\nc.Spawner.environment = {\n    'POSITRON_ENFORCED_SETTINGS': '{\"workbench.colorTheme\":\"Default Positron Dark\",\"extensions.autoUpdate\":false}'\n}\nEOF\nExisting user sessions are not affected until they start a new session."
   },
   {
+    "objectID": "configuration.html#memory-requirements",
+    "href": "configuration.html#memory-requirements",
+    "title": "Configuration",
+    "section": "Memory requirements",
+    "text": "Memory requirements\nIt is recommended to allocate at least 2.5 GB of RAM per Positron Server session. The right amount depends on the size of workload:\n\nLight: single console, few extensions, simple scripts, basic app development\nStandard: runtime switching, multiple consoles, multiple extensions, app development\nHeavy: memory-intensive extensions such as file watchers or language servers, multiple concurrent apps, large datasets\n\nUse the table below to match each workload level to its minimum and recommended memory allocation.\n\n\n\nWorkload\nMinimum\nRecommended\n\n\n\n\nLight\n2 GB\n2.5 GB\n\n\nStandard\n2.5 GB\n4 GB\n\n\nHeavy\n4 GB\n6 GB or more\n\n\n\nSigns of insufficient memory include slow runtime switching, extensions that fail to install, degraded app performance, and crashes during memory-intensive operations.\n\n\n\n\n\n\nNote\n\n\n\nSee the Positron Pro memory allocation FAQ for the full guidance this section summarizes."
+  },
+  {
     "objectID": "configuration.html#hub-license-minting-jupyterhub-orchestrated-deployments",
     "href": "configuration.html#hub-license-minting-jupyterhub-orchestrated-deployments",
     "title": "Configuration",
