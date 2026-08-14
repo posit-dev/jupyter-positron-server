@@ -9,13 +9,16 @@ JupyterHub:
 | Your JupyterHub | Use |
 |---|---|
 | [The Littlest JupyterHub (TLJH)](#tljh-one-shot-install-script) | `scripts/install-positron.sh` |
-| [Single-host docker-compose](#docker-compose-template) | `docker/` template |
+| [Single-host docker-compose](#docker-compose-template) | `scripts/docker/` template |
+| [Zero to JupyterHub (Kubernetes)](#zero-to-jupyterhub-kubernetes) | `scripts/z2jh/` template |
 
-All three need the same two files from Posit (email
-[academic-licenses@posit.co](mailto:academic-licenses@posit.co)):
+All of them need a **license file** (`license.lic`) from Posit — proof of
+entitlement. Email [academic-licenses@posit.co](mailto:academic-licenses@posit.co).
 
-- **Signing key** (`signing-key.pem`) — the RSA key used to mint per-session tokens
-- **License file** (`license.lic`) — proof of entitlement
+The TLJH and docker-compose templates additionally need a **signing key**
+(`signing-key.pem`), the RSA key the Hub-side verifier uses to mint per-session
+tokens. The Zero to JupyterHub template does not: it is pinned to the earlier
+licensing flow, in which Positron reads the license file directly.
 
 ::: callout-note
 Positron spells the CPU architecture three ways: the download filename uses
@@ -94,7 +97,7 @@ launch Positron from the JupyterLab launcher.
 
 ## docker-compose template
 
-The [`docker/`](https://github.com/posit-dev/jupyter-positron-server/tree/main/docker)
+The [`scripts/docker/`](https://github.com/posit-dev/jupyter-positron-server/tree/main/scripts/docker)
 directory is the Docker-native counterpart: a JupyterHub + DockerSpawner **hub**
 image (which runs the verifier and holds the secrets) and a **single-user**
 Positron image, wired together with `docker-compose`. It's a *deployment
@@ -127,8 +130,112 @@ password**. Replace it with a real authenticator (OAuth, native, LDAP, …) in
 `hub/jupyterhub_config.py` and rebuild before exposing the hub to anyone.
 :::
 
-See [`docker/README.md`](https://github.com/posit-dev/jupyter-positron-server/blob/main/docker/README.md)
+See [`scripts/docker/README.md`](https://github.com/posit-dev/jupyter-positron-server/blob/main/scripts/docker/README.md)
 for the full configuration reference and the token-flow diagram.
+
+## Zero to JupyterHub (Kubernetes)
+
+[`scripts/z2jh/`](https://github.com/posit-dev/jupyter-positron-server/tree/main/scripts/z2jh)
+targets [Zero to JupyterHub](https://z2jh.jupyter.org/) — the official JupyterHub
+Helm chart, and what most universities running JupyterHub on Kubernetes use.
+
+::: callout-important
+This template is pinned to Positron Server `2026.05.0-179` and
+`jupyter-positron-server` `0.0.4`, the last release that reads a license file
+directly from the activation directory. It does **not** use a signing key or a
+Hub-side minting service.
+:::
+
+The shape is different from the other two templates: **there is no custom hub
+image**. Nothing Positron-related runs on the Hub, so the chart's stock hub image
+is used unchanged — no `hub.image`, no `hub.services`, no `hub.extraVolumes`.
+Everything lives in the single-user image, and the license is a Kubernetes Secret
+mounted into user pods.
+
+::: callout-note
+Because the license is mounted into user pods, it is readable by users within
+their own session. That follows from this licensing model, not from Kubernetes.
+:::
+
+### Usage
+
+Build the single-user image and load or push it where your cluster can reach it:
+
+```bash
+cd scripts/z2jh
+docker build -t positron-singleuser:v1 --build-arg POSITRON_ARCH=x64 \
+  -f Dockerfile.singleuser .
+
+# local cluster
+kind load docker-image positron-singleuser:v1
+```
+
+Set the architecture directory in `values.yaml` (see the warning below), then
+install, passing the license at install time so it never lands in a values file or
+in git:
+
+```bash
+helm repo add jupyterhub https://hub.jupyter.org/helm-chart/ && helm repo update
+
+helm upgrade --install positron jupyterhub/jupyterhub \
+  --version 4.4.1 --namespace jupyterhub --create-namespace \
+  --values values.yaml \
+  --set-file 'singleuser.extraFiles.license\.lic.stringData'=./license.lic \
+  --wait
+
+kubectl -n jupyterhub port-forward svc/proxy-public 8080:http
+```
+
+### Two things that will bite you
+
+::: callout-warning
+**`subPath` is required.** The license must mount at the full *file* path with
+`subPath: license.lic`. Mounting at the directory replaces it entirely, and
+`license-manager` plus the activation libraries disappear. The user then sees a
+blank page for about two minutes, then `could not start positron in time`, while
+the pod log reports `No license key provided` — both pointing away from the real
+cause.
+
+`values.yaml` uses `singleuser.extraFiles`, which derives `subPath` automatically
+and makes this mistake impossible. `values-secret-alternative.yaml` (for
+externally managed Secrets) requires you to write it yourself.
+:::
+
+::: callout-warning
+**The activation directory is architecture-specific** — `x86_64` on amd64 nodes,
+`aarch64` on arm64. Every tarball ships *both* directories, both fully populated,
+so pointing at the wrong one looks entirely normal on inspection and fails with
+the same misleading symptoms above.
+
+Confirm what your nodes report:
+
+```bash
+kubectl -n jupyterhub exec <pod> -c notebook -- \
+  python3 -c "import platform; print(platform.machine())"
+```
+
+Mixed-architecture node pools cannot be served by a single `mountPath`; you would
+need per-architecture `singleuser.profileList` entries with node selectors.
+:::
+
+### Verifying
+
+`license-manager status` **cannot** be used here — it requires root, and user pods
+run as uid 1000 with no privilege escalation. Check the mount and Positron's own
+verdict instead:
+
+```bash
+POD=$(kubectl -n jupyterhub get pod -l component=singleuser-server -o name | head -1)
+kubectl -n jupyterhub exec $POD -c notebook -- \
+  ls -l /opt/positron-server/resources/activation/linux/x86_64/
+kubectl -n jupyterhub logs $POD -c notebook | grep -i "license verified"
+```
+
+A healthy listing keeps `license-manager`, `librclient.so`, `librserver.so` and
+`license-manager.conf` beside `license.lic`.
+
+See [`scripts/z2jh/README.md`](https://github.com/posit-dev/jupyter-positron-server/blob/main/scripts/z2jh/README.md)
+for the full configuration reference.
 
 ## Next steps
 

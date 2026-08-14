@@ -150,6 +150,94 @@ session-bound token. Common failures:
 - **Anyone can log in** — that's `DummyAuthenticator`, the template default.
   Replace it in `hub/jupyterhub_config.py` and rebuild before any real use.
 
+## Zero to JupyterHub (Kubernetes) specifics
+
+Logs live in the single-user pod, and `positron-server` restart-loops on failure,
+so always use `--tail`:
+
+```bash
+POD=$(kubectl -n jupyterhub get pod -l component=singleuser-server -o name | head -1)
+kubectl -n jupyterhub logs $POD -c notebook --tail=200
+```
+
+`-c notebook` avoids the "Defaulted container" notice from the pod's init
+container.
+
+### `could not start positron in time`
+
+The browser shows a blank page with a spinner for about two minutes, then a `500`
+with `could not start positron in time`. The message implicates slowness, but in a
+Kubernetes deployment it is far more often the license mount. The two-minute delay
+is `jupyter-server-proxy` giving up.
+
+Check the activation directory first:
+
+```bash
+kubectl -n jupyterhub exec $POD -c notebook -- \
+  ls -l /opt/positron-server/resources/activation/linux/<arch>/
+```
+
+**A healthy directory** holds `license-manager`, `librclient.so`, `librserver.so`,
+`license-manager.conf` and `license.lic`.
+
+**If only `license.lic` is there**, plus entries like `..data` and a timestamped
+directory, the Secret was mounted **at the directory** instead of at the file
+path. Add `subPath: license.lic` and make `mountPath` the full file path — or
+switch to `singleuser.extraFiles`, which derives `subPath` for you.
+
+**If the directory looks healthy but Positron still fails**, the license is
+probably in the *wrong architecture* directory. Both `x86_64` and `aarch64` ship
+in every tarball and both look complete, so this is invisible to inspection:
+
+```bash
+kubectl -n jupyterhub exec $POD -c notebook -- \
+  python3 -c "import platform; print(platform.machine())"
+```
+
+Whatever that prints is the only directory Positron consults.
+
+### `No license key provided` in the pod log
+
+```
+No license key provided. A license key is required to use Positron in a hosted
+environment. Provide a license key with the --license-key or --license-key-file ...
+```
+
+Taken literally this suggests the license is missing, and following its advice
+leads nowhere. It appears whenever Positron cannot *validate* a license — which
+includes the case where the license is mounted and readable but the activation
+libraries beside it were masked. Work through the activation-directory checks
+above before touching `--license-key-file`.
+
+### Confirming the license is readable at all
+
+```bash
+kubectl -n jupyterhub exec $POD -c notebook -- id
+kubectl -n jupyterhub exec $POD -c notebook -- \
+  head -c 30 /opt/positron-server/resources/activation/linux/<arch>/license.lic
+```
+
+`id` reports `uid=1000(jovyan) gid=100(users)`, and the license should show as
+`root:users` with mode `0440`. Note that `license-manager status` cannot be run
+here — it requires root, which user pods do not have.
+
+### User servers fail to spawn
+
+The single-user image's `jupyterhub` must be compatible with the Hub's. Compare:
+
+```bash
+kubectl -n jupyterhub exec deploy/hub -- jupyterhub --version
+docker run --rm --entrypoint pip <your-image> show jupyterhub
+```
+
+A patch-level difference is fine; a larger gap needs a pin in the image.
+
+### Extensions reinstall on every launch
+
+Expected when `singleuser.storage.type` is `none`, because `$HOME` is ephemeral and
+Positron re-bootstraps `~/.positron-server/extensions` each spawn. Set
+`storage.type: dynamic` so it happens once.
+
 ## Still stuck?
 
 Open an issue at
