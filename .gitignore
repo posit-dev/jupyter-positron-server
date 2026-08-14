@@ -25,6 +25,13 @@ ENV/
 .coverage
 htmlcov/
 
+# Secrets — never commit license or key material
+*.lic
+*.pem
+
+# Local scratch space (deployment testing, notes)
+scratch/
+
 # Misc
 *.DS_Store
 
