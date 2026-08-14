@@ -23,8 +23,13 @@ licensing flow, in which Positron reads the license file directly.
 ::: callout-note
 Positron spells the CPU architecture three ways: the download filename uses
 `x64`/`arm64`, the CDN path uses `x86_64`/`arm64`, and the activation directory
-uses `x86_64`/`aarch64`. The scripts derive all three from a single
-`POSITRON_ARCH` (`x64` or `arm64`), so you only set one value.
+uses `x86_64`/`aarch64`.
+
+The TLJH script and the docker-compose template derive all three from a single
+`POSITRON_ARCH` (`x64` or `arm64`), so you only set one value. The Zero to
+JupyterHub template derives the CDN path from `POSITRON_ARCH` at image build
+time, but the **activation directory is set separately** in `values.yaml` — see
+the warning in that section.
 :::
 
 ## TLJH: one-shot install script
