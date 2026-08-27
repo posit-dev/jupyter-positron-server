@@ -2,19 +2,52 @@
 title: "jupyter-positron-server"
 ---
 
-Run [Positron Server](https://github.com/posit-dev/positron) inside your JupyterHub environment.
+Run [Positron Server](https://github.com/posit-dev/positron) inside your
+JupyterHub environment.
 
 ## Overview
 
-`jupyter-positron-server` is a [jupyter-server-proxy](https://jupyter-server-proxy.readthedocs.io/) extension that enables running Positron Server within JupyterHub. This allows users to access the full Positron IDE experience directly from their Jupyter environment without needing a separate deployment.
+`jupyter-positron-server` is a
+[jupyter-server-proxy](https://jupyter-server-proxy.readthedocs.io/) extension
+that runs Positron Server within JupyterHub. Students reach the full Positron IDE
+from their Jupyter environment, with no separate deployment.
 
-This project draws inspiration from [jupyter-rsession-proxy](https://github.com/jupyterhub/jupyter-rsession-proxy), which provides similar functionality for RStudio Server. Both packages leverage the `jupyter-server-proxy` framework to integrate external web applications into the Jupyter ecosystem.
+This project draws inspiration from
+[jupyter-rsession-proxy](https://github.com/jupyterhub/jupyter-rsession-proxy),
+which does the same for RStudio Server. Both packages use the
+`jupyter-server-proxy` framework to bring an external web application into the
+Jupyter ecosystem.
 
-See the [Get Started](get_started.qmd) guide for detailed setup instructions.
+## Which setup applies to your version
+
+Positron Server changed how it verifies a license twice, so the setup steps depend
+on the version you install. Find your version in the table below, then follow the
+guide in the last column.
+
+| Positron Server version | How the license is verified | What to install | Setup guide |
+|---|---|---|---|
+| 2026.09.0 and newer | `positron-server` validates `license.lic` in its own activation directory, using the bundled `license-manager` | `jupyter-positron-server` | [Get started](get_started.qmd) |
+| 2026.07.0 through 2026.08.2 | A Hub service mints a signed, per-session token from a signing key. No license file is read by the session | `jupyter-positron-server` and `jupyter-positron-verifier` | [Verifier setup](verifier_get_started.qmd) |
+| 2026.06.1 and older | `positron-server` validates `license.lic` in its own activation directory, using the bundled `license-manager` | `jupyter-positron-server` | [Get started](get_started.qmd) |
+
+::: callout-important
+The signing key setup for 2026.07.0 through 2026.08.2 is not recommended. Those
+versions accept a signed token only, so a deployment on that range needs the
+signing key. On every other version, place `license.lic` at
+`/opt/positron-server/resources/activation/linux/<arch>/license.lic` and request
+no signing key.
+:::
+
+::: callout-note
+The two license file rows differ in one detail. On 2026.06.1 and older, install
+`jupyter-positron-server` version 0.0.4. On 2026.09.0 and newer, install version
+0.0.5 or newer.
+:::
 
 ## Features
 
-Positron Server provides a robust data science IDE without needing a local install or new infrastructure:
+Positron Server provides a data science IDE with no local install and no new
+infrastructure:
 
 - Rich Python and R support
 - OpenVSX extension marketplace access
@@ -23,12 +56,18 @@ Positron Server provides a robust data science IDE without needing a local insta
 
 ## Requirements
 
-- Python >= 3.9
-- [positron-server](https://github.com/posit-dev/positron) installed and available in PATH
-- A valid Positron license key file and signing key
+- Python 3.9 or newer
+- `positron-server` installed and available on `PATH`
+- A Positron license file, and a signing key on 2026.07.0 through 2026.08.2 only
+- At least 2.5 GB of RAM per session. See
+  [memory requirements](configuration.qmd#memory-requirements)
 
-## Getting a License
+## Get a license
 
-Positron Server is available for educational use only. Free licenses are available for currently enrolled students using Positron for coursework. Review the [Positron Education License Rider](https://github.com/posit-dev/positron/blob/main/LICENSE.txt) for full eligibility terms.
+Positron Server is available for educational use only. Free licenses are
+available for currently enrolled students using Positron for coursework. For the
+full eligibility terms, review the
+[Positron Education License Rider](https://github.com/posit-dev/positron/blob/main/LICENSE.txt).
 
-To request a license, email [academic-licenses@posit.co](mailto:academic-licenses@posit.co).
+To request a license, send email to
+[academic-licenses@posit.co](mailto:academic-licenses@posit.co).

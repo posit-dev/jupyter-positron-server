@@ -1,8 +1,15 @@
 # Positron Server on JupyterHub — docker-compose deployment template
 
-The Docker-native counterpart to [`scripts/install-positron.sh`](../scripts/install-positron.sh)
+The Docker-native counterpart to [`scripts/install-positron.sh`](../install-positron.sh)
 (which targets The Littlest JupyterHub). This is a **deployment template**: a
 starting point you copy and adapt for a real deployment.
+
+> **Applies to Positron Server 2026.07.0 through 2026.08.2.** This template sets up
+> the signing key and the Hub verifier service, which only those versions use.
+> Positron Server 2026.09.0 and newer validate a `license.lic` file directly and
+> need no signing key, no verifier service, and no minting endpoint. See the
+> [version matrix](https://posit-dev.github.io/jupyter-positron-server/#which-setup-applies-to-your-version)
+> and [Adapt a template for 2026.09.0 and newer](https://posit-dev.github.io/jupyter-positron-server/deployment.html#adapt-a-template).
 
 Two images run as separate containers on a shared docker network:
 

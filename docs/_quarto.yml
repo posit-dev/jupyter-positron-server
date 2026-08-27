@@ -14,12 +14,16 @@ website:
     background: light
     pinned: true
     left:
-      - text: "Get Started"
+      - text: "Get started"
         file: get_started.qmd
+      - text: "Verifier setup"
+        file: verifier_get_started.qmd
       - text: "Deployment"
         file: deployment.qmd
       - text: "Configuration"
         file: configuration.qmd
+      - text: "Classroom settings"
+        file: classroom_settings.qmd
       - text: "Troubleshooting"
         file: troubleshooting.qmd
       - text: "Reference"
