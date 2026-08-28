@@ -8,11 +8,8 @@ the **license/signing key**, or the **install itself** (arch/version). This page
 is organized by symptom.
 
 ::: callout-note
-The Zero to JupyterHub template has no verifier service — the license is read
-directly from the activation directory in the user pod. If that's your
-deployment, skip the verifier and mint sections and go to
-[Zero to JupyterHub (Kubernetes) specifics](#zero-to-jupyterhub-kubernetes-specifics),
-where the license-mount failures are the usual cause.
+On Kubernetes, license-mount problems are the usual cause — see
+[Zero to JupyterHub (Kubernetes) specifics](#zero-to-jupyterhub-kubernetes-specifics).
 :::
 
 ## Where to look first

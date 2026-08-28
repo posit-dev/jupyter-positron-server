@@ -15,10 +15,8 @@ JupyterHub:
 All of them need a **license file** (`license.lic`) from Posit — proof of
 entitlement. Email [academic-licenses@posit.co](mailto:academic-licenses@posit.co).
 
-The TLJH and docker-compose templates additionally need a **signing key**
-(`signing-key.pem`), the RSA key the Hub-side verifier uses to mint per-session
-tokens. The Zero to JupyterHub template does not: it is pinned to the earlier
-licensing flow, in which Positron reads the license file directly.
+On Positron `2026.09.0` and newer that is the only file you need — Positron
+reads the license directly, so there is no separate signing key.
 
 ::: callout-note
 Positron spells the CPU architecture three ways: the download filename uses
@@ -26,10 +24,9 @@ Positron spells the CPU architecture three ways: the download filename uses
 uses `x86_64`/`aarch64`.
 
 The TLJH script and the docker-compose template derive all three from a single
-`POSITRON_ARCH` (`x64` or `arm64`), so you only set one value. The Zero to
-JupyterHub template derives the CDN path from `POSITRON_ARCH` at image build
-time, but the **activation directory is set separately** in `values.yaml` — see
-the warning in that section.
+`POSITRON_ARCH` (`x64` or `arm64`). On
+[Zero to JupyterHub](#zero-to-jupyterhub-kubernetes) you set the activation
+directory yourself, in `values.yaml`.
 :::
 
 ## TLJH: one-shot install script
@@ -142,25 +139,18 @@ for the full configuration reference and the token-flow diagram.
 
 [`scripts/z2jh/`](https://github.com/posit-dev/jupyter-positron-server/tree/main/scripts/z2jh)
 targets [Zero to JupyterHub](https://z2jh.jupyter.org/) — the official JupyterHub
-Helm chart, and what most universities running JupyterHub on Kubernetes use.
+Helm chart.
 
 ::: callout-important
-This template is pinned to Positron Server `2026.05.0-179` and
-`jupyter-positron-server` `0.0.4`, the last release that reads a license file
-directly from the activation directory. It does **not** use a signing key or a
-Hub-side minting service.
+This template targets Positron Server `2026.09.0-XX` and
+`jupyter-positron-server` `0.0.6`, which read the license file directly from the
+activation directory.
 :::
 
-The shape is different from the other two templates: **there is no custom hub
-image**. Nothing Positron-related runs on the Hub, so the chart's stock hub image
-is used unchanged — no `hub.image`, no `hub.services`, no `hub.extraVolumes`.
-Everything lives in the single-user image, and the license is a Kubernetes Secret
-mounted into user pods.
-
-::: callout-note
-Because the license is mounted into user pods, it is readable by users within
-their own session. That follows from this licensing model, not from Kubernetes.
-:::
+**There is no custom hub image.** Nothing Positron-related runs on the Hub, so
+the chart's stock hub image is used unchanged — no `hub.image`, no
+`hub.extraVolumes`. Everything lives in the single-user image, and the license is
+a Kubernetes Secret mounted into user pods.
 
 ### Usage
 
@@ -175,7 +165,7 @@ docker build -t positron-singleuser:v1 --build-arg POSITRON_ARCH=x64 \
 kind load docker-image positron-singleuser:v1
 ```
 
-Set the architecture directory in `values.yaml` (see the warning below), then
+Set the architecture directory in `values.yaml` to match your nodes, then
 install, passing the license at install time so it never lands in a values file or
 in git:
 
@@ -191,37 +181,24 @@ helm upgrade --install positron jupyterhub/jupyterhub \
 kubectl -n jupyterhub port-forward svc/proxy-public 8080:http
 ```
 
-### Two things that will bite you
+### Troubleshooting
 
-::: callout-warning
-**`subPath` is required.** The license must mount at the full *file* path with
-`subPath: license.lic`. Mounting at the directory replaces it entirely, and
-`license-manager` plus the activation libraries disappear. The user then sees a
-blank page for about two minutes, then `could not start positron in time`, while
-the pod log reports `No license key provided` — both pointing away from the real
-cause.
+Two things in `values.yaml` are easy to get wrong, and both fail with symptoms
+that point somewhere else entirely:
 
-`values.yaml` uses `singleuser.extraFiles`, which derives `subPath` automatically
-and makes this mistake impossible. `values-secret-alternative.yaml` (for
-externally managed Secrets) requires you to write it yourself.
-:::
+- **`subPath` is required.** The license must mount at the full *file* path.
+  Mounting at the directory replaces it, so `license-manager` and the activation
+  libraries disappear. `values.yaml` uses `singleuser.extraFiles`, which derives
+  `subPath` for you; `values-secret-alternative.yaml` does not.
+- **The activation directory is architecture-specific** — `x86_64` on amd64
+  nodes, `aarch64` on arm64. Every tarball ships *both*, fully populated, so the
+  wrong one looks entirely normal on inspection. Mixed-architecture node pools
+  cannot be served by a single `mountPath`; you would need per-architecture
+  `singleuser.profileList` entries with node selectors.
 
-::: callout-warning
-**The activation directory is architecture-specific** — `x86_64` on amd64 nodes,
-`aarch64` on arm64. Every tarball ships *both* directories, both fully populated,
-so pointing at the wrong one looks entirely normal on inspection and fails with
-the same misleading symptoms above.
-
-Confirm what your nodes report:
-
-```bash
-kubectl -n jupyterhub exec <pod> -c notebook -- \
-  python3 -c "import platform; print(platform.machine())"
-```
-
-Mixed-architecture node pools cannot be served by a single `mountPath`; you would
-need per-architecture `singleuser.profileList` entries with node selectors.
-:::
+See
+[Troubleshooting](troubleshooting.qmd#zero-to-jupyterhub-kubernetes-specifics)
+for the symptoms and the diagnostic commands.
 
 ### Verifying
 

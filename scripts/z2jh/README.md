@@ -13,22 +13,19 @@ docker-compose).
 Everything Positron-related lives in the **single-user** image:
 
 - **No custom hub image.** Nothing Positron-related runs on the Hub, so the
-  chart's stock hub image is used unchanged. There is no `hub.image` override, no
-  `hub.services`, and no `hub.extraVolumes` anywhere in `values.yaml`.
+  chart's stock hub image is used unchanged. There is no `hub.image` override and
+  no `hub.extraVolumes` anywhere in `values.yaml`.
 - **The single-user image** carries the Positron Server binary and
   `jupyter-positron-server`, and holds no secrets.
 - **The license** is a Kubernetes Secret mounted into the user pod at the path
   Positron expects.
-
-Because the license is mounted into user pods, it is readable by users in their own
-session. That is inherent to this licensing model, not a Kubernetes limitation.
 
 ## Prerequisites
 
 - A Kubernetes cluster and Helm.
 - A **license file** (`license.lic`) from Posit — email
   [academic-licenses@posit.co](mailto:academic-licenses@posit.co). See the project
-  README for eligibility. No signing key is needed for this deployment.
+  README for eligibility. That is the only file you need.
 - A registry your cluster can pull from, or a local cluster you can load images
   into directly.
 
@@ -101,25 +98,20 @@ A healthy directory listing keeps `license-manager`, `librclient.so`,
 `librserver.so` and `license-manager.conf` next to `license.lic`. Ultimately the
 real test is that Positron opens in the browser.
 
-## Two things that will bite you
+## Two things that are easy to get wrong
 
-**`subPath` is required.** The license must mount at the full *file* path with
-`subPath: license.lic`. Mounting at the directory replaces it entirely —
-`license-manager` and the activation libraries disappear. The user then sees a
-blank page for about two minutes followed by `could not start positron in time`,
-while the pod log says `No license key provided`. Both messages point away from
-the real cause. The `singleuser.extraFiles` approach in `values.yaml` derives
-`subPath` for you, which is why it is the default;
-`values-secret-alternative.yaml` requires you to write it yourself.
+- **`subPath` is required.** The license must mount at the full *file* path.
+  Mounting at the directory replaces it, so `license-manager` and the activation
+  libraries disappear. `values.yaml` uses `singleuser.extraFiles`, which derives
+  `subPath` for you; `values-secret-alternative.yaml` does not.
+- **The activation directory must match your nodes** — `x86_64` on amd64,
+  `aarch64` on arm64. Every tarball ships *both*, fully populated, so the wrong
+  one looks completely normal on inspection. Mixed-architecture node pools cannot
+  be served by a single `mountPath`; you would need per-architecture
+  `singleuser.profileList` entries with node selectors.
 
-**The architecture directory must match your nodes.** Every tarball ships *both*
-`x86_64` and `aarch64` activation directories, both fully populated, so pointing
-at the wrong one looks completely normal on inspection and fails with the same
-misleading symptoms above.
-
-Mixed-architecture node pools cannot be served by a single `mountPath`. You would
-need per-architecture `singleuser.profileList` entries with node selectors, or
-separate values files per node pool.
+Both fail with symptoms that point somewhere else. See
+[Troubleshooting](https://posit-dev.github.io/jupyter-positron-server/troubleshooting.html#zero-to-jupyterhub-kubernetes-specifics) for what you actually see and how to diagnose it.
 
 ## Configuration reference
 
@@ -132,13 +124,12 @@ separate values files per node pool.
 | `singleuser.startTimeout` | Raised to 600; Positron images are large |
 | `POSITRON_VERSION` (build arg) | Positron Server release |
 | `POSITRON_ARCH` (build arg) | `x64` or `arm64` |
-| `POSITRON_SERVER_PKG` (build arg) | Pinned to `jupyter-positron-server==0.0.4` |
+| `POSITRON_SERVER_PKG` (build arg) | Pinned to `jupyter-positron-server==0.0.6` |
 
 ## Versions
 
-Verified against z2jh chart **4.4.1** (JupyterHub 5.5.1) on Kubernetes **v1.36.1**,
-with Positron Server **2026.05.0-179** and `jupyter-positron-server` **0.0.4**.
+Targets Positron Server **2026.09.0-XX** and `jupyter-positron-server`
+**0.0.6**, which read the license file directly from the activation directory.
 
-The pins are deliberate: `0.0.4` is the last release that reads a license file
-from the activation directory. Newer releases expect a signed token minted by a
-Hub-side service.
+The Kubernetes side of this template was developed and verified against z2jh
+chart **4.4.1** (JupyterHub 5.5.1) on Kubernetes **v1.36.1**.

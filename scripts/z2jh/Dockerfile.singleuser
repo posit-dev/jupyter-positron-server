@@ -9,12 +9,11 @@
 ARG BASE_IMAGE=quay.io/jupyter/base-notebook:latest
 FROM ${BASE_IMAGE}
 
-# Pinned deliberately. jupyter-positron-server 0.0.4 is the last release that
-# reads a license file from the activation directory; newer releases expect a
-# signed token minted by a Hub service.
-ARG POSITRON_VERSION=2026.05.0-179
+# jupyter-positron-server 0.0.6 and Positron 2026.09.0+ read the license file
+# directly from the activation directory.
+ARG POSITRON_VERSION=2026.09.0-XX
 ARG POSITRON_ARCH=x64
-ARG POSITRON_SERVER_PKG="jupyter-positron-server==0.0.4"
+ARG POSITRON_SERVER_PKG="jupyter-positron-server==0.0.6"
 
 ENV POSITRON_SERVER_DIR=/opt/positron-server
 
