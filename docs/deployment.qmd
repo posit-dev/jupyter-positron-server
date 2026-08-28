@@ -87,8 +87,8 @@ When it finishes, the script prints the checks to run. Confirm the license and
 the verifier service:
 
 ```bash
-# License status
-/opt/positron-server/resources/activation/linux/<arch>/license-manager status
+# License status (license-manager requires root)
+sudo /opt/positron-server/resources/activation/linux/<arch>/license-manager status
 
 # Verifier service came up
 journalctl -u jupyterhub --no-pager | grep -i positron-license
@@ -143,7 +143,7 @@ Helm chart.
 
 ::: callout-important
 This template targets Positron Server `2026.09.0-XX` and
-`jupyter-positron-server` `0.0.6`, which read the license file directly from the
+`jupyter-positron-server==0.0.6`, which read the license file directly from the
 activation directory.
 :::
 
@@ -202,9 +202,9 @@ for the symptoms and the diagnostic commands.
 
 ### Verifying
 
-`license-manager status` **cannot** be used here — it requires root, and user pods
-run as uid 1000 with no privilege escalation. Check the mount and Positron's own
-verdict instead:
+`license-manager status` requires root. On TLJH you can `sudo` it; user pods run
+as uid 1000 with no privilege escalation, so here it cannot be run at all. Check
+the mount and Positron's own verdict instead:
 
 ```bash
 POD=$(kubectl -n jupyterhub get pod -l component=singleuser-server -o name | head -1)

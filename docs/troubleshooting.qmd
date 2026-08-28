@@ -223,8 +223,9 @@ kubectl -n jupyterhub exec $POD -c notebook -- \
 ```
 
 `id` reports `uid=1000(jovyan) gid=100(users)`, and the license should show as
-`root:users` with mode `0440`. Note that `license-manager status` cannot be run
-here — it requires root, which user pods do not have.
+`root:users` with mode `0440`. Note that `license-manager status` requires root —
+usable via `sudo` on TLJH, but not in user pods, which have no privilege
+escalation.
 
 ### User servers fail to spawn
 

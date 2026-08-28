@@ -76,8 +76,9 @@ kubectl -n jupyterhub port-forward svc/proxy-public 8080:http
 
 ## Verifying the install
 
-Note that `license-manager status` **cannot** be used here. It requires root, and
-user pods run as uid 1000 with no privilege escalation. Check the mount instead:
+Note that `license-manager status` requires root — usable via `sudo` on TLJH, but
+user pods run as uid 1000 with no privilege escalation, so it cannot be run here.
+Check the mount instead:
 
 ```bash
 POD=$(kubectl -n jupyterhub get pod -l component=singleuser-server -o name | head -1)

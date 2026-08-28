@@ -50,10 +50,16 @@ singleuser:
       # decimal 440 (= 0670), which is more permissive than intended.
       mode: 0440
 
-  storage:
-    # Persist $HOME so Positron's extension bootstrap happens once rather than on
-    # every spawn. Set to `none` only for throwaway testing.
-    type: dynamic
+  # storage.type is left at the chart default (`dynamic`, a per-user PVC). Keep
+  # it: an ephemeral $HOME (`type: none`) makes Positron re-bootstrap all of its
+  # extensions on every spawn.
+
+  # Positron needs more memory than a bare notebook server; see
+  # https://posit-dev.github.io/jupyter-positron-server/configuration.html#memory-requirements
+  # (KubeSpawner accepts single-letter suffixes: G, not GB.)
+  memory:
+    guarantee: 2.5G
+    limit: 4G
 
 # --- Authentication ----------------------------------------------------------
 # The chart's default authenticator is DummyAuthenticator, which accepts ANY
