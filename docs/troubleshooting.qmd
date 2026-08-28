@@ -64,6 +64,15 @@ the **user** environment.
 
 The launcher runs, but `positron-server` fails to start.
 
+**Check the browser tab first.** When `positron-server` exits during startup,
+the tab shows a "Positron Server failed to start" page with the end of
+`positron-server`'s own log. That log names the failing step, so read it before
+going to the single-user server log.
+
+If the tab instead sits on a spinner for two minutes and then shows
+`could not start positron in time`, `positron-server` never exited — it hung.
+Go to the single-user server log for that one.
+
 **Check** the single-user server log for the failing step, then:
 
 - **`positron-server: command not found` / binary not found** — `positron-server`

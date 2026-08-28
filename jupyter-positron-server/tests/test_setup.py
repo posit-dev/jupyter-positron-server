@@ -968,3 +968,261 @@ class TestFetchLicenseFromHub:
             result = _fetch_license_from_hub("http://hub/mint", "tok")
 
         assert result is None
+
+
+class TestLauncherWiring:
+    """positron-server is launched under the supervising launcher."""
+
+    LAUNCHER_PREFIX = ["-m", "jupyter_positron_server._launch", "{port}", "--"]
+
+    def _reload(self, monkeypatch):
+        from importlib import reload
+        import jupyter_positron_server
+
+        monkeypatch.delenv("JSP_POSITRON_PORT", raising=False)
+        monkeypatch.delenv("JSP_POSITRON_SOCKET", raising=False)
+        monkeypatch.delenv("POSITRON_LICENSE_MINTING_ENDPOINT", raising=False)
+        reload(jupyter_positron_server)
+        monkeypatch.setattr(
+            jupyter_positron_server,
+            "which_positron_server",
+            lambda: "/opt/positron-server/bin/positron-server",
+        )
+        monkeypatch.setattr(os.path, "isdir", lambda path: True)
+        monkeypatch.setattr(os.path, "realpath", lambda path: path)
+        return jupyter_positron_server
+
+    def test_direct_launch_runs_under_launcher(self, monkeypatch):
+        """The direct-launch command is the launcher, with positron after `--`."""
+        monkeypatch.setenv("POSITRON_LICENSE_KEY_FILE", "/tokens/license.token")
+        jsp = self._reload(monkeypatch)
+        monkeypatch.setattr(os.path, "exists", lambda p: True)
+
+        cmd = jsp.setup_positron_server()["command"]
+
+        assert cmd[1:5] == self.LAUNCHER_PREFIX
+        child = cmd[cmd.index("--") + 1 :]
+        assert "/opt/positron-server/bin/positron-server" in child
+        assert "--license-key-file" in child
+
+    def test_hub_minted_launch_runs_under_launcher(self, monkeypatch):
+        """The Hub-minted callable is wrapped too, license key still injected."""
+        monkeypatch.delenv("POSITRON_LICENSE_KEY_FILE", raising=False)
+        jsp = self._reload(monkeypatch)
+        monkeypatch.setenv(
+            "POSITRON_LICENSE_MINTING_ENDPOINT",
+            "http://hub:8081/services/positron-license/mint",
+        )
+        monkeypatch.setattr(
+            jsp,
+            "_fetch_license_from_hub",
+            lambda endpoint, token: '{"connection_token":"t","signature":"sig"}',
+        )
+
+        cmd = jsp.setup_positron_server()["command"]()
+
+        assert cmd[1:5] == self.LAUNCHER_PREFIX
+        child = cmd[cmd.index("--") + 1 :]
+        assert any("POSITRON_LICENSE_KEY=" in part for part in child)
+        assert "/opt/positron-server/bin/positron-server" in child
+
+    def test_missing_license_file_does_not_raise(self, monkeypatch):
+        """A missing token file must not kill proxy registration.
+
+        Raising here makes jupyter-server-proxy skip the proxy entirely, so the
+        Positron tile vanishes. positron-server reports the missing file itself
+        and the launcher surfaces that.
+        """
+        monkeypatch.setenv("POSITRON_LICENSE_KEY_FILE", "/tokens/missing.token")
+        jsp = self._reload(monkeypatch)
+        monkeypatch.setattr(os.path, "exists", lambda p: False)
+
+        cmd = jsp.setup_positron_server()["command"]
+
+        assert cmd[1:5] == self.LAUNCHER_PREFIX
+        assert "/tokens/missing.token" in cmd
+
+
+class TestLauncher:
+    """Tests for the supervising launcher itself."""
+
+    def _free_port(self):
+        import socket
+
+        sock = socket.socket()
+        sock.bind(("127.0.0.1", 0))
+        port = sock.getsockname()[1]
+        sock.close()
+        return port
+
+    def _get_with_retry(self, url, timeout=15.0):
+        import time
+        import urllib.error
+        import urllib.request
+
+        deadline = time.time() + timeout
+        last_err = None
+        while time.time() < deadline:
+            try:
+                with urllib.request.urlopen(url, timeout=1) as resp:
+                    return resp.read().decode("utf-8")
+            except (urllib.error.URLError, OSError) as err:
+                last_err = err
+                time.sleep(0.1)
+        raise AssertionError(f"no response from {url}: {last_err}")
+
+    def test_parse_args_splits_port_and_command(self):
+        from jupyter_positron_server._launch import parse_args
+
+        assert parse_args(["8888", "--", "prog", "-x"]) == (8888, ["prog", "-x"])
+
+    def test_parse_args_rejects_missing_separator(self):
+        import pytest
+        from jupyter_positron_server._launch import parse_args
+
+        with pytest.raises(SystemExit):
+            parse_args(["8888"])
+
+    def test_error_html_escapes_the_log_tail(self):
+        from jupyter_positron_server._launch import build_error_html
+
+        page = build_error_html("boom <script> & fail")
+
+        assert "boom &lt;script&gt; &amp; fail" in page
+        assert "<script>" not in page
+
+    def test_error_html_keeps_the_license_guidance(self):
+        from jupyter_positron_server._launch import build_error_html
+
+        page = build_error_html("tail")
+
+        assert "POSITRON_LICENSE_KEY_FILE" in page
+        assert "academic-licenses@posit.co" in page
+        assert "https://posit-dev.github.io/jupyter-positron-server/" in page
+
+    def test_startup_failure_serves_the_log(self, tmp_path):
+        """A child that dies before binding hands its output to the browser."""
+        import subprocess
+        import sys
+
+        stub = tmp_path / "stub_fail.py"
+        stub.write_text(
+            "import sys\n"
+            "print('CONTEXT-ON-STDOUT')\n"
+            "sys.stderr.write('LICENSE-REJECTED-MARKER\\n')\n"
+            "sys.exit(1)\n"
+        )
+        port = self._free_port()
+        launcher = subprocess.Popen(
+            [
+                sys.executable,
+                "-m",
+                "jupyter_positron_server._launch",
+                str(port),
+                "--",
+                sys.executable,
+                str(stub),
+            ]
+        )
+        try:
+            body = self._get_with_retry(f"http://127.0.0.1:{port}/any/path")
+            assert "Positron Server failed to start" in body
+            assert "LICENSE-REJECTED-MARKER" in body
+            # stdout matters too: positron-server names the license source there.
+            assert "CONTEXT-ON-STDOUT" in body
+        finally:
+            launcher.terminate()
+            launcher.wait(timeout=10)
+
+    def test_healthy_child_is_left_alone_and_signalled(self, tmp_path):
+        """A child that binds the port serves it, and SIGTERM reaches it."""
+        import subprocess
+        import sys
+        import time
+
+        stub = tmp_path / "stub_ok.py"
+        stub.write_text(
+            "import sys\n"
+            "from http.server import BaseHTTPRequestHandler, HTTPServer\n"
+            "class H(BaseHTTPRequestHandler):\n"
+            "    def do_GET(self):\n"
+            "        self.send_response(200)\n"
+            "        self.end_headers()\n"
+            "        self.wfile.write(b'STUB-OK')\n"
+            "    def log_message(self, *a):\n"
+            "        pass\n"
+            "HTTPServer(('127.0.0.1', int(sys.argv[1])), H).serve_forever()\n"
+        )
+        port = self._free_port()
+        launcher = subprocess.Popen(
+            [
+                sys.executable,
+                "-m",
+                "jupyter_positron_server._launch",
+                str(port),
+                "--",
+                sys.executable,
+                str(stub),
+                str(port),
+            ]
+        )
+        try:
+            assert self._get_with_retry(f"http://127.0.0.1:{port}/") == "STUB-OK"
+
+            launcher.terminate()
+            assert launcher.wait(timeout=10) is not None
+
+            # The child went down with the launcher, leaving the port closed.
+            time.sleep(0.5)
+            import socket
+
+            with pytest.raises(OSError):
+                socket.create_connection(("127.0.0.1", port), timeout=1).close()
+        finally:
+            if launcher.poll() is None:
+                launcher.kill()
+                launcher.wait(timeout=10)
+
+    def test_bound_but_never_serving_still_gets_the_page(self, tmp_path):
+        """A child that holds the port without answering HTTP has not started.
+
+        positron-server binds the port before it validates the license, so
+        "something is listening" says nothing about whether it came up. Only a
+        response does. Measured against positron-server 2026.07: the port is
+        bound ~80ms before the process exits, so a connect-based check catches
+        it often enough to lose the page intermittently.
+        """
+        import subprocess
+        import sys
+
+        stub = tmp_path / "stub_bound_only.py"
+        stub.write_text(
+            "import socket, sys, time\n"
+            "srv = socket.socket()\n"
+            "srv.bind(('127.0.0.1', int(sys.argv[1])))\n"
+            "srv.listen(5)\n"  # accepts into the backlog, answers nothing
+            "time.sleep(1.5)\n"  # outlast the launcher's poll interval
+            "sys.stderr.write('DIED-WHILE-VALIDATING\\n')\n"
+            "sys.exit(1)\n"
+        )
+        port = self._free_port()
+        launcher = subprocess.Popen(
+            [
+                sys.executable,
+                "-m",
+                "jupyter_positron_server._launch",
+                str(port),
+                "--",
+                sys.executable,
+                str(stub),
+                str(port),
+            ]
+        )
+        try:
+            body = self._get_with_retry(f"http://127.0.0.1:{port}/")
+            assert "Positron Server failed to start" in body
+            assert "DIED-WHILE-VALIDATING" in body
+        finally:
+            if launcher.poll() is None:
+                launcher.kill()
+            launcher.wait(timeout=10)
