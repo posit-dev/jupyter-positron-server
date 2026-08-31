@@ -11,6 +11,12 @@ crash -- the launcher takes the port and serves those lines as a page. The
 reason then lands in the tab the user opened, instead of only in a pod log the
 user cannot read.
 
+The page is served for a bounded window (``ERROR_PAGE_SECONDS``), then the
+launcher exits nonzero so simpervisor restarts it and the launch is retried.
+Held forever, the page would satisfy jupyter-server-proxy's one-shot readiness
+check and the first failure would latch until the whole single-user server
+restarts; the bounded window keeps "fix the environment and refresh" working.
+
 Without this, jupyter-server-proxy restarts the failing process until its
 readiness timeout expires and answers with "could not start positron in time",
 which points at slowness no matter what actually went wrong.
@@ -21,6 +27,8 @@ SIGTERM/SIGINT to positron-server and exits with its status.
 
 import collections
 import html
+import http.client
+import os
 import signal
 import subprocess
 import sys
@@ -28,14 +36,34 @@ import threading
 import time
 import urllib.error
 import urllib.request
-from http.server import BaseHTTPRequestHandler, HTTPServer
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 LOG_TAIL_LINES = 50
 POLL_INTERVAL = 0.5  # seconds
 DRAIN_GRACE = 2  # seconds to let the last output land before building the page
+# How long the failure page stays up before the launcher exits and the launch
+# is retried. Long enough to be read, short enough that a fixed environment
+# comes back without waiting on anyone.
+ERROR_PAGE_SECONDS = float(os.environ.get("POSITRON_LAUNCHER_ERROR_PAGE_SECONDS", 30))
 
 DOCS_URL = "https://posit-dev.github.io/jupyter-positron-server/"
 ACADEMIC_EMAIL = "academic-licenses@posit.co"
+
+if sys.platform == "linux":
+    import ctypes
+
+    _libc = ctypes.CDLL(None, use_errno=True)
+    _PR_SET_PDEATHSIG = 1
+
+    def _die_with_launcher():
+        # Runs in the forked child, pre-exec. jupyter-server-proxy's
+        # ready-timeout kill SIGKILLs its direct child -- this launcher -- and
+        # SIGKILL cannot be forwarded, so without this a hung positron-server
+        # would outlive the launcher, still bound to the port.
+        _libc.prctl(_PR_SET_PDEATHSIG, signal.SIGKILL)
+
+else:
+    _die_with_launcher = None
 
 
 def build_error_html(log_tail):
@@ -78,7 +106,10 @@ def build_error_html(log_tail):
 class _ErrorPageHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         body = self.server.error_html.encode("utf-8")
-        self.send_response(200)
+        # 503, not 200: jupyter-server-proxy's readiness check counts any
+        # response, so the tab shows the page either way, but health checks
+        # can still tell this apart from a healthy positron-server.
+        self.send_response(503)
         self.send_header("Content-Type", "text/html; charset=utf-8")
         self.send_header("Content-Length", str(len(body)))
         self.end_headers()
@@ -92,12 +123,34 @@ class _ErrorPageHandler(BaseHTTPRequestHandler):
 def make_server(port, error_html):
     """Bind ``127.0.0.1:<port>`` and answer every request with ``error_html``.
 
-    ``HTTPServer`` sets ``allow_reuse_address``, so taking over the port the
-    just-exited child released does not trip over TIME_WAIT.
+    ``ThreadingHTTPServer``: a half-open connection (a browser's speculative
+    pre-connect, a TCP health probe) must not wedge the page for every later
+    request. Its ``allow_reuse_address`` keeps taking over the port the
+    just-exited child released from tripping over TIME_WAIT.
     """
-    server = HTTPServer(("127.0.0.1", port), _ErrorPageHandler)
+    server = ThreadingHTTPServer(("127.0.0.1", port), _ErrorPageHandler)
     server.error_html = error_html
     return server
+
+
+def serve_error_page(port, log_tail):
+    """Hold ``port`` with the failure page for ``ERROR_PAGE_SECONDS``.
+
+    Returns False without serving when the port cannot be bound -- something
+    else still holds it. The caller exits plainly in that case: a traceback
+    here would make simpervisor restart the launcher in a tight, no-backoff
+    loop against the same bind.
+    """
+    try:
+        server = make_server(port, build_error_html(log_tail))
+    except OSError:
+        return False
+    timer = threading.Timer(ERROR_PAGE_SECONDS, server.shutdown)
+    timer.daemon = True
+    timer.start()
+    server.serve_forever()
+    server.server_close()
+    return True
 
 
 def parse_args(argv):
@@ -118,6 +171,20 @@ def _drain_output(pipe, ring):
         sys.stderr.flush()
 
 
+class _NoRedirect(urllib.request.HTTPRedirectHandler):
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        # Refuse to follow: urlopen then raises HTTPError, and the probe
+        # counts that as a response -- the same rule jupyter-server-proxy
+        # applies, probing with redirects disabled.
+        return None
+
+
+# A private opener for the probe: the default one honors http_proxy/HTTP_PROXY,
+# and a corporate proxy answering for an unreachable 127.0.0.1 would look
+# exactly like positron-server serving.
+_opener = urllib.request.build_opener(urllib.request.ProxyHandler({}), _NoRedirect())
+
+
 def _watch_for_serving(port, served, stop):
     """Set ``served`` once the child answers HTTP on ``port``.
 
@@ -129,14 +196,18 @@ def _watch_for_serving(port, served, stop):
     url = "http://127.0.0.1:{}/".format(port)
     while not stop.is_set():
         try:
-            urllib.request.urlopen(url, timeout=1).close()
+            _opener.open(url, timeout=1).close()
             served.set()
             return
         except urllib.error.HTTPError:
             # An error status is still a response: it is up.
             served.set()
             return
-        except (urllib.error.URLError, OSError):
+        except (urllib.error.URLError, OSError, http.client.HTTPException):
+            # HTTPException covers a half-written response from a child still
+            # initializing (BadStatusLine is not an OSError); an unhandled one
+            # would kill this thread and every later exit would be
+            # misclassified as a startup failure.
             time.sleep(POLL_INTERVAL)
 
 
@@ -149,10 +220,13 @@ def run(port, child_cmd):
 
     try:
         child = subprocess.Popen(
-            child_cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT
+            child_cmd,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            preexec_fn=_die_with_launcher,
         )
     except OSError as exc:
-        make_server(port, build_error_html(f"Failed to launch: {exc}")).serve_forever()
+        serve_error_page(port, f"Failed to launch: {exc}")
         return 1
 
     drain = threading.Thread(target=_drain_output, args=(child.stdout, ring), daemon=True)
@@ -182,20 +256,33 @@ def run(port, child_cmd):
 
     if signalled.is_set() or served.is_set():
         # Culled by jupyter-server-proxy, or exited after it had served the
-        # port. Either way there is nothing to explain, and leaving the exit
-        # alone keeps jupyter-server-proxy free to restart a server that had
-        # worked.
+        # port. Either way there is nothing to explain; let the last of the
+        # output land (the final stack trace tends to be in it), and leave the
+        # exit alone so jupyter-server-proxy stays free to restart a server
+        # that had worked.
+        drain.join(timeout=DRAIN_GRACE)
         return returncode
 
-    # It never served, so this is a startup failure. Restore default signal
-    # handling first, so a later cull still terminates us, then hold the port.
-    drain.join(timeout=DRAIN_GRACE)
+    # It never served, so this is a startup failure. Hand signals back to the
+    # default handlers before anything else: from here on a cull must terminate
+    # the launcher, not be swallowed by _forward signalling an already-dead
+    # child.
     try:
         signal.signal(signal.SIGTERM, signal.SIG_DFL)
         signal.signal(signal.SIGINT, signal.SIG_DFL)
     except ValueError:
         pass
-    make_server(port, build_error_html("".join(ring))).serve_forever()
+    drain.join(timeout=DRAIN_GRACE)
+    if signalled.is_set():
+        return returncode
+
+    if serve_error_page(port, "".join(ring)):
+        # Nonzero even if the child exited 0: simpervisor restarts only
+        # nonzero exits, and that restart is what turns the bounded page
+        # into a retry.
+        return returncode or 1
+    # The port is still held. Exit as the child did rather than fight for it;
+    # jupyter-server-proxy's own timeout reports this one.
     return returncode
 
 

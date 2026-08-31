@@ -1,4 +1,6 @@
 import os
+import sys
+
 import pytest
 from unittest.mock import MagicMock
 
@@ -1066,6 +1068,11 @@ class TestLauncher:
             try:
                 with urllib.request.urlopen(url, timeout=1) as resp:
                     return resp.read().decode("utf-8")
+            except urllib.error.HTTPError as err:
+                # An error status is still a response -- the same rule as the
+                # launcher's own probe, and its page is deliberately a 503.
+                with err:
+                    return err.read().decode("utf-8")
             except (urllib.error.URLError, OSError) as err:
                 last_err = err
                 time.sleep(0.1)
@@ -1226,3 +1233,170 @@ class TestLauncher:
             if launcher.poll() is None:
                 launcher.kill()
             launcher.wait(timeout=10)
+
+    def test_failure_page_is_a_503(self, tmp_path):
+        """The page answers 503, so health checks can tell it from a healthy
+        positron-server. jupyter-server-proxy's readiness check counts any
+        response, so the browser tab shows the page either way."""
+        import subprocess
+        import sys
+        import urllib.error
+        import urllib.request
+
+        stub = tmp_path / "stub_fail.py"
+        stub.write_text("import sys\nsys.exit(1)\n")
+        port = self._free_port()
+        launcher = subprocess.Popen(
+            [
+                sys.executable,
+                "-m",
+                "jupyter_positron_server._launch",
+                str(port),
+                "--",
+                sys.executable,
+                str(stub),
+            ]
+        )
+        try:
+            self._get_with_retry(f"http://127.0.0.1:{port}/")
+            with pytest.raises(urllib.error.HTTPError) as excinfo:
+                urllib.request.urlopen(f"http://127.0.0.1:{port}/", timeout=5)
+            assert excinfo.value.code == 503
+        finally:
+            launcher.terminate()
+            launcher.wait(timeout=10)
+
+    def test_failure_page_is_bounded_then_exits_with_child_code(self, tmp_path):
+        """The page is served for a window, then the launcher exits nonzero.
+
+        Held forever, the page satisfies jupyter-server-proxy's one-shot
+        readiness check and the failure latches until the whole single-user
+        server restarts. Exiting nonzero instead hands control to simpervisor's
+        restart-on-nonzero, so fixing the environment and refreshing recovers.
+        """
+        import subprocess
+        import sys
+
+        stub = tmp_path / "stub_fail.py"
+        stub.write_text("import sys\nsys.exit(3)\n")
+        port = self._free_port()
+        launcher = subprocess.Popen(
+            [
+                sys.executable,
+                "-m",
+                "jupyter_positron_server._launch",
+                str(port),
+                "--",
+                sys.executable,
+                str(stub),
+            ],
+            env={**os.environ, "POSITRON_LAUNCHER_ERROR_PAGE_SECONDS": "2"},
+        )
+        try:
+            body = self._get_with_retry(f"http://127.0.0.1:{port}/")
+            assert "Positron Server failed to start" in body
+            # The child's own exit code survives, so the restart loop reports
+            # the real failure, not a launcher artifact.
+            assert launcher.wait(timeout=15) == 3
+        finally:
+            if launcher.poll() is None:
+                launcher.kill()
+                launcher.wait(timeout=10)
+
+    def test_held_port_exits_instead_of_crash_looping(self, tmp_path):
+        """A takeover bind that fails must not become a traceback.
+
+        If something still holds the port (an orphaned positron-server, a
+        grandchild that survived), the launcher exits with the child's own
+        code, leaving jupyter-server-proxy's timeout to report it -- a
+        traceback here would make simpervisor restart-loop with no backoff.
+        """
+        import socket
+        import subprocess
+        import sys
+
+        stub = tmp_path / "stub_fail.py"
+        stub.write_text("import sys\nsys.exit(5)\n")
+        port = self._free_port()
+        holder = socket.socket()
+        holder.bind(("127.0.0.1", port))
+        holder.listen(1)  # bound but never answers, so the probe never counts it
+        launcher = subprocess.Popen(
+            [
+                sys.executable,
+                "-m",
+                "jupyter_positron_server._launch",
+                str(port),
+                "--",
+                sys.executable,
+                str(stub),
+            ]
+        )
+        try:
+            assert launcher.wait(timeout=15) == 5
+        finally:
+            holder.close()
+            if launcher.poll() is None:
+                launcher.kill()
+                launcher.wait(timeout=10)
+
+    @pytest.mark.skipif(sys.platform != "linux", reason="PDEATHSIG is Linux-only")
+    def test_sigkilled_launcher_takes_the_child_with_it(self, tmp_path):
+        """SIGKILL on the launcher must not orphan positron-server.
+
+        jupyter-server-proxy's ready-timeout kill SIGKILLs its direct child --
+        the launcher -- and SIGKILL cannot be forwarded. PDEATHSIG makes the
+        kernel deliver it to the child too, so a hung positron-server cannot
+        outlive the launcher still holding the port.
+        """
+        import signal
+        import socket
+        import subprocess
+        import sys
+        import time
+
+        stub = tmp_path / "stub_ok.py"
+        stub.write_text(
+            "import sys\n"
+            "from http.server import BaseHTTPRequestHandler, HTTPServer\n"
+            "class H(BaseHTTPRequestHandler):\n"
+            "    def do_GET(self):\n"
+            "        self.send_response(200)\n"
+            "        self.end_headers()\n"
+            "        self.wfile.write(b'STUB-OK')\n"
+            "    def log_message(self, *a):\n"
+            "        pass\n"
+            "HTTPServer(('127.0.0.1', int(sys.argv[1])), H).serve_forever()\n"
+        )
+        port = self._free_port()
+        launcher = subprocess.Popen(
+            [
+                sys.executable,
+                "-m",
+                "jupyter_positron_server._launch",
+                str(port),
+                "--",
+                sys.executable,
+                str(stub),
+                str(port),
+            ]
+        )
+        try:
+            assert self._get_with_retry(f"http://127.0.0.1:{port}/") == "STUB-OK"
+
+            launcher.send_signal(signal.SIGKILL)
+            launcher.wait(timeout=10)
+
+            deadline = time.time() + 5
+            while time.time() < deadline:
+                try:
+                    socket.create_connection(("127.0.0.1", port), timeout=1).close()
+                    time.sleep(0.1)
+                except OSError:
+                    break
+            else:
+                raise AssertionError("child survived the launcher's SIGKILL")
+        finally:
+            if launcher.poll() is None:
+                launcher.kill()
+                launcher.wait(timeout=10)

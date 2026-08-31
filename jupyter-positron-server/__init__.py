@@ -196,7 +196,10 @@ def _resolve_license_source(minting_endpoint):
             # surface positron-server's own complaint about the missing file.
             logger.error(
                 f"Positron license token file not found at '{license_key_file}' "
-                f"(specified by POSITRON_LICENSE_KEY_FILE environment variable)."
+                f"(specified by POSITRON_LICENSE_KEY_FILE environment variable). "
+                f"Point POSITRON_LICENSE_KEY_FILE at a file containing a signed "
+                f"license token, or set POSITRON_LICENSE_MINTING_ENDPOINT to mint "
+                f"one from the Hub."
             )
     else:
         logger.warning(
