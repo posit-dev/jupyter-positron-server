@@ -91,11 +91,11 @@ def build_error_html(log_tail):
   <h1>Positron Server failed to start</h1>
   <p>Positron Server exited while starting up. The end of its log is below, and
   usually names the cause.</p>
-  <p>A license that is missing, expired, or unreadable is the most common one.
-  Set <code>POSITRON_LICENSE_KEY_FILE</code> to the path of your license file.
-  Request a free academic license at
-  <a href="mailto:{ACADEMIC_EMAIL}">{ACADEMIC_EMAIL}</a>, or see the
-  <a href="{DOCS_URL}">documentation</a>.</p>
+  <p>If the log mentions a license, set <code>POSITRON_LICENSE_KEY_FILE</code>
+  to the path of your license file, or request a free academic license at
+  <a href="mailto:{ACADEMIC_EMAIL}">{ACADEMIC_EMAIL}</a>. For this and any
+  other cause, the <a href="{DOCS_URL}">documentation</a> includes a
+  troubleshooting guide.</p>
   <h2>Positron Server log</h2>
   <pre>{html.escape(log_tail)}</pre>
 </body>
