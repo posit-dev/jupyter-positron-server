@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Get Started (versions 2026.05.0 and older) – jupyter-positron-server</title>
+<title>Verifier setup for 2026.07.0 through 2026.08.2 – jupyter-positron-server</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -79,7 +79,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <link href="site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-611f9a4f5276f3aa6c7bc3c7843ec587.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-dd413af1298e352d8fe9223d27e63c61.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -130,7 +130,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
             <ul class="navbar-nav navbar-nav-scroll me-auto">
   <li class="nav-item">
     <a class="nav-link" href="./get_started.html"> 
-<span class="menu-text">Get Started</span></a>
+<span class="menu-text">Get started</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link active" href="./verifier_get_started.html" aria-current="page"> 
+<span class="menu-text">Verifier setup</span></a>
   </li>  
   <li class="nav-item">
     <a class="nav-link" href="./deployment.html"> 
@@ -171,16 +175,15 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#prerequisites" id="toc-prerequisites" class="nav-link active" data-scroll-target="#prerequisites">Prerequisites</a></li>
-  <li><a href="#server-setup" id="toc-server-setup" class="nav-link" data-scroll-target="#server-setup">Server Setup</a>
-  <ul class="collapse">
-  <li><a href="#get-a-license" id="toc-get-a-license" class="nav-link" data-scroll-target="#get-a-license">1. Get a License</a></li>
-  <li><a href="#download-positron-server" id="toc-download-positron-server" class="nav-link" data-scroll-target="#download-positron-server">2. Download Positron Server</a></li>
-  <li><a href="#set-the-license-key" id="toc-set-the-license-key" class="nav-link" data-scroll-target="#set-the-license-key">3. Set the License Key</a></li>
-  <li><a href="#install-the-jupyter-positron-server-package" id="toc-install-the-jupyter-positron-server-package" class="nav-link" data-scroll-target="#install-the-jupyter-positron-server-package">4. Install the <code>jupyter-positron-server</code> package</a></li>
-  <li><a href="#restart-your-jupyter-server" id="toc-restart-your-jupyter-server" class="nav-link" data-scroll-target="#restart-your-jupyter-server">5. Restart your Jupyter server</a></li>
-  </ul></li>
-  <li><a href="#how-it-works" id="toc-how-it-works" class="nav-link" data-scroll-target="#how-it-works">How It Works</a></li>
+  <li><a href="#what-you-need-from-posit" id="toc-what-you-need-from-posit" class="nav-link active" data-scroll-target="#what-you-need-from-posit">What you need from Posit</a></li>
+  <li><a href="#install-positron-server" id="toc-install-positron-server" class="nav-link" data-scroll-target="#install-positron-server">Step 1: Install Positron Server in the single-user image</a></li>
+  <li><a href="#install-jupyter-positron-server" id="toc-install-jupyter-positron-server" class="nav-link" data-scroll-target="#install-jupyter-positron-server">Step 2: Install jupyter-positron-server in the single-user image</a></li>
+  <li><a href="#install-jupyter-positron-verifier" id="toc-install-jupyter-positron-verifier" class="nav-link" data-scroll-target="#install-jupyter-positron-verifier">Step 3: Install jupyter-positron-verifier on the Hub</a></li>
+  <li><a href="#register-the-verifier-as-a-jupyterhub-service" id="toc-register-the-verifier-as-a-jupyterhub-service" class="nav-link" data-scroll-target="#register-the-verifier-as-a-jupyterhub-service">Step 4: Register the verifier as a JupyterHub service</a></li>
+  <li><a href="#point-single-user-servers-at-the-minting-endpoint" id="toc-point-single-user-servers-at-the-minting-endpoint" class="nav-link" data-scroll-target="#point-single-user-servers-at-the-minting-endpoint">Step 5: Point single-user servers at the minting endpoint</a></li>
+  <li><a href="#restart-jupyterhub" id="toc-restart-jupyterhub" class="nav-link" data-scroll-target="#restart-jupyterhub">Step 6: Restart JupyterHub</a></li>
+  <li><a href="#how-it-works" id="toc-how-it-works" class="nav-link" data-scroll-target="#how-it-works">How it works</a></li>
+  <li><a href="#next-steps" id="toc-next-steps" class="nav-link" data-scroll-target="#next-steps">Next steps</a></li>
   </ul>
 </nav>
     </div>
@@ -189,7 +192,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Get Started (versions 2026.05.0 and older)</h1>
+<h1 class="title">Verifier setup for 2026.07.0 through 2026.08.2</h1>
 </div>
 
 
@@ -206,6 +209,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
+<p>Positron Server 2026.07.0 through 2026.08.2 do not validate a license file. These versions accept only a signed license token, so the Hub must mint one for each session. This page covers that setup.</p>
 <div class="callout callout-style-default callout-important callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -216,75 +220,176 @@ Important
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>This is the getting started workflow for versions of Positron 2026.05.0 and older. It is no longer the recommended workflow. To update to the latest version, check out the <a href="./get_started.html">Get Started page</a>.</p>
+<p>This setup is not recommended. It applies only to Positron Server 2026.07.0 through 2026.08.2. Positron Server 2026.09.0 and newer validate a license file directly, which removes the signing key, the Hub service, and the extra Python package. For those versions, follow the <a href="./get_started.html">Get started</a> guide instead.</p>
 </div>
 </div>
-<p>This guide walks you through installing and configuring <code>jupyter-positron-server</code> to run Positron Server in your Jupyter environment. Check out the below screencast for a walkthrough of getting started, or read on for instructions.</p>
-<div style="position: relative; padding-bottom: 56.25%; height: 0;">
-<iframe src="https://www.loom.com/embed/9a8c760a4d4e45b2ac78d62ba3e1d0b3" frameborder="0" webkitallowfullscreen="" mozallowfullscreen="" allowfullscreen="" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;">
-</iframe>
-</div>
-<section id="prerequisites" class="level2">
-<h2 class="anchored" data-anchor-id="prerequisites">Prerequisites</h2>
-<p>Before installing, ensure you have:</p>
-<ol type="1">
-<li><strong>Python 3.9 or later</strong></li>
-<li><strong>Positron Server</strong> installed and accessible in your system’s PATH</li>
-<li><strong>A valid Positron license key file</strong></li>
-</ol>
-</section>
-<section id="server-setup" class="level2">
-<h2 class="anchored" data-anchor-id="server-setup">Server Setup</h2>
-<section id="get-a-license" class="level3">
-<h3 class="anchored" data-anchor-id="get-a-license">1. Get a License</h3>
-<p>Positron Server is available for educational use only. Free licenses are available for currently enrolled students using Positron for coursework. Review the <a href="https://github.com/posit-dev/positron/blob/main/LICENSE.txt">Positron Education License Rider</a> for full eligibility terms.</p>
-<p>To request a license, email <a href="mailto:academic-licenses@posit.co">academic-licenses@posit.co</a>.</p>
-</section>
-<section id="download-positron-server" class="level3">
-<h3 class="anchored" data-anchor-id="download-positron-server">2. Download Positron Server</h3>
-<p>Download the Positron Server binary for your Linux architecture. For the latest release of Positron (May 2026), you can find the downloads here:</p>
+<section id="what-you-need-from-posit" class="level2">
+<h2 class="anchored" data-anchor-id="what-you-need-from-posit">What you need from Posit</h2>
+<p>Send email to <a href="mailto:academic-licenses@posit.co">academic-licenses@posit.co</a> to request both files:</p>
 <ul>
-<li>Download Linux x64 build: https://cdn.posit.co/positron/releases/server/x86_64/positron-server-linux-x64-2026.05.0-179.tar.gz</li>
-<li>Download Linux arm64 build: https://cdn.posit.co/positron/releases/server/arm64/positron-server-linux-arm64-2026.05.0-179.tar.gz</li>
+<li><strong>Signing key</strong> (<code>signing-key.pem</code>): the RSA private key that mints per-session license tokens</li>
+<li><strong>License file</strong> (<code>license.lic</code>): proof of entitlement</li>
 </ul>
-<p>After downloading, untar the archive and add it to your PATH.</p>
-<p>If you’re using <code>curl</code>, this step might look something like:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode zsh code-with-copy"><code class="sourceCode zsh"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Download Positron server to temporary directory</span></span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Note: this is the url for x64 architecture machines</span></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-L</span> <span class="st">"https://cdn.posit.co/positron/releases/server/x86_64/positron-server-linux-x64-2026.05.0-179.tar.gz"</span> <span class="at">-o</span> /tmp/positron-server.tar.gz</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Create directory</span></span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="fu">mkdir</span> <span class="at">-p</span> /opt/positron-server</span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Unpack Positron Server into newly created directory</span></span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="fu">tar</span> <span class="at">-xzf</span> /tmp/positron-server.tar.gz <span class="at">-C</span> /opt/positron-server <span class="at">--strip-components</span><span class="op">=</span>1</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Positron spells the CPU architecture three ways. The download filename uses <code>x64</code> or <code>arm64</code>, the CDN path uses <code>x86_64</code> or <code>arm64</code>, and the activation directory uses <code>x86_64</code> or <code>aarch64</code>. Throughout this guide, <code>&lt;arch&gt;</code> means the activation directory name.</p>
+</div>
+</div>
 </section>
-<section id="set-the-license-key" class="level3">
-<h3 class="anchored" data-anchor-id="set-the-license-key">3. Set the License Key</h3>
-<p>Place your license file at <code>/opt/positron-server/resources/activation/linux/{ARCH}/license.lic</code> (where <code>{ARCH}</code> is <code>x86_64</code> or <code>aarch64</code> depending on your Linux server’s architecture). Positron will automatically detect and activate your license if needed from this location.</p>
+<section id="install-positron-server" class="level2">
+<h2 class="anchored" data-anchor-id="install-positron-server">Step 1: Install Positron Server in the single-user image</h2>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>Terminal</strong></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1" data-filename="Terminal"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-L</span> <span class="st">"https://cdn.posit.co/positron/releases/server/x86_64/positron-server-linux-x64-2026.08.2-4.tar.gz"</span> <span class="dt">\</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">-o</span> /tmp/positron-server.tar.gz</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">mkdir</span> <span class="at">-p</span> /opt/positron-server</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">tar</span> <span class="at">-xzf</span> /tmp/positron-server.tar.gz <span class="at">-C</span> /opt/positron-server <span class="at">--strip-components</span><span class="op">=</span>1</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>For the arm64 build, replace the CDN path segment with <code>arm64</code> and the filename segment with <code>arm64</code>.</p>
+<p>Place the license file inside Positron Server, and restrict it so only root, which covers the Hub and the verifier, can read it:</p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>Terminal</strong></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2" data-filename="Terminal"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">install</span> <span class="at">-m</span> 600 license.lic /opt/positron-server/resources/activation/linux/<span class="op">&lt;</span>arch<span class="op">&gt;</span>/license.lic</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Mode <code>600</code> is correct for these versions only. The verifier reads this file as root, and sessions never touch it. Positron Server 2026.09.0 and newer need mode <code>644</code>, because each session reads the file itself.</p>
+</div>
+</div>
 </section>
-<section id="install-the-jupyter-positron-server-package" class="level3">
-<h3 class="anchored" data-anchor-id="install-the-jupyter-positron-server-package">4. Install the <code>jupyter-positron-server</code> package</h3>
-<p>Install <code>jupyter-positron-server</code> in an environment that is available to all users of your JupyterHub server. For the legacy setup, you will need version <code>0.0.4</code> (recommended) or lower.</p>
-<pre class="shell"><code>pip install jupyter-positron-server==0.0.4</code></pre>
+<section id="install-jupyter-positron-server" class="level2">
+<h2 class="anchored" data-anchor-id="install-jupyter-positron-server">Step 2: Install jupyter-positron-server in the single-user image</h2>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>Terminal</strong></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3" data-filename="Terminal"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># for example, in The Littlest JupyterHub</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="ex">/opt/tljh/user/bin/pip</span> install <span class="st">'jupyter-positron-server&gt;=0.0.5'</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>This proxy extension runs as the user. It requests a license from the Hub at session start and passes it to <code>positron-server</code>. Version 0.0.5 or newer is required for compatibility with these Positron Server releases.</p>
 </section>
-<section id="restart-your-jupyter-server" class="level3">
-<h3 class="anchored" data-anchor-id="restart-your-jupyter-server">5. Restart your Jupyter server</h3>
-<ol type="1">
-<li><p>Start or restart your Jupyter server. In JupyterHub, you can do this by selecting <code>File</code> &gt; <code>Hub Control Panel</code>, then clicking <code>Stop My Server</code> and <code>Start My Server</code>.</p></li>
-<li><p>Click the “Positron” icon in the JupyterLab launcher.</p></li>
-</ol>
+<section id="install-jupyter-positron-verifier" class="level2">
+<h2 class="anchored" data-anchor-id="install-jupyter-positron-verifier">Step 3: Install jupyter-positron-verifier on the Hub</h2>
+<p>Install the minting service in the Hub Python environment, not the single-user image:</p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>Terminal</strong></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4" data-filename="Terminal"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># for example, in The Littlest JupyterHub</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="ex">/opt/tljh/hub/bin/pip</span> install jupyter-positron-verifier</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>Store the signing key where the Hub service account can read it and users cannot:</p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>Terminal</strong></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5" data-filename="Terminal"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mkdir</span> <span class="at">-p</span> /etc/positron</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">install</span> <span class="at">-m</span> 600 <span class="at">-o</span> <span class="op">&lt;</span>hub-user<span class="op">&gt;</span> signing-key.pem /etc/positron/signing-key.pem</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>The signing key pairs with the public key embedded in <code>positron-server</code>. The license file is already in place from Step 1. The verifier reads it through <code>license-manager</code>, so the Hub needs no separate copy.</p>
 </section>
+<section id="register-the-verifier-as-a-jupyterhub-service" class="level2">
+<h2 class="anchored" data-anchor-id="register-the-verifier-as-a-jupyterhub-service">Step 4: Register the verifier as a JupyterHub service</h2>
+<p>Add this to <code>jupyterhub_config.py</code>:</p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>jupyterhub_config.py</strong></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6" data-filename="jupyterhub_config.py"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>c.JupyterHub.services <span class="op">=</span> [</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    {</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>        <span class="st">"name"</span>: <span class="st">"positron-license"</span>,</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>        <span class="st">"url"</span>: <span class="st">"http://127.0.0.1:10101"</span>,</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>        <span class="st">"command"</span>: [<span class="st">"positron-verifier"</span>],</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>        <span class="st">"environment"</span>: {</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>            <span class="st">"POSITRON_MINTING_KEY_FILE"</span>: <span class="st">"/etc/positron/signing-key.pem"</span>,</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>            <span class="st">"POSITRON_LICENSE_MANAGER_PATH"</span>: <span class="st">"/opt/positron-server/resources/activation/linux/&lt;arch&gt;/license-manager"</span>,</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>            <span class="st">"PORT"</span>: <span class="st">"10101"</span>,</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>        },</span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>]</span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>c.JupyterHub.load_roles <span class="op">=</span> [</span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>    {</span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>        <span class="st">"name"</span>: <span class="st">"positron-license-service"</span>,</span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>        <span class="st">"services"</span>: [<span class="st">"positron-license"</span>],</span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>        <span class="st">"scopes"</span>: [<span class="st">"read:users"</span>],</span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a>]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p><code>POSITRON_MINTING_KEY_FILE</code> points at the signing key from Step 3. <code>POSITRON_LICENSE_MANAGER_PATH</code> points at the <code>license-manager</code> binary inside the Positron Server install, which the verifier runs to confirm entitlement against <code>license.lic</code>. That binary sits in the same directory as the license.</p>
+</section>
+<section id="point-single-user-servers-at-the-minting-endpoint" class="level2">
+<h2 class="anchored" data-anchor-id="point-single-user-servers-at-the-minting-endpoint">Step 5: Point single-user servers at the minting endpoint</h2>
+<p>Tell <code>jupyter-positron-server</code> where to fetch licenses, and put <code>positron-server</code> on the session <code>PATH</code>, by adding this to <code>jupyterhub_config.py</code>:</p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>jupyterhub_config.py</strong></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7" data-filename="jupyterhub_config.py"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>c.Spawner.environment <span class="op">=</span> {</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">"PATH"</span>: <span class="st">"/opt/positron-server/bin:"</span> <span class="op">+</span> os.environ.get(<span class="st">"PATH"</span>, <span class="st">"/usr/local/bin:/usr/bin:/bin"</span>),</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">"POSITRON_LICENSE_MINTING_ENDPOINT"</span>: <span class="st">"http://127.0.0.1:10101/services/positron-license/mint"</span>,</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="restart-jupyterhub" class="level2">
+<h2 class="anchored" data-anchor-id="restart-jupyterhub">Step 6: Restart JupyterHub</h2>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>Terminal</strong></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8" data-filename="Terminal"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="ex">systemctl</span> restart jupyterhub</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>The verifier starts automatically as a managed JupyterHub service.</p>
 </section>
 <section id="how-it-works" class="level2">
-<h2 class="anchored" data-anchor-id="how-it-works">How It Works</h2>
-<p><code>jupyter-positron-server</code> uses <a href="https://jupyter-server-proxy.readthedocs.io/">jupyter-server-proxy</a> to proxy requests between JupyterHub/JupyterLab and the Positron Server process. When you click the Positron launcher icon:</p>
+<h2 class="anchored" data-anchor-id="how-it-works">How it works</h2>
+<p>When a student opens Positron:</p>
 <ol type="1">
-<li>The proxy starts a new <code>positron-server</code> process (or connects to an existing one)</li>
-<li>A secure connection token is generated automatically</li>
-<li>Requests are proxied through the Jupyter server to Positron</li>
+<li><code>jupyter-positron-server</code> calls the Hub minting endpoint, authenticated with its <code>JUPYTERHUB_API_TOKEN</code>, and sends the connection token for the session.</li>
+<li><code>jupyter-positron-verifier</code> verifies the user token, confirms entitlement through <code>license-manager</code>, which reads <code>license.lic</code>, and returns a signed license JSON bound to that connection token.</li>
+<li><code>jupyter-positron-server</code> starts <code>positron-server</code> with the license in <code>POSITRON_LICENSE_KEY</code>.</li>
+<li><code>positron-server</code> verifies the RSA signature with its embedded public key and starts.</li>
 </ol>
-<p>This approach is similar to how <a href="https://github.com/jupyterhub/jupyter-rsession-proxy">jupyter-rsession-proxy</a> integrates RStudio Server with Jupyter.</p>
+<pre class="text"><code>Hub (privileged)
+  signing-key.pem            /etc/positron/, root-only, never reaches users
+  jupyter-positron-verifier  confirms entitlement, mints a signed license
+                             at each session start
+
+Single-user server
+  jupyter-positron-server    requests a license, passes it to positron-server
+  positron-server            verifies the signed license and starts
+  license.lic                mode 600, read only by the Hub and the verifier</code></pre>
+</section>
+<section id="next-steps" class="level2">
+<h2 class="anchored" data-anchor-id="next-steps">Next steps</h2>
+<ul>
+<li>To move off this setup, see <a href="./get_started.html#move-an-existing-deployment-off-the-verifier">Move an existing deployment off the verifier</a>.</li>
+<li><a href="./configuration.html">Configuration</a> covers the environment variables that <code>jupyter-positron-server</code> reads.</li>
+<li><a href="./troubleshooting.html">Troubleshooting</a> covers a verifier that does not start and a mint call that fails.</li>
+</ul>
 
 
 </section>

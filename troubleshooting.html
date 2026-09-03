@@ -79,7 +79,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <link href="site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-611f9a4f5276f3aa6c7bc3c7843ec587.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-dd413af1298e352d8fe9223d27e63c61.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -130,7 +130,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
             <ul class="navbar-nav navbar-nav-scroll me-auto">
   <li class="nav-item">
     <a class="nav-link" href="./get_started.html"> 
-<span class="menu-text">Get Started</span></a>
+<span class="menu-text">Get started</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./verifier_get_started.html"> 
+<span class="menu-text">Verifier setup</span></a>
   </li>  
   <li class="nav-item">
     <a class="nav-link" href="./deployment.html"> 
@@ -172,12 +176,24 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
    
   <ul>
   <li><a href="#where-to-look-first" id="toc-where-to-look-first" class="nav-link active" data-scroll-target="#where-to-look-first">Where to look first</a></li>
-  <li><a href="#the-positron-launcher-tile-doesnt-appear" id="toc-the-positron-launcher-tile-doesnt-appear" class="nav-link" data-scroll-target="#the-positron-launcher-tile-doesnt-appear">The Positron launcher tile doesn’t appear</a></li>
+  <li><a href="#the-positron-tile-does-not-appear" id="toc-the-positron-tile-does-not-appear" class="nav-link" data-scroll-target="#the-positron-tile-does-not-appear">The Positron tile does not appear</a></li>
   <li><a href="#the-tile-is-there-but-positron-never-loads" id="toc-the-tile-is-there-but-positron-never-loads" class="nav-link" data-scroll-target="#the-tile-is-there-but-positron-never-loads">The tile is there, but Positron never loads</a></li>
-  <li><a href="#the-verifier-service-isnt-running-or-registered" id="toc-the-verifier-service-isnt-running-or-registered" class="nav-link" data-scroll-target="#the-verifier-service-isnt-running-or-registered">The verifier service isn’t running or registered</a></li>
-  <li><a href="#license-mint-errors" id="toc-license-mint-errors" class="nav-link" data-scroll-target="#license-mint-errors">License / mint errors</a></li>
+  <li><a href="#license-errors-on-2026.09.0-and-newer" id="toc-license-errors-on-2026.09.0-and-newer" class="nav-link" data-scroll-target="#license-errors-on-2026.09.0-and-newer">License errors on 2026.09.0 and newer</a></li>
+  <li><a href="#license-errors-on-2026.07.0-through-2026.08.2" id="toc-license-errors-on-2026.07.0-through-2026.08.2" class="nav-link" data-scroll-target="#license-errors-on-2026.07.0-through-2026.08.2">License errors on 2026.07.0 through 2026.08.2</a>
+  <ul class="collapse">
+  <li><a href="#the-verifier-is-not-running-or-not-registered" id="toc-the-verifier-is-not-running-or-not-registered" class="nav-link" data-scroll-target="#the-verifier-is-not-running-or-not-registered">The verifier is not running or not registered</a></li>
+  <li><a href="#mint-calls-fail" id="toc-mint-calls-fail" class="nav-link" data-scroll-target="#mint-calls-fail">Mint calls fail</a></li>
+  </ul></li>
   <li><a href="#install-time-failures" id="toc-install-time-failures" class="nav-link" data-scroll-target="#install-time-failures">Install-time failures</a></li>
   <li><a href="#docker-compose-specifics" id="toc-docker-compose-specifics" class="nav-link" data-scroll-target="#docker-compose-specifics">docker-compose specifics</a></li>
+  <li><a href="#zero-to-jupyterhub-kubernetes-specifics" id="toc-zero-to-jupyterhub-kubernetes-specifics" class="nav-link" data-scroll-target="#zero-to-jupyterhub-kubernetes-specifics">Zero to JupyterHub (Kubernetes) specifics</a>
+  <ul class="collapse">
+  <li><a href="#could-not-start-positron-in-time" id="toc-could-not-start-positron-in-time" class="nav-link" data-scroll-target="#could-not-start-positron-in-time"><code>could not start positron in time</code></a></li>
+  <li><a href="#no-license-key-provided-in-the-pod-log" id="toc-no-license-key-provided-in-the-pod-log" class="nav-link" data-scroll-target="#no-license-key-provided-in-the-pod-log"><code>No license key provided</code> in the pod log</a></li>
+  <li><a href="#confirming-the-license-is-readable-at-all" id="toc-confirming-the-license-is-readable-at-all" class="nav-link" data-scroll-target="#confirming-the-license-is-readable-at-all">Confirming the license is readable at all</a></li>
+  <li><a href="#user-servers-fail-to-spawn" id="toc-user-servers-fail-to-spawn" class="nav-link" data-scroll-target="#user-servers-fail-to-spawn">User servers fail to spawn</a></li>
+  <li><a href="#extensions-reinstall-on-every-launch" id="toc-extensions-reinstall-on-every-launch" class="nav-link" data-scroll-target="#extensions-reinstall-on-every-launch">Extensions reinstall on every launch</a></li>
+  </ul></li>
   <li><a href="#still-stuck" id="toc-still-stuck" class="nav-link" data-scroll-target="#still-stuck">Still stuck?</a></li>
   </ul>
 </nav>
@@ -204,109 +220,279 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<p>When Positron won’t start for a user, the cause is almost always in one of four places: the <strong>launcher extension</strong> (user env), the <strong>verifier service</strong> (Hub), the <strong>license/signing key</strong>, or the <strong>install itself</strong> (arch/version). This page is organized by symptom.</p>
+<p>When Positron does not start for a student, the cause is almost always in one of four places: the launcher extension in the user environment, the license file, the install itself, which covers architecture and version, or, on Positron Server 2026.07.0 through 2026.08.2, the Hub verifier service. This page is organized by symptom.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>On Kubernetes, license-mount problems are the usual cause. See <a href="#zero-to-jupyterhub-kubernetes-specifics">Zero to JupyterHub (Kubernetes) specifics</a>.</p>
+</div>
+</div>
 <section id="where-to-look-first" class="level2">
 <h2 class="anchored" data-anchor-id="where-to-look-first">Where to look first</h2>
-<p>Most answers are in the logs. The verifier runs as a managed JupyterHub service, so its output lands in the Hub log:</p>
+<p>Most answers are in the logs.</p>
 <div class="tabset-margin-container"></div><div class="panel-tabset">
 <ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-1-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-1" role="tab" aria-controls="tabset-1-1" aria-selected="true" href="">TLJH / systemd</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-1-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-2" role="tab" aria-controls="tabset-1-2" aria-selected="false" href="">docker-compose</a></li></ul>
 <div class="tab-content">
 <div id="tabset-1-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-1-1-tab">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Hub + verifier service (the verifier logs with the "positron-license" name)</span></span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="ex">journalctl</span> <span class="at">-u</span> jupyterhub <span class="at">--no-pager</span> <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-i</span> positron-license</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Full Hub log (spawn errors, service registration)</span></span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="ex">journalctl</span> <span class="at">-u</span> jupyterhub <span class="at">--no-pager</span> <span class="at">-n</span> 200</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>Terminal</strong></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1" data-filename="Terminal"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Full Hub log, which covers spawn errors and service registration</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="ex">journalctl</span> <span class="at">-u</span> jupyterhub <span class="at">--no-pager</span> <span class="at">-n</span> 200</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
 </div>
 <div id="tabset-1-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-1-2-tab">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Hub + verifier</span></span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="ex">docker</span> compose logs hub <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-i</span> positron-license</span>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>Terminal</strong></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2" data-filename="Terminal"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Hub log</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="ex">docker</span> compose logs hub</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co"># A user's single-user container (name shown by `docker ps`)</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co"># A student's single-user container, named by `docker ps`</span></span>
 <span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="ex">docker</span> logs <span class="op">&lt;</span>jupyter-USERNAME-container<span class="op">&gt;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </div>
 </div>
-<p>The single-user server’s log (available from the JupyterHub UI under the user’s server, or the spawner logs) shows what <code>jupyter-positron-server</code> and <code>positron-server</code> reported at launch.</p>
+</div>
+<p>The single-user server log shows what <code>jupyter-positron-server</code> and <code>positron-server</code> reported at launch. Reach it from the JupyterHub UI under the student server, or from the spawner logs.</p>
 </section>
-<section id="the-positron-launcher-tile-doesnt-appear" class="level2">
-<h2 class="anchored" data-anchor-id="the-positron-launcher-tile-doesnt-appear">The Positron launcher tile doesn’t appear</h2>
-<p>The tile is provided by <code>jupyter-positron-server</code> via <code>jupyter-server-proxy</code>, in the <strong>user</strong> environment.</p>
-<p><strong>Check</strong> — in the user env:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Is the extension installed and jupyter_server_proxy enabled?</span></span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="ex">/opt/tljh/user/bin/pip</span> show jupyter-positron-server</span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="ex">/opt/tljh/user/bin/jupyter</span> server extension list</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p><strong>Fixes:</strong></p>
+<section id="the-positron-tile-does-not-appear" class="level2">
+<h2 class="anchored" data-anchor-id="the-positron-tile-does-not-appear">The Positron tile does not appear</h2>
+<p><code>jupyter-positron-server</code> provides the tile through <code>jupyter-server-proxy</code>, in the <strong>user</strong> environment.</p>
+<p>Check the user environment:</p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>Terminal</strong></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3" data-filename="Terminal"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">/opt/tljh/user/bin/pip</span> show jupyter-positron-server</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="ex">/opt/tljh/user/bin/jupyter</span> server extension list</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>Fixes:</p>
 <ul>
-<li><p>Extension missing → install it in the user env and enable the proxy:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="ex">/opt/tljh/user/bin/pip</span> install <span class="st">'jupyter-positron-server&gt;=0.0.5'</span></span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="ex">/opt/tljh/user/bin/jupyter</span> server extension enable <span class="at">--sys-prefix</span> jupyter_server_proxy</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div></li>
-<li><p>Installed but no tile → confirm <code>JSP_POSITRON_LAUNCHER_DISABLED</code> is <strong>not</strong> set in the spawner environment (any value hides the tile).</p></li>
-<li><p>Restart the user’s server (stop and start it from the JupyterHub UI) — the extension is picked up on server start, not on Hub reload.</p></li>
+<li><p>Extension missing: install it in the user environment and enable the proxy.</p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>Terminal</strong></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4" data-filename="Terminal"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="ex">/opt/tljh/user/bin/pip</span> install <span class="st">'jupyter-positron-server&gt;=0.0.5'</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="ex">/opt/tljh/user/bin/jupyter</span> server extension enable <span class="at">--sys-prefix</span> jupyter_server_proxy</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div></li>
+<li><p>Installed but no tile: confirm <code>JSP_POSITRON_LAUNCHER_DISABLED</code> is not set in the spawner environment. Any value hides the tile.</p></li>
+<li><p>Restart the student server, by stopping and starting it from the JupyterHub UI. The extension is picked up on server start, not on Hub reload.</p></li>
 </ul>
 </section>
 <section id="the-tile-is-there-but-positron-never-loads" class="level2">
 <h2 class="anchored" data-anchor-id="the-tile-is-there-but-positron-never-loads">The tile is there, but Positron never loads</h2>
-<p>The launcher runs, but <code>positron-server</code> fails to start.</p>
-<p><strong>Check</strong> the single-user server log for the failing step, then:</p>
+<p>The launcher runs, and <code>positron-server</code> fails to start.</p>
+<p>Check the browser tab first. When <code>positron-server</code> exits during startup, the tab shows a “Positron Server failed to start” page with the end of the log <code>positron-server</code> writes on its own. That log names the failing step, so read it before going to the single-user server log. The launch is retried about every 30 seconds, so once the cause is fixed, refreshing the tab is enough. No server restart is needed. A refresh that briefly shows a proxy error landed mid-retry. Refresh again.</p>
+<p>If the tab instead sits on a spinner for two minutes and then shows <code>could not start positron in time</code>, <code>positron-server</code> never exited. It hung. Go to the single-user server log for that one.</p>
+<p>Check the single-user server log for the failing step, then:</p>
 <ul>
-<li><p><strong><code>positron-server: command not found</code> / binary not found</strong> — <code>positron-server</code> isn’t on the session <code>PATH</code>. Confirm the spawner sets it:</p>
+<li><p><strong><code>positron-server: command not found</code>, or binary not found</strong>: <code>positron-server</code> is not on the session <code>PATH</code>. Confirm the spawner sets it:</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># TLJH: jupyterhub_config.py</span></span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>c.Spawner.environment <span class="op">=</span> {</span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">"PATH"</span>: <span class="st">"/opt/positron-server/bin:"</span> <span class="op">+</span> os.environ.get(<span class="st">"PATH"</span>, <span class="st">"/usr/local/bin:/usr/bin:/bin"</span>),</span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    ...</span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>In the docker template the binary is on <code>PATH</code> via the single-user image’s <code>ENV</code>, and the spawner intentionally does <strong>not</strong> override <code>PATH</code>.</p></li>
-<li><p><strong>Hangs or license error</strong> — the mint step is failing. See the two sections below.</p></li>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>In the docker template the binary is on <code>PATH</code> through the single-user image <code>ENV</code>, and the spawner does not override <code>PATH</code>.</p></li>
+<li><p><strong>A license error</strong>: see the section below that matches your Positron Server version.</p></li>
 </ul>
 </section>
-<section id="the-verifier-service-isnt-running-or-registered" class="level2">
-<h2 class="anchored" data-anchor-id="the-verifier-service-isnt-running-or-registered">The verifier service isn’t running or registered</h2>
-<p><strong>Check</strong> whether the Hub registered the <code>positron-license</code> service and it is listening:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="ex">journalctl</span> <span class="at">-u</span> jupyterhub <span class="at">--no-pager</span> <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-i</span> positron-license</span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Should show the service starting; if there is nothing, it was never registered.</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p><strong>Fixes:</strong></p>
+<section id="license-errors-on-2026.09.0-and-newer" class="level2">
+<h2 class="anchored" data-anchor-id="license-errors-on-2026.09.0-and-newer">License errors on 2026.09.0 and newer</h2>
+<p>These versions read <code>license.lic</code> from the activation directory and validate it with the bundled <code>license-manager</code>. Check the license first:</p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>Terminal</strong></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6" data-filename="Terminal"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="ex">/opt/positron-server/resources/activation/linux/</span><span class="op">&lt;</span>arch<span class="op">&gt;</span>/license-manager status</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>Common failures:</p>
 <ul>
-<li><p>No mention at all → the service config wasn’t loaded. Confirm your <code>jupyterhub_config.py</code> (or the generated <code>positron-license.py</code> in <code>jupyterhub_config.d/</code>) contains the <code>c.JupyterHub.services</code> block, then reload:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="ex">tljh-config</span> reload        <span class="co"># TLJH</span></span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="co"># or: systemctl restart jupyterhub</span></span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="co"># docker: docker compose restart hub</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div></li>
-<li><p>Service starts then dies → check the command exists in the <strong>Hub</strong> env:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="ex">/opt/tljh/hub/bin/pip</span> show jupyter-positron-verifier</span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="fu">ls</span> <span class="at">-l</span> /opt/tljh/hub/bin/positron-verifier</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div></li>
-<li><p><strong>Port conflict</strong> on <code>VERIFIER_PORT</code> (default <code>10101</code>) → another process holds the port; change <code>VERIFIER_PORT</code> and update <code>POSITRON_LICENSE_MINTING_ENDPOINT</code> to match.</p></li>
+<li><p><strong>Permission denied on the license file</strong>: each session reads the file as the student, so a root-only mode such as <code>600</code> fails every session. Confirm the mode is <code>644</code>.</p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>Terminal</strong></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7" data-filename="Terminal"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ls</span> <span class="at">-l</span> /opt/positron-server/resources/activation/linux/<span class="op">&lt;</span>arch<span class="op">&gt;</span>/license.lic</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">chmod</span> 644 /opt/positron-server/resources/activation/linux/<span class="op">&lt;</span>arch<span class="op">&gt;</span>/license.lic</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div></li>
+<li><p><strong>Expired or altered license</strong>: <code>license-manager status</code> reports the reason. A license file that exists but does not verify stops the session rather than falling back to anything else. Request a replacement from <a href="mailto:academic-licenses@posit.co">academic-licenses@posit.co</a>.</p></li>
+<li><p><strong>Wrong architecture directory</strong>: <code>positron-server</code> looks under <code>resources/activation/linux/x86_64</code> on x64 hosts and <code>resources/activation/linux/aarch64</code> on arm64 hosts. A license placed in the other directory is not found.</p></li>
 </ul>
 </section>
-<section id="license-mint-errors" class="level2">
-<h2 class="anchored" data-anchor-id="license-mint-errors">License / mint errors</h2>
-<p>The verifier confirms entitlement with <code>license-manager</code> and mints a signed, session-bound token. Common failures:</p>
+<section id="license-errors-on-2026.07.0-through-2026.08.2" class="level2">
+<h2 class="anchored" data-anchor-id="license-errors-on-2026.07.0-through-2026.08.2">License errors on 2026.07.0 through 2026.08.2</h2>
+<p>These versions accept a signed token only, which the Hub verifier mints. The verifier runs as a managed JupyterHub service, so its output lands in the Hub log:</p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>Terminal</strong></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8" data-filename="Terminal"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="ex">journalctl</span> <span class="at">-u</span> jupyterhub <span class="at">--no-pager</span> <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-i</span> positron-license</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>This section covers a hand-rolled <a href="./verifier_get_started.html">Verifier setup</a> deployment. Neither <code>scripts/install-positron.sh</code> nor the <code>scripts/docker/</code> template in this repository sets up the verifier anymore. Both target Positron Server 2026.09.0 and newer, and 2026.06.1 and older, which validate <code>license.lic</code> directly. See <a href="#license-errors-on-2026.09.0-and-newer">License errors on 2026.09.0 and newer</a> instead if you deployed with one of those templates.</p>
+</div>
+</div>
+<section id="the-verifier-is-not-running-or-not-registered" class="level3">
+<h3 class="anchored" data-anchor-id="the-verifier-is-not-running-or-not-registered">The verifier is not running or not registered</h3>
 <ul>
-<li><p><strong>Signing key not readable</strong> — the verifier runs as the Hub service account and reads <code>POSITRON_MINTING_KEY_FILE</code>. Confirm the file exists and is readable by that account:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ls</span> <span class="at">-l</span> /etc/positron/signing-key.pem   <span class="co"># mode 600, owned by the Hub user</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div></li>
-<li><p><strong>Minting endpoint unreachable / wrong URL</strong> — <code>POSITRON_LICENSE_MINTING_ENDPOINT</code> must point at the Hub-proxied service path. TLJH: <code>http://127.0.0.1:10101/services/positron-license/mint</code>; docker: <code>http://hub:${VERIFIER_PORT}/services/positron-license/mint</code>.</p></li>
-<li><p><strong><code>403</code> / authorization errors from the mint call</strong> — the service role is missing scopes. Confirm the <code>c.JupyterHub.load_roles</code> block grants the <code>positron-license</code> service <code>read:users</code>.</p></li>
+<li><p><strong>No mention at all</strong>: the service config was not loaded. Confirm that <code>jupyterhub_config.py</code>, or the generated <code>positron-license.py</code> in <code>jupyterhub_config.d/</code>, contains the <code>c.JupyterHub.services</code> block, then reload.</p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>Terminal</strong></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9" data-filename="Terminal"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="ex">tljh-config</span> reload</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="co"># or: systemctl restart jupyterhub</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div></li>
+<li><p><strong>The service starts and then dies</strong>: confirm the command exists in the <strong>Hub</strong> environment.</p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>Terminal</strong></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10" data-filename="Terminal"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="ex">/opt/tljh/hub/bin/pip</span> show jupyter-positron-verifier</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="fu">ls</span> <span class="at">-l</span> /opt/tljh/hub/bin/positron-verifier</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div></li>
+<li><p><strong>Port conflict</strong> on <code>VERIFIER_PORT</code>, which defaults to <code>10101</code>: another process holds the port. Change <code>VERIFIER_PORT</code> and update <code>POSITRON_LICENSE_MINTING_ENDPOINT</code> to match.</p></li>
 </ul>
+</section>
+<section id="mint-calls-fail" class="level3">
+<h3 class="anchored" data-anchor-id="mint-calls-fail">Mint calls fail</h3>
+<ul>
+<li><p><strong>Signing key not readable</strong>: the verifier runs as the Hub service account and reads <code>POSITRON_MINTING_KEY_FILE</code>. Confirm the file exists and that account can read it.</p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>Terminal</strong></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11" data-filename="Terminal"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ls</span> <span class="at">-l</span> /etc/positron/signing-key.pem   <span class="co"># mode 600, owned by the Hub user</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div></li>
+<li><p><strong>Minting endpoint unreachable or wrong URL</strong>: <code>POSITRON_LICENSE_MINTING_ENDPOINT</code> must point at the Hub-proxied service path, e.g., <code>http://127.0.0.1:10101/services/positron-license/mint</code>.</p></li>
+<li><p><strong><code>403</code> or other authorization errors from the mint call</strong>: the service role is missing scopes. Confirm the <code>c.JupyterHub.load_roles</code> block grants the <code>positron-license</code> service <code>read:users</code>.</p></li>
+</ul>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Upgrading to Positron Server 2026.09.0 or newer removes this whole class of failure. See <a href="./get_started.html#move-an-existing-deployment-off-the-verifier">Move an existing deployment off the verifier</a>.</p>
+</div>
+</div>
+</section>
 </section>
 <section id="install-time-failures" class="level2">
 <h2 class="anchored" data-anchor-id="install-time-failures">Install-time failures</h2>
 <ul>
-<li><strong>Download fails (<code>curl</code> 403/404)</strong> — the <code>POSITRON_VERSION</code>/<code>POSITRON_ARCH</code> combination doesn’t exist on the CDN. Verify the version string, or download the tarball yourself and pass <code>POSITRON_TARBALL=./positron-server.tar.gz</code>.</li>
+<li><strong>Download fails with <code>curl</code> 403 or 404</strong>: the <code>POSITRON_VERSION</code> and <code>POSITRON_ARCH</code> combination does not exist on the Content Delivery Network (CDN). Verify the version string against the <a href="https://github.com/posit-dev/positron/releases">Positron releases page</a>, or download the tarball yourself and pass <code>POSITRON_TARBALL=./positron-server.tar.gz</code>.</li>
 </ul>
 </section>
 <section id="docker-compose-specifics" class="level2">
 <h2 class="anchored" data-anchor-id="docker-compose-specifics">docker-compose specifics</h2>
 <ul>
-<li><p><strong>Hub container exits at boot with <code>Positron … not found or empty at …</code></strong> — a secret wasn’t placed. Copy <code>signing-key.pem</code> and <code>license.lic</code> into <code>docker/secrets/</code> (a missing bind-mount source makes Docker create an empty directory, which is why the Hub checks at boot):</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cp</span> /path/to/signing-key.pem secrets/signing-key.pem</span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="fu">cp</span> /path/to/license.lic     secrets/license.lic</span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="ex">docker</span> compose up <span class="at">-d</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div></li>
-<li><p><strong>Single-user containers fail to spawn</strong> — the single-user image must be built (<code>docker compose build hub singleuser</code>) and its <code>jupyterhub-singleuser</code> version must be compatible with the Hub’s JupyterHub (see below).</p></li>
-<li><p><strong>Anyone can log in</strong> — that’s <code>DummyAuthenticator</code>, the template default. Replace it in <code>hub/jupyterhub_config.py</code> and rebuild before any real use.</p></li>
+<li><p><strong>The hub container exits at boot reporting a file not found or empty</strong>: the license secret was not placed. Copy it into <code>scripts/docker/secrets/</code>. A missing bind-mount source makes Docker create an empty directory, which is why the hub checks at boot.</p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>Terminal</strong></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12" data-filename="Terminal"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cp</span> /path/to/license.lic secrets/license.lic</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="fu">chmod</span> 644 secrets/license.lic</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="ex">docker</span> compose up <span class="at">-d</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div></li>
+<li><p><strong>Single-user containers fail to spawn with a license error</strong>: confirm <code>POSITRON_LICENSE_HOST_PATH</code> (set from <code>${PWD}</code> in <code>docker-compose.yml</code>) resolved to the right absolute path. <code>docker compose config</code> prints the resolved value. It must be a path on the Docker host, which is why <code>docker compose</code> needs to be run from <code>scripts/docker/</code> itself.</p></li>
 </ul>
+</section>
+<section id="zero-to-jupyterhub-kubernetes-specifics" class="level2">
+<h2 class="anchored" data-anchor-id="zero-to-jupyterhub-kubernetes-specifics">Zero to JupyterHub (Kubernetes) specifics</h2>
+<p>Logs live in the single-user pod, and <code>positron-server</code> restart-loops on failure, so always use <code>--tail</code>:</p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>Terminal</strong></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13" data-filename="Terminal"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="va">POD</span><span class="op">=</span><span class="va">$(</span><span class="ex">kubectl</span> <span class="at">-n</span> jupyterhub get pod <span class="at">-l</span> component=singleuser-server <span class="at">-o</span> name <span class="kw">|</span> <span class="fu">head</span> <span class="at">-1</span><span class="va">)</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="ex">kubectl</span> <span class="at">-n</span> jupyterhub logs <span class="va">$POD</span> <span class="at">-c</span> notebook <span class="at">--tail</span><span class="op">=</span>200</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p><code>-c notebook</code> avoids the “Defaulted container” notice from the pod’s init container.</p>
+<section id="could-not-start-positron-in-time" class="level3">
+<h3 class="anchored" data-anchor-id="could-not-start-positron-in-time"><code>could not start positron in time</code></h3>
+<p>The browser shows a blank page with a spinner for about two minutes, then a <code>500</code> with <code>could not start positron in time</code>. The message implicates slowness, but in a Kubernetes deployment it is far more often the license mount. The two-minute delay is <code>jupyter-server-proxy</code> giving up.</p>
+<p>Check the activation directory first:</p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>Terminal</strong></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14" data-filename="Terminal"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="ex">kubectl</span> <span class="at">-n</span> jupyterhub exec <span class="va">$POD</span> <span class="at">-c</span> notebook <span class="at">--</span> <span class="dt">\</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  ls <span class="at">-l</span> /opt/positron-server/resources/activation/linux/<span class="op">&lt;</span>arch<span class="op">&gt;</span>/</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>If only <code>license.lic</code> is there, plus entries like <code>..data</code> and a timestamped directory, the Secret was mounted at the directory instead of at the file path. Add <code>subPath: license.lic</code> and make <code>mountPath</code> the full file path, or switch to <code>singleuser.extraFiles</code>, which derives <code>subPath</code> for you.</p>
+<p>If the directory looks healthy but Positron still fails, the license is probably in the <em>wrong architecture</em> directory. Both <code>x86_64</code> and <code>aarch64</code> ship in every tarball and both look complete, so this is invisible to inspection:</p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>Terminal</strong></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15" data-filename="Terminal"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="ex">kubectl</span> <span class="at">-n</span> jupyterhub exec <span class="va">$POD</span> <span class="at">-c</span> notebook <span class="at">--</span> <span class="dt">\</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>  python3 <span class="at">-c</span> <span class="st">"import platform; print(platform.machine())"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>Whatever that prints is the only directory Positron consults.</p>
+</section>
+<section id="no-license-key-provided-in-the-pod-log" class="level3">
+<h3 class="anchored" data-anchor-id="no-license-key-provided-in-the-pod-log"><code>No license key provided</code> in the pod log</h3>
+<pre class="text"><code>No license key provided. A license key is required to use Positron in a hosted
+environment. Provide a license key with the --license-key or --license-key-file ...</code></pre>
+<p>Taken literally this suggests the license is missing, and following its advice leads nowhere. It appears whenever Positron cannot validate a license, which includes the case where the license is mounted and readable but the activation libraries beside it were masked. Work through the activation-directory checks above before touching <code>--license-key-file</code>.</p>
+</section>
+<section id="confirming-the-license-is-readable-at-all" class="level3">
+<h3 class="anchored" data-anchor-id="confirming-the-license-is-readable-at-all">Confirming the license is readable at all</h3>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>Terminal</strong></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17" data-filename="Terminal"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="ex">kubectl</span> <span class="at">-n</span> jupyterhub exec <span class="va">$POD</span> <span class="at">-c</span> notebook <span class="at">--</span> id</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="ex">kubectl</span> <span class="at">-n</span> jupyterhub exec <span class="va">$POD</span> <span class="at">-c</span> notebook <span class="at">--</span> <span class="dt">\</span></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>  head <span class="at">-c</span> 30 /opt/positron-server/resources/activation/linux/<span class="op">&lt;</span>arch<span class="op">&gt;</span>/license.lic</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p><code>id</code> reports <code>uid=1000(jovyan) gid=100(users)</code>, and the license appears as <code>root:users</code> with mode <code>0440</code>. Note that <code>license-manager status</code> requires root: usable via <code>sudo</code> on The Littlest JupyterHub (TLJH), but not in user pods, which have no privilege escalation.</p>
+</section>
+<section id="user-servers-fail-to-spawn" class="level3">
+<h3 class="anchored" data-anchor-id="user-servers-fail-to-spawn">User servers fail to spawn</h3>
+<p>The single-user image’s <code>jupyterhub</code> must be compatible with the Hub’s. Compare:</p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>Terminal</strong></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb18" data-filename="Terminal"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="ex">kubectl</span> <span class="at">-n</span> jupyterhub exec deploy/hub <span class="at">--</span> jupyterhub <span class="at">--version</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="ex">docker</span> run <span class="at">--rm</span> <span class="at">--entrypoint</span> pip <span class="op">&lt;</span>your-image<span class="op">&gt;</span> show jupyterhub</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>A patch-level difference is fine. A larger gap needs a pin in the image.</p>
+</section>
+<section id="extensions-reinstall-on-every-launch" class="level3">
+<h3 class="anchored" data-anchor-id="extensions-reinstall-on-every-launch">Extensions reinstall on every launch</h3>
+<p>Expected when <code>singleuser.storage.type</code> is <code>none</code>, because <code>$HOME</code> is ephemeral and Positron re-bootstraps <code>~/.positron-server/extensions</code> each spawn. Set <code>storage.type: dynamic</code> so it happens once.</p>
+</section>
 </section>
 <section id="still-stuck" class="level2">
 <h2 class="anchored" data-anchor-id="still-stuck">Still stuck?</h2>
-<p>Open an issue at <a href="https://github.com/posit-dev/jupyter-positron-server/issues">github.com/posit-dev/jupyter-positron-server</a> with the relevant Hub and single-user log excerpts, your Positron version, and which deployment path you used.</p>
+<p>Open an issue at <a href="https://github.com/posit-dev/jupyter-positron-server/issues">the jupyter-positron-server issue tracker</a> with the relevant Hub and single-user log excerpts, your Positron Server version, and which setup path you used.</p>
 
 
 </section>
