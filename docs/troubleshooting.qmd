@@ -9,7 +9,7 @@ install itself, which covers architecture and version, or, on Positron Server
 symptom.
 
 ::: callout-note
-On Kubernetes, license-mount problems are the usual cause — see
+On Kubernetes, license-mount problems are the usual cause. See
 [Zero to JupyterHub (Kubernetes) specifics](#zero-to-jupyterhub-kubernetes-specifics).
 :::
 
@@ -66,22 +66,22 @@ Fixes:
 
 The launcher runs, and `positron-server` fails to start.
 
-**Check the browser tab first.** When `positron-server` exits during startup,
-the tab shows a "Positron Server failed to start" page with the end of
-`positron-server`'s own log. That log names the failing step, so read it before
-going to the single-user server log. The launch is retried about every
-30 seconds, so once the cause is fixed, refreshing the tab is enough — no
-server restart needed. A refresh that briefly shows a proxy error landed
-mid-retry; refresh again.
+Check the browser tab first. When `positron-server` exits during startup,
+the tab shows a "Positron Server failed to start" page with the end of the log
+`positron-server` writes on its own. That log names the failing step, so read
+it before going to the single-user server log. The launch is retried about
+every 30 seconds, so once the cause is fixed, refreshing the tab is enough. No
+server restart is needed. A refresh that briefly shows a proxy error landed
+mid-retry. Refresh again.
 
 If the tab instead sits on a spinner for two minutes and then shows
-`could not start positron in time`, `positron-server` never exited — it hung.
+`could not start positron in time`, `positron-server` never exited. It hung.
 Go to the single-user server log for that one.
 
-**Check** the single-user server log for the failing step, then:
+Check the single-user server log for the failing step, then:
 
-- **`positron-server: command not found` / binary not found** — `positron-server`
-  isn't on the session `PATH`. Confirm the spawner sets it:
+- **`positron-server: command not found`, or binary not found**: `positron-server`
+  is not on the session `PATH`. Confirm the spawner sets it:
   ```python
   # TLJH: jupyterhub_config.py
   c.Spawner.environment = {
@@ -132,7 +132,7 @@ journalctl -u jupyterhub --no-pager | grep -i positron-license
 ::: callout-note
 This section covers a hand-rolled [Verifier setup](verifier_get_started.qmd)
 deployment. Neither `scripts/install-positron.sh` nor the `scripts/docker/`
-template in this repository sets up the verifier anymore — both target
+template in this repository sets up the verifier anymore. Both target
 Positron Server 2026.09.0 and newer, and 2026.06.1 and older, which validate
 `license.lic` directly. See
 [License errors on 2026.09.0 and newer](#license-errors-on-2026.09.0-and-newer)
@@ -168,7 +168,7 @@ instead if you deployed with one of those templates.
   ```
 - **Minting endpoint unreachable or wrong URL**:
   `POSITRON_LICENSE_MINTING_ENDPOINT` must point at the Hub-proxied service path,
-  e.g. `http://127.0.0.1:10101/services/positron-license/mint`.
+  e.g., `http://127.0.0.1:10101/services/positron-license/mint`.
 - **`403` or other authorization errors from the mint call**: the service role is
   missing scopes. Confirm the `c.JupyterHub.load_roles` block grants the
   `positron-license` service `read:users`.
@@ -182,7 +182,7 @@ failure. See
 ## Install-time failures
 
 - **Download fails with `curl` 403 or 404**: the `POSITRON_VERSION` and
-  `POSITRON_ARCH` combination does not exist on the CDN. Verify the version string
+  `POSITRON_ARCH` combination does not exist on the Content Delivery Network (CDN). Verify the version string
   against the [Positron releases page](https://github.com/posit-dev/positron/releases),
   or download the tarball yourself and pass
   `POSITRON_TARBALL=./positron-server.tar.gz`.
@@ -200,8 +200,8 @@ failure. See
   ```
 - **Single-user containers fail to spawn with a license error**: confirm
   `POSITRON_LICENSE_HOST_PATH` (set from `${PWD}` in `docker-compose.yml`)
-  resolved to the right absolute path — `docker compose config` prints the
-  resolved value. It must be a path on the Docker **host**, which is why
+  resolved to the right absolute path. `docker compose config` prints the
+  resolved value. It must be a path on the Docker host, which is why
   `docker compose` needs to be run from `scripts/docker/` itself.
 
 
@@ -210,7 +210,7 @@ failure. See
 Logs live in the single-user pod, and `positron-server` restart-loops on failure,
 so always use `--tail`:
 
-```bash
+```{.bash filename="Terminal"}
 POD=$(kubectl -n jupyterhub get pod -l component=singleuser-server -o name | head -1)
 kubectl -n jupyterhub logs $POD -c notebook --tail=200
 ```
@@ -227,24 +227,21 @@ is `jupyter-server-proxy` giving up.
 
 Check the activation directory first:
 
-```bash
+```{.bash filename="Terminal"}
 kubectl -n jupyterhub exec $POD -c notebook -- \
   ls -l /opt/positron-server/resources/activation/linux/<arch>/
 ```
 
-**A healthy directory** holds `license-manager`, `librclient.so`, `librserver.so`,
-`license-manager.conf` and `license.lic`.
-
-**If only `license.lic` is there**, plus entries like `..data` and a timestamped
-directory, the Secret was mounted **at the directory** instead of at the file
-path. Add `subPath: license.lic` and make `mountPath` the full file path — or
+If only `license.lic` is there, plus entries like `..data` and a timestamped
+directory, the Secret was mounted at the directory instead of at the file
+path. Add `subPath: license.lic` and make `mountPath` the full file path, or
 switch to `singleuser.extraFiles`, which derives `subPath` for you.
 
-**If the directory looks healthy but Positron still fails**, the license is
+If the directory looks healthy but Positron still fails, the license is
 probably in the *wrong architecture* directory. Both `x86_64` and `aarch64` ship
 in every tarball and both look complete, so this is invisible to inspection:
 
-```bash
+```{.bash filename="Terminal"}
 kubectl -n jupyterhub exec $POD -c notebook -- \
   python3 -c "import platform; print(platform.machine())"
 ```
@@ -253,40 +250,40 @@ Whatever that prints is the only directory Positron consults.
 
 ### `No license key provided` in the pod log
 
-```
+```text
 No license key provided. A license key is required to use Positron in a hosted
 environment. Provide a license key with the --license-key or --license-key-file ...
 ```
 
 Taken literally this suggests the license is missing, and following its advice
-leads nowhere. It appears whenever Positron cannot *validate* a license — which
+leads nowhere. It appears whenever Positron cannot validate a license, which
 includes the case where the license is mounted and readable but the activation
 libraries beside it were masked. Work through the activation-directory checks
 above before touching `--license-key-file`.
 
 ### Confirming the license is readable at all
 
-```bash
+```{.bash filename="Terminal"}
 kubectl -n jupyterhub exec $POD -c notebook -- id
 kubectl -n jupyterhub exec $POD -c notebook -- \
   head -c 30 /opt/positron-server/resources/activation/linux/<arch>/license.lic
 ```
 
-`id` reports `uid=1000(jovyan) gid=100(users)`, and the license should show as
-`root:users` with mode `0440`. Note that `license-manager status` requires root —
-usable via `sudo` on TLJH, but not in user pods, which have no privilege
-escalation.
+`id` reports `uid=1000(jovyan) gid=100(users)`, and the license appears as
+`root:users` with mode `0440`. Note that `license-manager status` requires
+root: usable via `sudo` on The Littlest JupyterHub (TLJH), but not in user
+pods, which have no privilege escalation.
 
 ### User servers fail to spawn
 
 The single-user image's `jupyterhub` must be compatible with the Hub's. Compare:
 
-```bash
+```{.bash filename="Terminal"}
 kubectl -n jupyterhub exec deploy/hub -- jupyterhub --version
 docker run --rm --entrypoint pip <your-image> show jupyterhub
 ```
 
-A patch-level difference is fine; a larger gap needs a pin in the image.
+A patch-level difference is fine. A larger gap needs a pin in the image.
 
 ### Extensions reinstall on every launch
 

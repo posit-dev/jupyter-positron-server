@@ -15,7 +15,7 @@ Positron Server changed how it verifies a license twice, so the setup steps depe
 
 | Positron Server version | How the license is verified | What to install | Setup guide |
 |---|---|---|---|
-| 2026.09.0 and newer | `positron-server` validates `license.lic` in its own activation directory | [Get started](https://posit-dev.github.io/jupyter-positron-server/get_started.html) |
+| 2026.09.0 and newer | `positron-server` validates `license.lic` in its own activation directory | `jupyter-positron-server` | [Get started](https://posit-dev.github.io/jupyter-positron-server/get_started.html) |
 | 2026.07.0 through 2026.08.2 | A Hub service mints a signed, per-session token from a signing key. No license file is read by the session | `jupyter-positron-server` and `jupyter-positron-verifier` | [Verifier setup](https://posit-dev.github.io/jupyter-positron-server/verifier_get_started.html) |
 | 2026.06.1 and older | `positron-server` validates `license.lic` in its own activation directory | `jupyter-positron-server` | [Get started](https://posit-dev.github.io/jupyter-positron-server/get_started.html) |
 
@@ -27,11 +27,11 @@ The two license file rows differ in one detail: on 2026.06.1 and older, install 
 
 For Positron Server 2026.09.0 and newer, the setup is:
 
-1. Email [academic-licenses@posit.co](mailto:academic-licenses@posit.co) to request a license file (`license.lic`). Free for currently enrolled students using Positron for coursework. See the [Positron Education License Rider](https://github.com/posit-dev/positron/blob/main/LICENSE.txt) for eligibility.
+1. Send email to [academic-licenses@posit.co](mailto:academic-licenses@posit.co) to request a license file (`license.lic`). Free for currently enrolled students using Positron for coursework. See the [Positron Education License Rider](https://github.com/posit-dev/positron/blob/main/LICENSE.txt) for eligibility.
 2. Download the Positron Server binary and extract it to `/opt/positron-server` in the single-user image.
 3. Place `license.lic` next to the `license-manager` binary, at `/opt/positron-server/resources/activation/linux/<arch>/license.lic`, with mode `644` so each session can read it. `<arch>` is `x86_64` or `aarch64`.
 4. Install `jupyter-positron-server` in the single-user image.
 5. Add `/opt/positron-server/bin` to `c.Spawner.environment["PATH"]` in `jupyterhub_config.py`.
-6. Restart JupyterHub, then select the "Positron" tile in the JupyterLab launcher.
+6. Restart JupyterHub, then select the Positron tile in the JupyterLab launcher.
 
 See the [Get started guide](https://posit-dev.github.io/jupyter-positron-server/get_started.html) for the full walkthrough, including the exact `jupyterhub_config.py` snippets and how to move an existing verifier deployment off the signing key.

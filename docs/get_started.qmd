@@ -51,9 +51,9 @@ tar -xzf /tmp/positron-server.tar.gz -C /opt/positron-server --strip-components=
 
 ::: callout-note
 Positron spells the CPU architecture three ways. The download filename uses
-`x64` or `arm64`, the CDN path uses `x86_64` or `arm64`, and the activation
-directory uses `x86_64` or `aarch64`. Throughout this guide, `<arch>` means the
-activation directory name.
+`x64` or `arm64`, the Content Delivery Network (CDN) path uses `x86_64` or
+`arm64`, and the activation directory uses `x86_64` or `aarch64`. Throughout
+this guide, `<arch>` means the activation directory name.
 :::
 
 
@@ -114,11 +114,11 @@ Students can then select the Positron tile in the JupyterLab launcher.
 
 When a student opens Positron:
 
-1. `jupyter-positron-server` kicks off starting Positron Server
+1. `jupyter-positron-server` kicks off starting Positron Server.
 2. Positron Server validates the license file, and then starts.
 3. `jupyter-positron-server` opens Positron Server with a connection token for the session.
 
-```
+```text
 Single-user server
   jupyter-positron-server    starts positron-server on the first request
   positron-server            validates the license file and starts

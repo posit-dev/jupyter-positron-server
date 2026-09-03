@@ -19,15 +19,15 @@ instead.
 Send email to [academic-licenses@posit.co](mailto:academic-licenses@posit.co) to
 request both files:
 
-- **Signing key** (`signing-key.pem`): the RSA private key that mints per-session
-  license tokens
+- **Signing key** (`signing-key.pem`): the RSA private
+  key that mints per-session license tokens
 - **License file** (`license.lic`): proof of entitlement
 
 ::: callout-note
 Positron spells the CPU architecture three ways. The download filename uses
-`x64` or `arm64`, the CDN path uses `x86_64` or `arm64`, and the activation
-directory uses `x86_64` or `aarch64`. Throughout this guide, `<arch>` means the
-activation directory name.
+`x64` or `arm64`, the CDN path uses `x86_64` or
+`arm64`, and the activation directory uses `x86_64` or `aarch64`. Throughout
+this guide, `<arch>` means the activation directory name.
 :::
 
 ## Step 1: Install Positron Server in the single-user image {#install-positron-server}
@@ -156,7 +156,7 @@ When a student opens Positron:
 4. `positron-server` verifies the RSA signature with its embedded public key and
    starts.
 
-```
+```text
 Hub (privileged)
   signing-key.pem            /etc/positron/, root-only, never reaches users
   jupyter-positron-verifier  confirms entitlement, mints a signed license
