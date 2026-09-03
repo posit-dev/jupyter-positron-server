@@ -1,0 +1,76 @@
+# Positron Server on Zero to JupyterHub — Helm values.
+#
+# Verified against z2jh chart 4.4.1 (JupyterHub 5.5.1) on Kubernetes v1.36.1.
+#
+# The license content is NOT in this file. Pass it at install time so it never
+# lands in version control:
+#
+#   helm upgrade --install positron jupyterhub/jupyterhub \
+#     --version 4.4.1 --namespace jupyterhub --create-namespace \
+#     --values values.yaml \
+#     --set-file 'singleuser.extraFiles.license\.lic.stringData'=./license.lic
+#
+# There is no `hub:` image override anywhere below. Nothing Positron-related runs
+# on the Hub in this deployment, so the chart's stock hub image is used as-is.
+
+singleuser:
+  image:
+    # Push this to a registry your cluster can pull from, or load it directly for
+    # local testing: `kind load docker-image positron-singleuser:v1`
+    name: positron-singleuser
+    tag: v1
+
+  # Positron images are large; a cold pull plus first-launch extension bootstrap
+  # can exceed the chart's default spawn timeout.
+  startTimeout: 600
+
+  extraFiles:
+    # ---------------------------------------------------------------------------
+    # ARCHITECTURE: the directory below MUST match your nodes' architecture —
+    # `x86_64` for amd64 nodes, `aarch64` for arm64. Positron only consults the
+    # directory matching the running architecture.
+    #
+    # Both directories ship in every tarball and both look complete, so pointing
+    # at the wrong one produces NO obvious error: the user gets a blank page for
+    # two minutes, then "could not start positron in time", and the pod log says
+    # "No license key provided" even though the license is mounted and readable.
+    #
+    # Confirm the value your nodes report:
+    #   kubectl exec <pod> -c notebook -- python3 -c "import platform; print(platform.machine())"
+    #
+    # Mixed-architecture node pools cannot be served by a single mountPath; see
+    # README.md.
+    # ---------------------------------------------------------------------------
+    #
+    # The key must be quoted (it contains a dot) and must match the target
+    # filename: the chart uses it as the volume's subPath.
+    "license.lic":
+      mountPath: /opt/positron-server/resources/activation/linux/x86_64/license.lic
+      # Unquoted, so YAML parses it as octal. Written as `440` it would become
+      # decimal 440 (= 0670), which is more permissive than intended.
+      mode: 0440
+
+  # storage.type is left at the chart default (`dynamic`, a per-user PVC). Keep
+  # it: an ephemeral $HOME (`type: none`) makes Positron re-bootstrap all of its
+  # extensions on every spawn.
+
+  # Positron needs more memory than a bare notebook server; see
+  # https://posit-dev.github.io/jupyter-positron-server/configuration.html#memory-requirements
+  # (KubeSpawner accepts single-letter suffixes: G, not GB.)
+  memory:
+    guarantee: 2.5G
+    limit: 4G
+
+# --- Authentication ----------------------------------------------------------
+# The chart's default authenticator is DummyAuthenticator, which accepts ANY
+# username and password. Replace it with a real authenticator before exposing
+# this hub to anyone.
+#
+# hub:
+#   config:
+#     JupyterHub:
+#       authenticator_class: oauthenticator.github.GitHubOAuthenticator
+#     GitHubOAuthenticator:
+#       client_id: ...
+#       client_secret: ...
+#       oauth_callback_url: ...

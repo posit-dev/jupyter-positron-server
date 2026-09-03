@@ -13,6 +13,7 @@ import os
 import platform
 import re
 import secrets
+import sys
 import urllib.request
 import urllib.error
 
@@ -189,7 +190,11 @@ def _resolve_license_source(minting_endpoint):
     if license_key_file:
         logger.info(f"POSITRON_LICENSE_KEY_FILE set to: {license_key_file}")
         if not os.path.exists(license_key_file):
-            raise FileNotFoundError(
+            # Deliberately not raising: jupyter-server-proxy answers an exception
+            # here by skipping registration, so the Positron tile disappears and
+            # the user has nothing to click. Launch anyway and let the launcher
+            # surface positron-server's own complaint about the missing file.
+            logger.error(
                 f"Positron license token file not found at '{license_key_file}' "
                 f"(specified by POSITRON_LICENSE_KEY_FILE environment variable). "
                 f"Point POSITRON_LICENSE_KEY_FILE at a file containing a signed "
@@ -274,6 +279,23 @@ def _resolve_activation_path(positron_server_path):
         )
 
     return f"/usr/local/lib:{activation_path}"
+
+
+def _wrap_with_launcher(command):
+    """Run ``command`` under the supervising launcher.
+
+    If positron-server exits before it ever serves the port, the launcher takes
+    the port and serves a page with the tail of positron-server's log, instead
+    of leaving the user with a two-minute wait and a generic 500. ``{port}`` is
+    substituted by jupyter-server-proxy.
+    """
+    return [
+        sys.executable,
+        "-m",
+        "jupyter_positron_server._launch",
+        "{port}",
+        "--",
+    ] + command
 
 
 def setup_positron_server():
@@ -364,7 +386,9 @@ def setup_positron_server():
                     "Hub minting endpoint returned no license; "
                     "positron-server may fail license validation"
                 )
-            return cmd + [_positron_server_path] + _command_arguments
+            return _wrap_with_launcher(
+                cmd + [_positron_server_path] + _command_arguments
+            )
 
         proxy_config_dict["command"] = _get_hub_minted_command
         logger.info("Positron server command: Hub-minted license (callable)")
@@ -377,7 +401,7 @@ def setup_positron_server():
             positron_server_path,
         ] + command_arguments
 
-        proxy_config_dict["command"] = full_command
+        proxy_config_dict["command"] = _wrap_with_launcher(full_command)
         logger.info(f"Positron server command: {' '.join(full_command)}")
 
     return proxy_config_dict
