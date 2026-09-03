@@ -2,26 +2,41 @@
 title: "Configuration"
 ---
 
-`jupyter-positron-server` can be configured using environment variables to customize how Positron Server runs within your Jupyter environment.
+Environment variables control how `jupyter-positron-server` runs Positron Server
+inside your Jupyter environment.
 
-## Optional: Environment Variables
+## Environment variables
 
 | Variable | Description |
 |----------|-------------|
-| `POSITRON_LICENSE_KEY_FILE` | Path to your Positron license key file. The user starting Positron must have write access to the Positron Server's installation directory, as Positron will copy the license file to the location where Positron Server expects to find it. Positron Server will look for a license at `<positron-server-path>/resources/activation/linux/{ARCH}/license.lic` (where `{ARCH}` is `x86_64` or `aarch64`) if not set. |
-| `POSITRON_LICENSE_MINTING_ENDPOINT` | URL of the JupyterHub minting endpoint that issues short-lived signed license tokens. When set, `jupyter-positron-server` calls this endpoint (authenticated with `JUPYTERHUB_API_TOKEN`) at each Positron Server launch instead of reading a static license file. Takes precedence over `POSITRON_LICENSE_KEY_FILE`. See the Hub minting endpoint setup section below. |
+| `POSITRON_LICENSE_KEY_FILE` | Path to a license file that `jupyter-positron-server` passes to `positron-server` as `--license-key-file`. On Positron Server 2026.09.0 and newer, this file can be a raw `license.lic`. Leave it unset when the license file sits in the activation directory at `<positron-server-path>/resources/activation/linux/<arch>/license.lic`, which is where `positron-server` looks by default. |
+| `POSITRON_LICENSE_MINTING_ENDPOINT` | URL of the JupyterHub minting endpoint that issues short-lived signed license tokens. Applies to Positron Server 2026.07.0 through 2026.08.2 only. Takes precedence over `POSITRON_LICENSE_KEY_FILE`. See [Verifier setup](verifier_get_started.qmd). |
+| `POSITRON_ENFORCED_SETTINGS` | JSON object of Positron settings that students cannot change. See [Admin-enforced settings](#admin-enforced-settings). |
 | `POSITRON_HOST` | Host address for Positron Server to bind to. Defaults to `127.0.0.1`. |
-| `JSP_POSITRON_LAUNCHER_DISABLED` | Set to any value to hide the Positron launcher entry in JupyterLab. |
+| `JSP_DEFAULT_FOLDER` | Directory that Positron Server opens. Defaults to `JUPYTERHUB_ROOT_DIR`, then `HOME`. |
+| `JSP_POSITRON_LAUNCHER_DISABLED` | Set to any value to hide the Positron tile in the JupyterLab launcher. |
 
-## Admin-Enforced Settings
+::: callout-note
+On Positron Server 2026.09.0 and newer, a license needs no environment variable
+at all. `positron-server` finds `license.lic` in its own activation directory.
+Both license variables are for deployments that keep the file somewhere else, or
+that still run on 2026.07.0 through 2026.08.2.
+:::
 
-`POSITRON_ENFORCED_SETTINGS` lets administrators lock Positron settings so users cannot override them via the Settings UI or by editing `settings.json` directly. Locked settings appear grayed out with a policy indicator in the UI. Enforced settings survive profile changes, workspace switches, and direct edits to `~/.positron-server/data/User/settings.json`.
+## Admin-enforced settings
 
-**Requirements:** `jupyter-positron-server >= 0.0.4`, Positron Server `>= 2026.07.1-5`
+`POSITRON_ENFORCED_SETTINGS` lets administrators lock Positron settings so
+students cannot override them through the Settings UI, or by editing
+`settings.json` directly. Locked settings appear grayed out with a policy
+indicator. Enforced settings survive profile changes, workspace switches, and
+direct edits to `~/.positron-server/data/User/settings.json`.
 
-**Step 1 — Create the config file**
+**Requirements**: `jupyter-positron-server` 0.0.4 or newer, and Positron Server
+2026.07.1-5 or newer.
 
-```bash
+Create the config file:
+
+```{.bash filename="Terminal"}
 cat > /opt/tljh/config/jupyterhub_config.d/positron_enforced.py << 'EOF'
 c.Spawner.environment = {
     'POSITRON_ENFORCED_SETTINGS': '{"workbench.colorTheme":"Default Positron Dark","extensions.autoUpdate":false}'
@@ -29,17 +44,25 @@ c.Spawner.environment = {
 EOF
 ```
 
-Existing user sessions are not affected until they start a new session.
+Sessions that are already running keep their settings until a student starts a
+new session.
+
+::: callout-important
+Each assignment to `c.Spawner.environment` replaces the whole dictionary. Set
+every session variable in one assignment, including `PATH`.
+:::
 
 ## Memory requirements
 
-It is recommended to allocate at least 2.5 GB of RAM per Positron Server session. The right amount depends on the size of workload:
+Allocate at least 2.5 GB of RAM per Positron Server session. The right amount
+depends on the size of the workload:
 
 - **Light**: single console, few extensions, simple scripts, basic app development
 - **Standard**: runtime switching, multiple consoles, multiple extensions, app development
 - **Heavy**: memory-intensive extensions such as file watchers or language servers, multiple concurrent apps, large datasets
 
-Use the table below to match each workload level to its minimum and recommended memory allocation.
+Use the table below to match each workload level to its minimum and recommended
+memory allocation.
 
 | Workload | Minimum | Recommended |
 |----------|---------|-------------|
@@ -47,25 +70,21 @@ Use the table below to match each workload level to its minimum and recommended 
 | Standard | 2.5 GB | 4 GB |
 | Heavy | 4 GB | 6 GB or more |
 
-Signs of insufficient memory include slow runtime switching, extensions that fail to install, degraded app performance, and crashes during memory-intensive operations.
+Signs of insufficient memory include slow runtime switching, extensions that fail
+to install, degraded app performance, and crashes during memory-intensive
+operations.
 
 ::: callout-note
-See the Positron Pro [memory allocation FAQ](https://docs.posit.co/ide/server-pro/user/positron/reference/faq.html#allocate-sufficient-memory-for-your-positron-pro-session) for the full guidance this section summarizes.
+For the full guidance this section summarizes, see the Positron Pro
+[memory allocation FAQ](https://docs.posit.co/ide/server-pro/user/positron/reference/faq.html#allocate-sufficient-memory-for-your-positron-pro-session).
 :::
-## Hub License Minting (JupyterHub orchestrated deployments)
 
-The **Hub minting endpoint** is a privileged JupyterHub service that holds the signing key and issues short-lived, session-bound tokens on demand.
+## Hub license minting
 
-**Configuration**
-
-Set `POSITRON_LICENSE_MINTING_ENDPOINT` to the URL of the Hub minting service, for example in `jupyterhub_config.py`:
-
-```python
-c.Spawner.environment = {
-    'POSITRON_LICENSE_MINTING_ENDPOINT': 'http://hub:8081/services/positron-license/mint',
-}
-```
-
-`JUPYTERHUB_API_TOKEN` is set automatically by JupyterHub for each single-user server and is used to authenticate requests to the minting endpoint.
-
-When `POSITRON_LICENSE_MINTING_ENDPOINT` is set, `POSITRON_LICENSE_KEY_FILE` is ignored.
+::: callout-note
+Hub license minting is a former way of working, scoped to Positron Server
+2026.07.0 through 2026.08.2, and not recommended for a new deployment. Positron
+Server 2026.09.0 and newer validate `license.lic` directly and need no minting
+service. See [Verifier setup](verifier_get_started.qmd) only if you are
+deploying that exact version range.
+:::

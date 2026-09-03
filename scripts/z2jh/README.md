@@ -129,7 +129,7 @@ Both fail with symptoms that point somewhere else. See
 
 ## Versions
 
-Targets Positron Server **2026.09.0-XX** and `jupyter-positron-server`
+Targets Positron Server **2026.09.0-256** and `jupyter-positron-server`
 **0.0.6**, which read the license file directly from the activation directory.
 
 The Kubernetes side of this template was developed and verified against z2jh

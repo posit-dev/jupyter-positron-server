@@ -14,8 +14,10 @@ website:
     background: light
     pinned: true
     left:
-      - text: "Get Started"
+      - text: "Get started"
         file: get_started.qmd
+      - text: "Verifier setup"
+        file: verifier_get_started.qmd
       - text: "Deployment"
         file: deployment.qmd
       - text: "Configuration"

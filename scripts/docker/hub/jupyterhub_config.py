@@ -4,75 +4,66 @@
 # docker-compose.yml) so the same image works for any deployment.
 import os
 
-verifier_port = os.environ.get("VERIFIER_PORT", "10101")
 singleuser_image = os.environ.get("SINGLEUSER_IMAGE", "jupyter-positron-singleuser:latest")
 docker_network = os.environ.get("DOCKER_NETWORK", "jupyter-positron")
 activation_arch = os.environ.get("POSITRON_ACTIVATION_ARCH", "x86_64")
 positron_server_dir = os.environ.get("POSITRON_SERVER_DIR", "/opt/positron-server")
+license_host_path = os.environ.get("POSITRON_LICENSE_HOST_PATH", "")
 
-signing_key_file = "/etc/positron/signing-key.pem"
 activation_dir = f"{positron_server_dir}/resources/activation/linux/{activation_arch}"
-license_file = f"{activation_dir}/license.lic"
-license_manager = f"{activation_dir}/license-manager"
-minting_endpoint = f"http://hub:{verifier_port}/services/positron-license/mint"
 
-# --- 0. Fail fast if secrets are missing ------------------------------------
+# --- 0. Fail fast if the license secret is missing --------------------------
 # A missing bind-mount source makes Docker create an EMPTY DIRECTORY at the
-# target, so a forgotten secret would otherwise surface much later as a cryptic
-# mint-time failure. Check at hub boot instead and stop with a clear message.
-for _label, _path in (("signing key", signing_key_file), ("license", license_file)):
-    if not os.path.isfile(_path) or os.path.getsize(_path) == 0:
-        raise RuntimeError(
-            f"Positron {_label} not found or empty at {_path}. Add it to "
-            "./secrets/ before `docker compose up` (see docker/README.md). "
-            "Request a signing key + license from academic-licenses@posit.co."
-        )
+# target, so a forgotten secret would otherwise surface much later as a
+# cryptic per-session failure. Check at hub boot instead and stop with a clear
+# message.
+#
+# This mount (/run/secrets/license.lic, below) exists in THIS container only
+# for this check. The file single-user sessions actually read is bind-mounted
+# separately by DockerSpawner in step 1, from POSITRON_LICENSE_HOST_PATH.
+_check_path = "/run/secrets/license.lic"
+if not os.path.isfile(_check_path) or os.path.getsize(_check_path) == 0:
+    raise RuntimeError(
+        f"Positron license not found or empty at {_check_path}. Add it to "
+        "./secrets/license.lic before `docker compose up` (see docker/README.md). "
+        "Request one from academic-licenses@posit.co."
+    )
+if not license_host_path:
+    raise RuntimeError(
+        "POSITRON_LICENSE_HOST_PATH is not set. It must be the absolute path, "
+        "on the Docker host (not inside this container), to secrets/license.lic "
+        "-- see docker-compose.yml."
+    )
 
-# --- 1. positron-license minting service ------------------------------------
-# Runs in the Hub container, holds the signing key, mints per-session tokens.
-# Bind on 0.0.0.0 (not 127.0.0.1 as in TLJH) so single-user containers on the
-# docker network can reach it by the hub's service name.
-c.JupyterHub.services = [
-    {
-        "name": "positron-license",
-        "url": f"http://0.0.0.0:{verifier_port}",
-        "command": ["positron-verifier"],
-        "environment": {
-            "POSITRON_MINTING_KEY_FILE": signing_key_file,
-            "POSITRON_LICENSE_MANAGER_PATH": license_manager,
-            "PORT": verifier_port,
-        },
-    }
-]
-
-c.JupyterHub.load_roles = [
-    {
-        "name": "positron-license-service",
-        "services": ["positron-license"],
-        "scopes": ["read:users"],
-    }
-]
-
-# --- 2. DockerSpawner: launch single-user containers as siblings ------------
+# --- 1. DockerSpawner: launch single-user containers as siblings ------------
 c.JupyterHub.spawner_class = "dockerspawner.DockerSpawner"
 c.DockerSpawner.image = singleuser_image
 c.DockerSpawner.network_name = docker_network
 c.DockerSpawner.use_internal_ip = True
 c.DockerSpawner.remove = True  # remove stopped single-user containers
 
+# The license file, mounted read-only at the exact path positron-server
+# validates itself, in each session's activation directory. DockerSpawner
+# talks to the HOST docker daemon (via the socket mounted into this
+# container), so the mount source must be a host-absolute path, not a path
+# inside this container -- hence POSITRON_LICENSE_HOST_PATH rather than the
+# ./secrets/license.lic mount used for the check above.
+c.DockerSpawner.volumes = {
+    license_host_path: {"bind": f"{activation_dir}/license.lic", "mode": "ro"},
+}
+
 # The Hub API must be reachable by the spawned containers: bind on all
 # interfaces, and have containers connect back by the compose service name.
 c.JupyterHub.hub_ip = "0.0.0.0"
 c.JupyterHub.hub_connect_ip = "hub"
 
-# Session environment: only the minting endpoint. PATH is intentionally NOT set
-# here — positron-server is already on PATH via the single-user image's ENV, and
-# overriding PATH would drop the image's own entries.
-c.DockerSpawner.environment = {
-    "POSITRON_LICENSE_MINTING_ENDPOINT": minting_endpoint,
-}
+# No POSITRON_* environment variable is needed: positron-server finds and
+# validates the mounted license file in its own activation directory. PATH is
+# intentionally NOT set here -- positron-server is already on PATH via the
+# single-user image's ENV, and overriding PATH would drop the image's own
+# entries.
 
-# --- 3. Authenticator -------------------------------------------------------
+# --- 2. Authenticator -------------------------------------------------------
 # !!! TEMPLATE PLACEHOLDER: DummyAuthenticator accepts ANY username with ANY
 # !!! password. You MUST replace this with a real authenticator (OAuth, native,
 # !!! LDAP, ...) before any non-local or real deployment.

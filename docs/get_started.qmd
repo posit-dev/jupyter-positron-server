@@ -1,162 +1,151 @@
 ---
-title: "Get Started"
+title: "Get started"
 ---
 
-This guide walks an **administrator** through deploying Positron Server on JupyterHub, step by step and by hand.
+This guide walks an administrator through deploying Positron Server on JupyterHub.
+Positron Server reads a license file that you place inside its own install
+directory, and validates that file with the bundled `license-manager` binary.
 
-::: callout-tip
-Prefer not to run these steps manually? The
-[Deployment templates](deployment.qmd) page covers ready-made helpers: a
-one-shot TLJH install script (`scripts/install-positron.sh`) and a
+::: callout-important
+This guide covers Positron Server 2026.09.0 and newer, and 2026.06.1 and older.
+Positron Server 2026.07.0 through 2026.08.2 validate a signed token instead of a
+license file, and need the extra setup on the
+[verifier setup](verifier_get_started.qmd) page. See the
+[version matrix](index.qmd#which-setup-applies-to-your-version) to confirm which
+guide applies to the version you install.
+:::
+
+::: callout-note
+To skip the steps on this page, the [deployment templates](deployment.qmd) page
+covers a one-shot install script for The Littlest JupyterHub (TLJH) and a
 docker-compose template.
 :::
 
-::: callout-important
-This getting started guide is for Positron version 2026.07.0 and newer.
-If you are installing an older version of Positron, please refer to the [legacy instructions](legacy_get_started.qmd).
-:::
+## What you need from Posit
 
+Send email to [academic-licenses@posit.co](mailto:academic-licenses@posit.co) to
+request a license file (`license.lic`). This file is proof of entitlement, and it
+is the only file this setup needs from Posit.
 
-## What you will need from Posit
+Positron Server is free for educational use. For the eligibility terms, see the
+[Positron Education License Rider](https://github.com/posit-dev/positron/blob/main/LICENSE.txt).
 
-Before starting, make sure you have emailed [academic-licenses@posit.co](mailto:academic-licenses@posit.co) to receive:
+## Step 1: Install Positron Server in the single-user image {#install-positron-server}
 
-- **Signing key** (`signing-key.pem`) -- the RSA private key used to mint per-session license tokens
-- **License file** (`license.lic`) -- proof of entitlement
+Take the exact version string from the
+[Positron releases page](https://github.com/posit-dev/positron/releases), then
+download and unpack the build for your architecture:
 
-Throughout this guide, `<arch>` refers to the activation directory name, which is `x86_64` or `aarch64` (this differs from the `x64`/`arm64` suffix in the download filename).
+```{.bash filename="Terminal"}
+POSITRON_VERSION=2026.09.0-256       # exact string from the releases page
+POSITRON_ARCH=x64                    # x64 or arm64
+CDN_ARCH=x86_64                      # x86_64 for x64, arm64 for arm64
 
-## Step 1: Install Positron Server in the single-user image
+curl -L "https://cdn.posit.co/positron/releases/server/${CDN_ARCH}/positron-server-linux-${POSITRON_ARCH}-${POSITRON_VERSION}.tar.gz" \
+  -o /tmp/positron-server.tar.gz
 
-Download the Positron Server binary for your Linux architecture. For the latest release of Positron (July 2026), you can find the downloads here:
-
-- Download Linux x64 build: https://cdn.posit.co/positron/releases/server/x86_64/positron-server-linux-x64-2026.07.1-5.tar.gz
-- Download Linux arm64 build: https://cdn.posit.co/positron/releases/server/arm64/positron-server-linux-arm64-2026.07.1-5.tar.gz
-
-```bash
-# Download Positron server to temporary directory
-# Note: this is the url for x64 architecture machines
-curl -L "https://cdn.posit.co/positron/releases/server/x86_64/positron-server-linux-x64-2026.07.1-5.tar.gz" -o /tmp/positron-server.tar.gz
-
-# Create directory
 mkdir -p /opt/positron-server
-
-# Unpack Positron Server into newly created directory
 tar -xzf /tmp/positron-server.tar.gz -C /opt/positron-server --strip-components=1
 ```
 
-Place the license file you received inside Positron, and lock it down so only root (the Hub/verifier) can read it:
 
-```bash
-install -m 600 license.lic /opt/positron-server/resources/activation/linux/<arch>/license.lic
+::: callout-note
+Positron spells the CPU architecture three ways. The download filename uses
+`x64` or `arm64`, the Content Delivery Network (CDN) path uses `x86_64` or
+`arm64`, and the activation directory uses `x86_64` or `aarch64`. Throughout
+this guide, `<arch>` means the activation directory name.
+:::
+
+
+Place the license file next to the `license-manager` binary, in the activation
+directory for your architecture:
+
+```{.bash filename="Terminal"}
+install -m 644 license.lic /opt/positron-server/resources/activation/linux/<arch>/license.lic
 ```
 
-## Step 2: Install `jupyter-positron-server` in the single-user image
+::: callout-important
+Mode `644` matters. Each single-user session runs `positron-server` as the
+student, and `positron-server` reads and validates this file itself. A
+root-only mode such as `600` makes every session fail to start.
+:::
 
-```bash
+Confirm the license before you go further:
+
+```{.bash filename="Terminal"}
+/opt/positron-server/resources/activation/linux/<arch>/license-manager status
+```
+
+## Step 2: Install jupyter-positron-server in the single-user image {#install-jupyter-positron-server}
+
+```{.bash filename="Terminal"}
 # for example, in The Littlest JupyterHub
 /opt/tljh/user/bin/pip install 'jupyter-positron-server>=0.0.5'
 ```
 
-This is the proxy extension that runs as a user. 
-It requests a license from the Hub at session start and passes it to `positron-server`.
-You will need version `0.0.5` or greater to have compatibility with the latest Positron Server releases.
+This proxy extension runs as the user. It adds the Positron tile to the
+JupyterLab launcher and starts `positron-server` on the first request.
 
-## Step 3: Install `jupyter-positron-verifier` on the Hub
+## Step 3: Point single-user servers at positron-server {#point-single-user-servers-at-positron-server}
 
-Install the minting service in the Hub's Python environment (not the single-user image).
+Put `positron-server` on the session `PATH` by adding this to
+`jupyterhub_config.py`:
 
-```bash
-# for example, in The Littlest JupyterHub
-/opt/tljh/hub/bin/pip install jupyter-positron-verifier
-```
-
-Store the signing key where the Hub service account can read it but users cannot:
-
-```bash
-mkdir -p /etc/positron
-install -m 600 -o <hub-user> signing-key.pem /etc/positron/signing-key.pem
-```
-
-The signing key you are given pairs with the public key embedded in `positron-server`. The license file is already in place from Step 1 - the verifier reads it through `license-manager`, so it does not need a separate copy on the Hub.
-
-## Step 4: Register `jupyter-positron-verifier` as a JupyterHub service
-
-Add the following to `jupyterhub_config.py`:
-
-```python
-c.JupyterHub.services = [
-    {
-        "name": "positron-license",
-        "url": "http://127.0.0.1:10101",
-        "command": ["positron-verifier"],
-        "environment": {
-            "POSITRON_MINTING_KEY_FILE": "/etc/positron/signing-key.pem",
-            "POSITRON_LICENSE_MANAGER_PATH": "/opt/positron-server/resources/activation/linux/<arch>/license-manager",
-            "PORT": "10101",
-        },
-    }
-]
-
-c.JupyterHub.load_roles = [
-    {
-        "name": "positron-license-service",
-        "services": ["positron-license"],
-        "scopes": ["read:users"],
-    }
-]
-```
-
-`POSITRON_MINTING_KEY_FILE` points at the signing key from Step 3. 
-`POSITRON_LICENSE_MANAGER_PATH` points at the `license-manager` binary inside the Positron Server install, which the verifier runs to confirm entitlement against `license.lic`. 
-It is at the same location as your license.
-
-## Step 5: Point single-user servers at the minting endpoint
-
-Tell `jupyter-positron-server` where to fetch licenses, and make sure `positron-server` is on the session `PATH`, by adding to `jupyterhub_config.py`:
-
-```python
+```{.python filename="jupyterhub_config.py"}
 import os
 
 c.Spawner.environment = {
     "PATH": "/opt/positron-server/bin:" + os.environ.get("PATH", "/usr/local/bin:/usr/bin:/bin"),
-    "POSITRON_LICENSE_MINTING_ENDPOINT": "http://127.0.0.1:10101/services/positron-license/mint",
 }
 ```
 
-## Step 6: Restart JupyterHub
+This setup needs no license environment variables. Positron Server finds the
+license file in its own install directory.
 
-```bash
+## Step 4: Restart JupyterHub {#restart-jupyterhub}
+
+```{.bash filename="Terminal"}
 systemctl restart jupyterhub
-# or however your deployment restarts the Hub
 ```
 
-The `jupyter-positron-verifier` service starts automatically as a managed JupyterHub service.
-
+Students can then select the Positron tile in the JupyterLab launcher.
 
 ## How it works
 
-When a user opens Positron:
+When a student opens Positron:
 
-1. `jupyter-positron-server` calls the Hub minting endpoint, authenticated with its `JUPYTERHUB_API_TOKEN`, sending this session's connection token.
-2. `jupyter-positron-verifier` verifies the user token, confirms entitlement via `license-manager` (which reads `license.lic`), and returns a signed license JSON bound to this session's connection token.
-3. `jupyter-positron-server` starts `positron-server` with the license in its environment (`POSITRON_LICENSE_KEY`).
-4. `positron-server` verifies the RSA signature using its embedded public key and starts.
+1. `jupyter-positron-server` kicks off starting Positron Server.
+2. Positron Server validates the license file, and then starts.
+3. `jupyter-positron-server` opens Positron Server with a connection token for the session.
 
-```
-Hub (privileged)
-  signing-key.pem            -- /etc/positron/, root-only, never reaches users
-  jupyter-positron-verifier  -- verifies entitlement and mints a fresh signed 
-                                license at each session start
-
+```text
 Single-user server
-  jupyter-positron-server    -- requests a license from the Hub, passes it to positron-server
-  positron-server            -- verifies the signed license and starts
-  license.lic                -- chmod 600 so only the Hub/verifier can read it
+  jupyter-positron-server    starts positron-server on the first request
+  positron-server            validates the license file and starts
+  license.lic                mode 644, read by the session
 ```
+
+A license file that is missing, expired, or altered stops the session from
+starting. See [Troubleshooting](troubleshooting.qmd) for what each failure looks
+like in the logs.
+
+## Move an existing deployment off the verifier
+
+If you set up Positron Server 2026.07.0 through 2026.08.2 with the signing key
+and the Hub verifier service, upgrading to 2026.09.0 or newer removes both. Make
+these four changes:
+
+1. Change the license file mode from `600` to `644`, so sessions can read it.
+2. Remove `POSITRON_LICENSE_MINTING_ENDPOINT` from `c.Spawner.environment`.
+3. Remove the `positron-license` entry from `c.JupyterHub.services`, and the
+   `positron-license-service` entry from `c.JupyterHub.load_roles`.
+4. Delete the signing key at `/etc/positron/signing-key.pem`, and uninstall
+   `jupyter-positron-verifier` from the Hub environment.
 
 ## Next steps
 
-- See [Configuration](configuration.qmd) for additional environment variables
-- To lock Positron settings for all users, see the Admin-Enforced Settings section in [Configuration](configuration.qmd)
-- If Positron won't start for a user, see [Troubleshooting](troubleshooting.qmd)
+- [Configuration](configuration.qmd) covers the environment variables that
+  `jupyter-positron-server` reads, and the memory each session needs.
+- [Deployment templates](deployment.qmd) covers the TLJH install script and the
+  docker-compose template.
+- [Troubleshooting](troubleshooting.qmd) covers a session that does not start.
