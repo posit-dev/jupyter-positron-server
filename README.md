@@ -15,11 +15,11 @@ Positron Server changed how it verifies a license twice, so the setup steps depe
 
 | Positron Server version | How the license is verified | What to install | Setup guide |
 |---|---|---|---|
-| 2026.09.0 and newer | `positron-server` validates `license.lic` in its own activation directory, using the bundled `license-manager` | `jupyter-positron-server` | [Get started](https://posit-dev.github.io/jupyter-positron-server/get_started.html) |
+| 2026.09.0 and newer | `positron-server` validates `license.lic` in its own activation directory | [Get started](https://posit-dev.github.io/jupyter-positron-server/get_started.html) |
 | 2026.07.0 through 2026.08.2 | A Hub service mints a signed, per-session token from a signing key. No license file is read by the session | `jupyter-positron-server` and `jupyter-positron-verifier` | [Verifier setup](https://posit-dev.github.io/jupyter-positron-server/verifier_get_started.html) |
-| 2026.06.1 and older | `positron-server` validates `license.lic` in its own activation directory, using the bundled `license-manager` | `jupyter-positron-server` | [Get started](https://posit-dev.github.io/jupyter-positron-server/get_started.html) |
+| 2026.06.1 and older | `positron-server` validates `license.lic` in its own activation directory | `jupyter-positron-server` | [Get started](https://posit-dev.github.io/jupyter-positron-server/get_started.html) |
 
-The signing key setup for 2026.07.0 through 2026.08.2 is **not recommended**. Those versions accept a signed token only, so a deployment on that range needs the signing key. On every other version, place `license.lic` inside the Positron Server install and request no signing key.
+The signing key is a former way of working, scoped to Positron Server 2026.07.0 through 2026.08.2, and **not recommended** for a new deployment. See the [Verifier setup guide](https://posit-dev.github.io/jupyter-positron-server/verifier_get_started.html) only if you are deploying that exact version range.
 
 The two license file rows differ in one detail: on 2026.06.1 and older, install `jupyter-positron-server` version 0.0.4, and on 2026.09.0 and newer, install version 0.0.5 or newer.
 

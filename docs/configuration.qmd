@@ -9,7 +9,7 @@ inside your Jupyter environment.
 
 | Variable | Description |
 |----------|-------------|
-| `POSITRON_LICENSE_KEY_FILE` | Path to a license file that `jupyter-positron-server` passes to `positron-server` as `--license-key-file`. On Positron Server 2026.09.0 and newer, this file can be a raw `license.lic`. On 2026.07.0 through 2026.08.2, it must hold a signed license token. Leave it unset when the license file sits in the activation directory at `<positron-server-path>/resources/activation/linux/<arch>/license.lic`, which is where `positron-server` looks by default. |
+| `POSITRON_LICENSE_KEY_FILE` | Path to a license file that `jupyter-positron-server` passes to `positron-server` as `--license-key-file`. On Positron Server 2026.09.0 and newer, this file can be a raw `license.lic`. Leave it unset when the license file sits in the activation directory at `<positron-server-path>/resources/activation/linux/<arch>/license.lic`, which is where `positron-server` looks by default. |
 | `POSITRON_LICENSE_MINTING_ENDPOINT` | URL of the JupyterHub minting endpoint that issues short-lived signed license tokens. Applies to Positron Server 2026.07.0 through 2026.08.2 only. Takes precedence over `POSITRON_LICENSE_KEY_FILE`. See [Verifier setup](verifier_get_started.qmd). |
 | `POSITRON_CONNECTION_TOKEN` | Pins the connection token that Positron Server validates on every request. Set this to land students in Positron Server through `Spawner.default_url`. See [Classroom settings](classroom_settings.qmd#start-students-in-positron-server). |
 | `POSITRON_ENFORCED_SETTINGS` | JSON object of Positron settings that students cannot change. See [Admin-enforced settings](#admin-enforced-settings). |
@@ -82,26 +82,10 @@ For the full guidance this section summarizes, see the Positron Pro
 
 ## Hub license minting
 
-::: callout-important
-Hub license minting applies to Positron Server 2026.07.0 through 2026.08.2 only,
-and it is not recommended. Positron Server 2026.09.0 and newer validate
-`license.lic` directly, so those versions need no minting service. See
-[Get started](get_started.qmd).
+::: callout-note
+Hub license minting is a former way of working, scoped to Positron Server
+2026.07.0 through 2026.08.2, and not recommended for a new deployment. Positron
+Server 2026.09.0 and newer validate `license.lic` directly and need no minting
+service. See [Verifier setup](verifier_get_started.qmd) only if you are
+deploying that exact version range.
 :::
-
-The Hub minting endpoint is a privileged JupyterHub service that holds the signing
-key and issues short-lived, session-bound tokens on demand. Point sessions at it
-in `jupyterhub_config.py`:
-
-```{.python filename="jupyterhub_config.py"}
-c.Spawner.environment = {
-    'POSITRON_LICENSE_MINTING_ENDPOINT': 'http://hub:8081/services/positron-license/mint',
-}
-```
-
-JupyterHub sets `JUPYTERHUB_API_TOKEN` for each single-user server, which
-authenticates requests to the minting endpoint. When
-`POSITRON_LICENSE_MINTING_ENDPOINT` is set, `jupyter-positron-server` ignores
-`POSITRON_LICENSE_KEY_FILE`.
-
-For the full setup, see [Verifier setup](verifier_get_started.qmd).

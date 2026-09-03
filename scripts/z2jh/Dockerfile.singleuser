@@ -11,7 +11,7 @@ FROM ${BASE_IMAGE}
 
 # jupyter-positron-server 0.0.6 and Positron 2026.09.0+ read the license file
 # directly from the activation directory.
-ARG POSITRON_VERSION=2026.09.0-XX
+ARG POSITRON_VERSION=2026.09.0-256
 ARG POSITRON_ARCH=x64
 ARG POSITRON_SERVER_PKG="jupyter-positron-server==0.0.6"
 

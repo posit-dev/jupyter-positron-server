@@ -1,11 +1,12 @@
 # syntax=docker/dockerfile:1
-# Single-user Positron session image. Holds NO secrets — it fetches a minted
-# license token from the Hub at session start. Launched on demand by
+# Single-user Positron session image. Holds no secrets at build time —
+# license.lic is bind-mounted into the activation directory by DockerSpawner
+# at session start (see ../hub/jupyterhub_config.py). Launched on demand by
 # DockerSpawner, so it is built (see README) but never run as a compose service.
 ARG BASE_IMAGE=quay.io/jupyter/base-notebook:latest
 FROM ${BASE_IMAGE}
 
-ARG POSITRON_VERSION=2026.07.1-5
+ARG POSITRON_VERSION=2026.09.0-256
 ARG POSITRON_ARCH=x64
 ARG POSITRON_SERVER_PKG="jupyter-positron-server>=0.0.5"
 

@@ -111,9 +111,6 @@ Common failures:
   ls -l /opt/positron-server/resources/activation/linux/<arch>/license.lic
   chmod 644 /opt/positron-server/resources/activation/linux/<arch>/license.lic
   ```
-- **License file not found**: the file must sit next to the `license-manager`
-  binary, and it must be named `license.lic`. A file named `positron.lic` is not
-  found.
 - **Expired or altered license**: `license-manager status` reports the reason. A
   license file that exists but does not verify stops the session rather than
   falling back to anything else. Request a replacement from
@@ -123,13 +120,6 @@ Common failures:
   `resources/activation/linux/aarch64` on arm64 hosts. A license placed in the
   other directory is not found.
 
-::: callout-note
-On these versions, `jupyter-positron-server` 0.0.5 logs a warning at launch that
-neither `POSITRON_LICENSE_MINTING_ENDPOINT` nor `POSITRON_LICENSE_KEY_FILE` is
-set, and that a signed token is required. Ignore that warning.
-`positron-server` finds and validates the license file itself.
-:::
-
 ## License errors on 2026.07.0 through 2026.08.2
 
 These versions accept a signed token only, which the Hub verifier mints. The
@@ -137,8 +127,17 @@ verifier runs as a managed JupyterHub service, so its output lands in the Hub lo
 
 ```{.bash filename="Terminal"}
 journalctl -u jupyterhub --no-pager | grep -i positron-license
-# docker: docker compose logs hub | grep -i positron-license
 ```
+
+::: callout-note
+This section covers a hand-rolled [Verifier setup](verifier_get_started.qmd)
+deployment. Neither `scripts/install-positron.sh` nor the `scripts/docker/`
+template in this repository sets up the verifier anymore — both target
+Positron Server 2026.09.0 and newer, and 2026.06.1 and older, which validate
+`license.lic` directly. See
+[License errors on 2026.09.0 and newer](#license-errors-on-2026.09.0-and-newer)
+instead if you deployed with one of those templates.
+:::
 
 ### The verifier is not running or not registered
 
@@ -148,7 +147,6 @@ journalctl -u jupyterhub --no-pager | grep -i positron-license
   ```{.bash filename="Terminal"}
   tljh-config reload
   # or: systemctl restart jupyterhub
-  # docker: docker compose restart hub
   ```
 - **The service starts and then dies**: confirm the command exists in the **Hub**
   environment.
@@ -169,9 +167,8 @@ journalctl -u jupyterhub --no-pager | grep -i positron-license
   ls -l /etc/positron/signing-key.pem   # mode 600, owned by the Hub user
   ```
 - **Minting endpoint unreachable or wrong URL**:
-  `POSITRON_LICENSE_MINTING_ENDPOINT` must point at the Hub-proxied service path.
-  On TLJH that is `http://127.0.0.1:10101/services/positron-license/mint`. On
-  docker it is `http://hub:${VERIFIER_PORT}/services/positron-license/mint`.
+  `POSITRON_LICENSE_MINTING_ENDPOINT` must point at the Hub-proxied service path,
+  e.g. `http://127.0.0.1:10101/services/positron-license/mint`.
 - **`403` or other authorization errors from the mint call**: the service role is
   missing scopes. Confirm the `c.JupyterHub.load_roles` block grants the
   `positron-license` service `read:users`.
@@ -192,20 +189,21 @@ failure. See
 
 ## docker-compose specifics
 
-- **The hub container exits at boot reporting a file not found or empty**: a secret
-  was not placed. Copy the files into `scripts/docker/secrets/`. A missing
-  bind-mount source makes Docker create an empty directory, which is why the hub
-  checks at boot.
+- **The hub container exits at boot reporting a file not found or empty**: the
+  license secret was not placed. Copy it into `scripts/docker/secrets/`. A
+  missing bind-mount source makes Docker create an empty directory, which is
+  why the hub checks at boot.
   ```{.bash filename="Terminal"}
-  cp /path/to/signing-key.pem secrets/signing-key.pem
-  cp /path/to/license.lic     secrets/license.lic
+  cp /path/to/license.lic secrets/license.lic
+  chmod 644 secrets/license.lic
   docker compose up -d
   ```
-- **Single-user containers fail to spawn**: build the single-user image with
-  `docker compose build hub singleuser`, and confirm that its
-  `jupyterhub-singleuser` version is compatible with the Hub JupyterHub version.
-- **Anyone can sign in**: that is `DummyAuthenticator`, the template default.
-  Replace it in `hub/jupyterhub_config.py` and rebuild before any real use.
+- **Single-user containers fail to spawn with a license error**: confirm
+  `POSITRON_LICENSE_HOST_PATH` (set from `${PWD}` in `docker-compose.yml`)
+  resolved to the right absolute path — `docker compose config` prints the
+  resolved value. It must be a path on the Docker **host**, which is why
+  `docker compose` needs to be run from `scripts/docker/` itself.
+
 
 ## Zero to JupyterHub (Kubernetes) specifics
 

@@ -1,34 +1,40 @@
 # Positron Server on JupyterHub — docker-compose deployment template.
 #
-# Before `up`: copy .env.example to .env, then drop license.lic and
-# signing-key.pem into secrets/ (see README.md). The single-user image is built
-# but never run here — DockerSpawner launches it on demand.
+# Before `up`: copy .env.example to .env, then drop license.lic into secrets/
+# (see README.md). The single-user image is built but never run here —
+# DockerSpawner launches it on demand.
+#
+# Run `docker compose` from this directory: ${PWD} below must resolve to
+# scripts/docker/, since it becomes the HOST path DockerSpawner mounts
+# license.lic from when it creates each single-user container.
 
 services:
   hub:
     build:
       context: ./hub
-      args:
-        POSITRON_VERSION: ${POSITRON_VERSION}
-        POSITRON_ARCH: ${POSITRON_ARCH}
-        POSITRON_VERIFIER_PKG: ${POSITRON_VERIFIER_PKG}
     image: ${HUB_IMAGE}
     hostname: hub
     restart: unless-stopped
     ports:
       - "${HUB_PORT}:8000"
     environment:
-      VERIFIER_PORT: ${VERIFIER_PORT}
       SINGLEUSER_IMAGE: ${SINGLEUSER_IMAGE}
       DOCKER_NETWORK: ${DOCKER_NETWORK}
       POSITRON_ACTIVATION_ARCH: ${POSITRON_ACTIVATION_ARCH}
+      # Host-absolute path DockerSpawner bind-mounts into each spawned
+      # single-user container. Must be a HOST path (not a path inside this
+      # container) because DockerSpawner creates sibling containers through
+      # the host docker daemon, via the socket mounted below.
+      POSITRON_LICENSE_HOST_PATH: ${PWD}/secrets/license.lic
     volumes:
       # DockerSpawner launches single-user containers via the host docker daemon.
       - /var/run/docker.sock:/var/run/docker.sock
-      # Secrets — mounted read-only, never baked into image layers. These files
-      # must exist in ./secrets before `up` (see README).
-      - ./secrets/signing-key.pem:/etc/positron/signing-key.pem:ro
-      - ./secrets/license.lic:/opt/positron-server/resources/activation/linux/${POSITRON_ACTIVATION_ARCH}/license.lic:ro
+      # Secret — mounted read-only, never baked into image layers. Must exist
+      # in ./secrets before `up` (see README). This mount is read by the hub
+      # only to fail fast at boot if the file is missing; the file
+      # single-user sessions actually read is mounted separately by
+      # DockerSpawner, from the host path above.
+      - ./secrets/license.lic:/run/secrets/license.lic:ro
 
   # Built by `docker compose build singleuser` (or with --profile build-only);
   # never started by `up`. DockerSpawner runs it on demand.

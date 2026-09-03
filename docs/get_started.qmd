@@ -1,7 +1,5 @@
 ---
 title: "Get started"
-aliases:
-  - /legacy_get_started.html
 ---
 
 This guide walks an administrator through deploying Positron Server on JupyterHub.
@@ -29,16 +27,8 @@ Send email to [academic-licenses@posit.co](mailto:academic-licenses@posit.co) to
 request a license file (`license.lic`). This file is proof of entitlement, and it
 is the only file this setup needs from Posit.
 
-Positron Server is free for currently enrolled students using Positron for
-coursework. For the eligibility terms, see the
+Positron Server is free for educational use. For the eligibility terms, see the
 [Positron Education License Rider](https://github.com/posit-dev/positron/blob/main/LICENSE.txt).
-
-::: callout-note
-Positron spells the CPU architecture three ways. The download filename uses
-`x64` or `arm64`, the CDN path uses `x86_64` or `arm64`, and the activation
-directory uses `x86_64` or `aarch64`. Throughout this guide, `<arch>` means the
-activation directory name.
-:::
 
 ## Step 1: Install Positron Server in the single-user image {#install-positron-server}
 
@@ -47,7 +37,7 @@ Take the exact version string from the
 download and unpack the build for your architecture:
 
 ```{.bash filename="Terminal"}
-POSITRON_VERSION=2026.09.0-<build>   # exact string from the releases page
+POSITRON_VERSION=2026.09.0-256       # exact string from the releases page
 POSITRON_ARCH=x64                    # x64 or arm64
 CDN_ARCH=x86_64                      # x86_64 for x64, arm64 for arm64
 
@@ -57,6 +47,15 @@ curl -L "https://cdn.posit.co/positron/releases/server/${CDN_ARCH}/positron-serv
 mkdir -p /opt/positron-server
 tar -xzf /tmp/positron-server.tar.gz -C /opt/positron-server --strip-components=1
 ```
+
+
+::: callout-note
+Positron spells the CPU architecture three ways. The download filename uses
+`x64` or `arm64`, the CDN path uses `x86_64` or `arm64`, and the activation
+directory uses `x86_64` or `aarch64`. Throughout this guide, `<arch>` means the
+activation directory name.
+:::
+
 
 Place the license file next to the `license-manager` binary, in the activation
 directory for your architecture:
@@ -100,7 +99,7 @@ c.Spawner.environment = {
 }
 ```
 
-This setup needs no license environment variables. `positron-server` finds the
+This setup needs no license environment variables. Positron Server finds the
 license file in its own install directory.
 
 ## Step 4: Restart JupyterHub {#restart-jupyterhub}
@@ -115,18 +114,15 @@ Students can then select the Positron tile in the JupyterLab launcher.
 
 When a student opens Positron:
 
-1. `jupyter-positron-server` starts `positron-server` with a connection token for
-   the session.
-2. `positron-server` looks for `license.lic` next to its bundled `license-manager`
-   binary.
-3. `license-manager` validates the file, and `positron-server` starts.
+1. `jupyter-positron-server` kicks off starting Positron Server
+2. Positron Server validates the license file, and then starts.
+3. `jupyter-positron-server` opens Positron Server with a connection token for the session.
 
 ```
 Single-user server
   jupyter-positron-server    starts positron-server on the first request
   positron-server            validates the license file and starts
   license.lic                mode 644, read by the session
-  license-manager            validates license.lic
 ```
 
 A license file that is missing, expired, or altered stops the session from
@@ -146,19 +142,10 @@ these four changes:
 4. Delete the signing key at `/etc/positron/signing-key.pem`, and uninstall
    `jupyter-positron-verifier` from the Hub environment.
 
-::: callout-note
-Positron Server 2026.09.0 and newer fall back to the license file when a supplied
-token fails to validate. A deployment that still mints tokens keeps working
-during an upgrade, which means you can change the config after you upgrade rather
-than at the same time.
-:::
-
 ## Next steps
 
 - [Configuration](configuration.qmd) covers the environment variables that
   `jupyter-positron-server` reads, and the memory each session needs.
-- [Classroom settings](classroom_settings.qmd) covers the JupyterHub settings
-  that matter for a class signing in at once.
 - [Deployment templates](deployment.qmd) covers the TLJH install script and the
   docker-compose template.
 - [Troubleshooting](troubleshooting.qmd) covers a session that does not start.
