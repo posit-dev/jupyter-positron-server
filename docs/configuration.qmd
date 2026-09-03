@@ -11,7 +11,6 @@ inside your Jupyter environment.
 |----------|-------------|
 | `POSITRON_LICENSE_KEY_FILE` | Path to a license file that `jupyter-positron-server` passes to `positron-server` as `--license-key-file`. On Positron Server 2026.09.0 and newer, this file can be a raw `license.lic`. Leave it unset when the license file sits in the activation directory at `<positron-server-path>/resources/activation/linux/<arch>/license.lic`, which is where `positron-server` looks by default. |
 | `POSITRON_LICENSE_MINTING_ENDPOINT` | URL of the JupyterHub minting endpoint that issues short-lived signed license tokens. Applies to Positron Server 2026.07.0 through 2026.08.2 only. Takes precedence over `POSITRON_LICENSE_KEY_FILE`. See [Verifier setup](verifier_get_started.qmd). |
-| `POSITRON_CONNECTION_TOKEN` | Pins the connection token that Positron Server validates on every request. Set this to land students in Positron Server through `Spawner.default_url`. See [Classroom settings](classroom_settings.qmd#start-students-in-positron-server). |
 | `POSITRON_ENFORCED_SETTINGS` | JSON object of Positron settings that students cannot change. See [Admin-enforced settings](#admin-enforced-settings). |
 | `POSITRON_HOST` | Host address for Positron Server to bind to. Defaults to `127.0.0.1`. |
 | `JSP_DEFAULT_FOLDER` | Directory that Positron Server opens. Defaults to `JUPYTERHUB_ROOT_DIR`, then `HOME`. |

@@ -22,8 +22,6 @@ website:
         file: deployment.qmd
       - text: "Configuration"
         file: configuration.qmd
-      - text: "Classroom settings"
-        file: classroom_settings.qmd
       - text: "Troubleshooting"
         file: troubleshooting.qmd
       - text: "Reference"

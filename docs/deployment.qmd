@@ -218,6 +218,4 @@ for the full configuration reference.
 
 - [Configuration](configuration.qmd) covers environment variables and
   admin-enforced settings.
-- [Classroom settings](classroom_settings.qmd) covers the JupyterHub settings that
-  matter for a class.
 - [Troubleshooting](troubleshooting.qmd) covers a session that does not start.
