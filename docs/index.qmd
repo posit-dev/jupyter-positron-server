@@ -18,29 +18,6 @@ which does the same for RStudio Server. Both packages use the
 `jupyter-server-proxy` framework to bring an external web application into the
 Jupyter ecosystem.
 
-## Which setup applies to your version
-
-Positron Server changed how it verifies a license twice, so the setup steps depend
-on the version you install. Find your version in the table below, then follow the
-guide in the last column.
-
-| Positron Server version | How the license is verified | What to install | Setup guide |
-|---|---|---|---|
-| 2026.09.0 and newer | `positron-server` validates `license.lic` in its own activation directory | `jupyter-positron-server` | [Get started](get_started.qmd) |
-| 2026.07.0 through 2026.08.2 | A Hub service mints a signed, per-session token from a signing key. No license file is read by the session | `jupyter-positron-server` and `jupyter-positron-verifier` | [Verifier setup](verifier_get_started.qmd) |
-| 2026.06.1 and older | `positron-server` validates `license.lic` in its own activation directory | `jupyter-positron-server` | [Get started](get_started.qmd) |
-
-::: callout-important
-The signing key is a former way of working, scoped to Positron Server 2026.07.0
-through 2026.08.2, and not recommended for a new deployment. See
-[Verifier setup](verifier_get_started.qmd) only if you are deploying that exact
-version range.
-:::
-
-The two license file rows differ in one detail. On 2026.06.1 and older, install
-`jupyter-positron-server` version 0.0.4. On 2026.09.0 and newer, install version
-0.0.6 or newer.
-
 ## Features
 
 Positron Server provides a data science IDE with no local install and no new
@@ -68,3 +45,26 @@ full eligibility terms, review the
 
 To request a license, send email to
 [academic-licenses@posit.co](mailto:academic-licenses@posit.co).
+
+## Which setup applies to your version
+
+Positron Server changed how it verifies a license twice, so the setup steps depend
+on the version you install. Find your version in the table below, then follow the
+guide in the last column.
+
+| Positron Server version | How the license is verified | What to install | Setup guide |
+|---|---|---|---|
+| 2026.09.0 and newer | `positron-server` validates `license.lic` in its own activation directory | `jupyter-positron-server` | [Get started](get_started.qmd) |
+| 2026.07.0 through 2026.08.2 | A Hub service mints a signed, per-session token from a signing key. No license file is read by the session | `jupyter-positron-server` and `jupyter-positron-verifier` | [Verifier setup](verifier_get_started.qmd) |
+| 2026.06.1 and older | `positron-server` validates `license.lic` in its own activation directory | `jupyter-positron-server` | [Get started](get_started.qmd) |
+
+::: callout-important
+The signing key is a former way of working, scoped to Positron Server 2026.07.0
+through 2026.08.2, and not recommended for a new deployment. See
+[Verifier setup](verifier_get_started.qmd) only if you are deploying that exact
+version range.
+:::
+
+The two license file rows differ in one detail. On 2026.06.1 and older, install
+`jupyter-positron-server` version 0.0.4. On 2026.09.0 and newer, install version
+0.0.6 or newer.
