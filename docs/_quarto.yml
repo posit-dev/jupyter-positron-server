@@ -1,6 +1,8 @@
 project:
   type: website
   output-dir: _site
+  resources:
+    - images/posit-logo.svg
 
 website:
   title: "jupyter-positron-server"
@@ -9,7 +11,7 @@ website:
   page-footer:
     center: |
       Proudly supported by
-      [![](https://www.posit.co/wp-content/uploads/2022/10/posit-logo-fullcolor-TM.svg){fig-alt="Posit PBC" width=65px}](https://posit.co/)
+      [![](/images/posit-logo.svg){fig-alt="Posit PBC" width=65px}](https://posit.co/)
   navbar:
     background: light
     pinned: true
@@ -17,11 +19,11 @@ website:
       - text: "Get started"
         file: get_started.qmd
       - text: "Deployment"
-        file: deployment.qmd
-      - text: "Configuration"
-        file: configuration.qmd
-      - text: "Common settings"
-        file: common_settings.qmd
+        menu:
+          - text: "Configuration"
+            file: configuration.qmd
+          - text: "Templates"
+            file: deployment.qmd
       - text: "Troubleshooting"
         file: troubleshooting.qmd
       - text: "Reference"

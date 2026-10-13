@@ -11,8 +11,8 @@ setup steps by hand. Pick the one that matches your JupyterHub:
 | [Single-host docker-compose](#docker-compose-template) | `scripts/docker/` template |
 | [Zero to JupyterHub (Kubernetes)](#zero-to-jupyterhub-kubernetes) | `scripts/z2jh/` template |
 
-All of them need a **license file** (`license.lic`) from Posit: proof of
-entitlement. Send email to [academic-licenses@posit.co](mailto:academic-licenses@posit.co).
+All of them need a license file (`license.lic`) from Posit.
+Send an email to [academic-licenses@posit.co](mailto:academic-licenses@posit.co) to request a license.
 
 ::: callout-note
 Positron spells the CPU architecture three ways: the download filename uses
@@ -216,8 +216,6 @@ for the full configuration reference.
 
 ## Next steps
 
-- [Configuration](configuration.qmd) covers environment variables and
-  admin-enforced settings.
-- [Common settings](common_settings.qmd) covers the JupyterHub settings that
-  matter most for a group of users.
+- [Configuration](configuration.qmd) covers environment variables, landing
+  students in Positron, admin-enforced settings, and limits on memory and CPU.
 - [Troubleshooting](troubleshooting.qmd) covers a session that does not start.
