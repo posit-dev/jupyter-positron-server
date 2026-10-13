@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.10.18">
+<meta name="generator" content="quarto-1.10.19">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -76,10 +76,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="site_libs/quarto-html/anchor.min.js"></script>
 <link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-bf27225e3a48a9273f3daa8f8e829971.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-dd413af1298e352d8fe9223d27e63c61.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-c4d3e0078a890bf3a79e9e11db7ee5ef.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -132,18 +132,21 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <a class="nav-link" href="./get_started.html"> 
 <span class="menu-text">Get started</span></a>
   </li>  
-  <li class="nav-item">
-    <a class="nav-link" href="./verifier_get_started.html"> 
-<span class="menu-text">Verifier setup</span></a>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-deployment" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Deployment</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-deployment">    
+        <li>
+    <a class="dropdown-item" href="./configuration.html">
+ <span class="dropdown-text">Configuration</span></a>
   </li>  
-  <li class="nav-item">
-    <a class="nav-link" href="./deployment.html"> 
-<span class="menu-text">Deployment</span></a>
+        <li>
+    <a class="dropdown-item" href="./deployment.html">
+ <span class="dropdown-text">Templates</span></a>
   </li>  
-  <li class="nav-item">
-    <a class="nav-link active" href="./configuration.html" aria-current="page"> 
-<span class="menu-text">Configuration</span></a>
-  </li>  
+    </ul>
+  </li>
   <li class="nav-item">
     <a class="nav-link" href="./troubleshooting.html"> 
 <span class="menu-text">Troubleshooting</span></a>
@@ -176,9 +179,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
    
   <ul>
   <li><a href="#environment-variables" id="toc-environment-variables" class="nav-link active" data-scroll-target="#environment-variables">Environment variables</a></li>
+  <li><a href="#start-students-in-positron-server" id="toc-start-students-in-positron-server" class="nav-link" data-scroll-target="#start-students-in-positron-server">Start students in Positron Server</a></li>
   <li><a href="#admin-enforced-settings" id="toc-admin-enforced-settings" class="nav-link" data-scroll-target="#admin-enforced-settings">Admin-enforced settings</a></li>
-  <li><a href="#memory-requirements" id="toc-memory-requirements" class="nav-link" data-scroll-target="#memory-requirements">Memory requirements</a></li>
-  <li><a href="#hub-license-minting" id="toc-hub-license-minting" class="nav-link" data-scroll-target="#hub-license-minting">Hub license minting</a></li>
+  <li><a href="#memory-requirements" id="toc-memory-requirements" class="nav-link" data-scroll-target="#memory-requirements">Memory requirements</a>
+  <ul class="collapse">
+  <li><a href="#cap-memory-and-cpu-per-session" id="toc-cap-memory-and-cpu-per-session" class="nav-link" data-scroll-target="#cap-memory-and-cpu-per-session">Cap memory and CPU per session</a></li>
+  </ul></li>
+  <li><a href="#hub-license-minting-deprecated" id="toc-hub-license-minting-deprecated" class="nav-link" data-scroll-target="#hub-license-minting-deprecated">Hub license minting (deprecated)</a></li>
+  <li><a href="#next-steps" id="toc-next-steps" class="nav-link" data-scroll-target="#next-steps">Next steps</a></li>
   </ul>
 </nav>
     </div>
@@ -204,7 +212,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<p>Environment variables control how <code>jupyter-positron-server</code> runs Positron Server inside your Jupyter environment.</p>
+<p>You configure <code>jupyter-positron-server</code> through environment variables, and the JupyterHub side through <code>jupyterhub_config.py</code>. This page covers both, and the settings that matter most when you run Positron Server for a group of users, such as a class. Treat the suggested values as starting points, then measure your own hardware and number of users and adjust.</p>
 <section id="environment-variables" class="level2">
 <h2 class="anchored" data-anchor-id="environment-variables">Environment variables</h2>
 <table class="caption-top table">
@@ -224,53 +232,28 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td>URL of the JupyterHub minting endpoint that issues short-lived signed license tokens. Applies to Positron Server 2026.07.0 through 2026.08.2 only. Takes precedence over <code>POSITRON_LICENSE_KEY_FILE</code>. See <a href="./verifier_get_started.html">Verifier setup</a>.</td>
 </tr>
 <tr class="odd">
+<td><code>POSITRON_CONNECTION_TOKEN</code></td>
+<td>Sets the connection token that Positron Server validates on every request. Defaults to a random token for each session. Set it per session from a <code>pre_spawn_hook</code> to land students in Positron Server through <code>Spawner.default_url</code>. Do not set one fixed value for all sessions. See <a href="#start-students-in-positron-server">Start students in Positron Server</a>.</td>
+</tr>
+<tr class="even">
 <td><code>POSITRON_ENFORCED_SETTINGS</code></td>
 <td>JSON object of Positron settings that students cannot change. See <a href="#admin-enforced-settings">Admin-enforced settings</a>.</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><code>POSITRON_HOST</code></td>
 <td>Host address for Positron Server to bind to. Defaults to <code>127.0.0.1</code>.</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><code>JSP_DEFAULT_FOLDER</code></td>
 <td>Directory that Positron Server opens. Defaults to <code>JUPYTERHUB_ROOT_DIR</code>, then <code>HOME</code>.</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><code>JSP_POSITRON_LAUNCHER_DISABLED</code></td>
 <td>Set to any value to hide the Positron tile in the JupyterLab launcher.</td>
 </tr>
 </tbody>
 </table>
-<div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-Note
-</div>
-</div>
-<div class="callout-body-container callout-body">
 <p>On Positron Server 2026.09.0 and newer, a license needs no environment variable at all. <code>positron-server</code> finds <code>license.lic</code> in its own activation directory. Both license variables are for deployments that keep the file somewhere else, or that still run on 2026.07.0 through 2026.08.2.</p>
-</div>
-</div>
-</section>
-<section id="admin-enforced-settings" class="level2">
-<h2 class="anchored" data-anchor-id="admin-enforced-settings">Admin-enforced settings</h2>
-<p><code>POSITRON_ENFORCED_SETTINGS</code> lets administrators lock Positron settings so students cannot override them through the Settings UI, or by editing <code>settings.json</code> directly. Locked settings appear grayed out with a policy indicator. Enforced settings survive profile changes, workspace switches, and direct edits to <code>~/.positron-server/data/User/settings.json</code>.</p>
-<p><strong>Requirements</strong>: <code>jupyter-positron-server</code> 0.0.4 or newer, and Positron Server 2026.07.1-5 or newer.</p>
-<p>Create the config file:</p>
-<div class="code-with-filename">
-<div class="code-with-filename-file">
-<pre><strong>Terminal</strong></pre>
-</div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1" data-filename="Terminal"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span> <span class="op">&gt;</span> /opt/tljh/config/jupyterhub_config.d/positron_enforced.py <span class="op">&lt;&lt; 'EOF'</span></span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="st">c.Spawner.environment = {</span></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="st">    'POSITRON_ENFORCED_SETTINGS': '{"workbench.colorTheme":"Default Positron Dark","extensions.autoUpdate":false}'</span></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="st">}</span></span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="op">EOF</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-<p>Sessions that are already running keep their settings until a student starts a new session.</p>
 <div class="callout callout-style-default callout-important callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -281,19 +264,63 @@ Important
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>Each assignment to <code>c.Spawner.environment</code> replaces the whole dictionary. Set every session variable in one assignment, including <code>PATH</code>.</p>
+<p>Each assignment to <code>c.Spawner.environment</code> replaces the whole dictionary, so use <code>.update()</code> to add a variable. On TLJH, the install script sets <code>PATH</code> in <code>c.SystemdSpawner.environment</code>. A setting on the spawner class takes precedence over <code>c.Spawner</code>, so on TLJH, JupyterHub ignores <code>c.Spawner.environment</code>. Use <code>c.SystemdSpawner.environment.update()</code> instead, in a file in <code>jupyterhub_config.d/</code> whose name sorts after <code>positron.py</code>.</p>
 </div>
 </div>
 </section>
+<section id="start-students-in-positron-server" class="level2">
+<h2 class="anchored" data-anchor-id="start-students-in-positron-server">Start students in Positron Server</h2>
+<p>A single-user server opens JupyterLab by default, and students reach Positron Server from the launcher tile. <code>Spawner.default_url</code> changes where a session lands.</p>
+<p>Positron Server validates a connection token on every HTTP and WebSocket request. The launcher tile works because it carries that token as a <code>tkn</code> query parameter. A bare <code>/positron</code> URL carries no token, so Positron Server answers <code>403 Forbidden</code>.</p>
+<p>The token protects the port that Positron Server listens on, so only the student who owns the session can connect to it. To land students in Positron Server, make a new token when each session starts. Put it in the session environment and in the landing URL:</p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>jupyterhub_config.py</strong></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1" data-filename="jupyterhub_config.py"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> secrets</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> positron_token_hook(spawner):</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    token <span class="op">=</span> secrets.token_hex(<span class="dv">16</span>)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Copy the dictionary. The configured value can be shared by every spawner.</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    spawner.environment <span class="op">=</span> {<span class="op">**</span>spawner.environment, <span class="st">"POSITRON_CONNECTION_TOKEN"</span>: token}</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    spawner.default_url <span class="op">=</span> <span class="ss">f"/positron/?tkn=</span><span class="sc">{</span>token<span class="sc">}</span><span class="ss">"</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>c.Spawner.pre_spawn_hook <span class="op">=</span> positron_token_hook</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>On TLJH, put this code in a file in <code>/opt/tljh/config/jupyterhub_config.d/</code>, then run <code>sudo tljh-config reload</code>. Do not set one fixed token for all sessions. Every student sees the token in their own URL. On TLJH, all sessions share one host, so a student with the token can open the Positron Server of another student. Students can still reach JupyterLab at <code>/user/&lt;username&gt;/lab</code> when they need the notebook interface.</p>
+</section>
+<section id="admin-enforced-settings" class="level2">
+<h2 class="anchored" data-anchor-id="admin-enforced-settings">Admin-enforced settings</h2>
+<p><code>POSITRON_ENFORCED_SETTINGS</code> lets administrators lock Positron settings so students cannot override them through the Settings UI, or by editing <code>settings.json</code> directly. Locked settings appear grayed out with a policy indicator. Enforced settings survive profile changes, workspace switches, and direct edits to <code>~/.positron-server/data/User/settings.json</code>.</p>
+<p><strong>Requirements</strong>: <code>jupyter-positron-server</code> 0.0.4 or newer, and Positron Server 2026.07.1-5 or newer.</p>
+<p>Two settings come up often for coursework:</p>
+<ul>
+<li><strong><code>ai.enabled</code></strong>: set to <code>false</code> to turn off every Positron AI feature at once. To turn features off one at a time, see the <a href="https://positron.posit.co/ai-configuration.html">Positron AI configuration reference</a>.</li>
+<li><strong><code>extensions.autoUpdate</code></strong>: set to <code>false</code> to hold extension versions steady across a class for the length of a term.</li>
+</ul>
+<p>On TLJH, create a config file that locks both:</p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>Terminal</strong></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2" data-filename="Terminal"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span> <span class="op">&gt;</span> /opt/tljh/config/jupyterhub_config.d/positron_enforced.py <span class="op">&lt;&lt; 'EOF'</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="st">c.SystemdSpawner.environment.update({</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="st">    'POSITRON_ENFORCED_SETTINGS': '{"ai.enabled":false,"extensions.autoUpdate":false}'</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="st">})</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="op">EOF</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>The file name <code>positron_enforced.py</code> sorts after <code>positron.py</code>, so the update runs after the install script sets <code>PATH</code>. On other spawners, use <code>c.Spawner.environment.update(...)</code> in <code>jupyterhub_config.py</code>.</p>
+<p>Sessions that are already running keep their settings until a student starts a new session.</p>
+</section>
 <section id="memory-requirements" class="level2">
 <h2 class="anchored" data-anchor-id="memory-requirements">Memory requirements</h2>
-<p>Allocate at least 2.5 GB of RAM per Positron Server session. The right amount depends on the size of the workload:</p>
+<p>Allocate memory per Positron Server session based on the size of the workload:</p>
 <ul>
 <li><strong>Light</strong>: single console, few extensions, simple scripts, basic app development</li>
 <li><strong>Standard</strong>: runtime switching, multiple consoles, multiple extensions, app development</li>
 <li><strong>Heavy</strong>: memory-intensive extensions such as file watchers or language servers, multiple concurrent apps, large datasets</li>
 </ul>
-<p>Use the table below to match each workload level to its minimum and recommended memory allocation.</p>
+<p>Use the Minimum column for your workload tier.</p>
 <table class="caption-top table">
 <thead>
 <tr class="header">
@@ -334,22 +361,38 @@ Note
 <p>For the full guidance this section summarizes, see the Positron Pro <a href="https://docs.posit.co/ide/server-pro/user/positron/reference/faq.html#allocate-sufficient-memory-for-your-positron-pro-session">memory allocation FAQ</a>.</p>
 </div>
 </div>
+<section id="cap-memory-and-cpu-per-session" class="level3">
+<h3 class="anchored" data-anchor-id="cap-memory-and-cpu-per-session">Cap memory and CPU per session</h3>
+<p>To enforce the recommended allocation for a standard workload, set limits in <code>jupyterhub_config.py</code>:</p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>jupyterhub_config.py</strong></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3" data-filename="jupyterhub_config.py"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>c.Spawner.mem_limit <span class="op">=</span> <span class="st">'4G'</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>c.Spawner.cpu_limit <span class="op">=</span> <span class="dv">1</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p><code>mem_limit</code> is a hard cap, not a share. The spawner stops a session that reaches the cap. A value below the Minimum for the workload risks OOM kills. The example’s <code>4G</code> matches the Standard recommendation.</p>
+<p>On TLJH, set the same limits through <code>tljh-config</code>:</p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>Terminal</strong></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4" data-filename="Terminal"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> tljh-config set limits.memory 4G</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> tljh-config set limits.cpu 1</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> tljh-config reload</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
 </section>
-<section id="hub-license-minting" class="level2">
-<h2 class="anchored" data-anchor-id="hub-license-minting">Hub license minting</h2>
-<div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-Note
-</div>
-</div>
-<div class="callout-body-container callout-body">
+</section>
+<section id="hub-license-minting-deprecated" class="level2">
+<h2 class="anchored" data-anchor-id="hub-license-minting-deprecated">Hub license minting (deprecated)</h2>
 <p>Hub license minting is a former way of working, scoped to Positron Server 2026.07.0 through 2026.08.2, and not recommended for a new deployment. Positron Server 2026.09.0 and newer validate <code>license.lic</code> directly and need no minting service. See <a href="./verifier_get_started.html">Verifier setup</a> only if you are deploying that exact version range.</p>
-</div>
-</div>
+</section>
+<section id="next-steps" class="level2">
+<h2 class="anchored" data-anchor-id="next-steps">Next steps</h2>
+<ul>
+<li><a href="./deployment.html">Deployment templates</a> covers the TLJH install script and the docker-compose template.</li>
+<li><a href="./troubleshooting.html">Troubleshooting</a> covers a session that does not start.</li>
+</ul>
 
 
 </section>
@@ -762,7 +805,7 @@ Note
       &nbsp;
     </div>   
     <div class="nav-footer-center">
-<p>Proudly supported by <a href="https://posit.co/"><img src="https://www.posit.co/wp-content/uploads/2022/10/posit-logo-fullcolor-TM.svg" class="img-fluid" alt="Posit PBC" width="65"></a></p>
+<p>Proudly supported by <a href="https://posit.co/"><img src="images/posit-logo.svg" class="img-fluid" alt="Posit PBC" width="65"></a></p>
 </div>
     <div class="nav-footer-right">
       &nbsp;

@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.10.18">
+<meta name="generator" content="quarto-1.10.19">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -76,10 +76,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="site_libs/quarto-html/anchor.min.js"></script>
 <link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-bf27225e3a48a9273f3daa8f8e829971.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-dd413af1298e352d8fe9223d27e63c61.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-c4d3e0078a890bf3a79e9e11db7ee5ef.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -132,18 +132,21 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <a class="nav-link active" href="./get_started.html" aria-current="page"> 
 <span class="menu-text">Get started</span></a>
   </li>  
-  <li class="nav-item">
-    <a class="nav-link" href="./verifier_get_started.html"> 
-<span class="menu-text">Verifier setup</span></a>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-deployment" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Deployment</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-deployment">    
+        <li>
+    <a class="dropdown-item" href="./configuration.html">
+ <span class="dropdown-text">Configuration</span></a>
   </li>  
-  <li class="nav-item">
-    <a class="nav-link" href="./deployment.html"> 
-<span class="menu-text">Deployment</span></a>
+        <li>
+    <a class="dropdown-item" href="./deployment.html">
+ <span class="dropdown-text">Templates</span></a>
   </li>  
-  <li class="nav-item">
-    <a class="nav-link" href="./configuration.html"> 
-<span class="menu-text">Configuration</span></a>
-  </li>  
+    </ul>
+  </li>
   <li class="nav-item">
     <a class="nav-link" href="./troubleshooting.html"> 
 <span class="menu-text">Troubleshooting</span></a>
@@ -175,10 +178,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#what-you-need-from-posit" id="toc-what-you-need-from-posit" class="nav-link active" data-scroll-target="#what-you-need-from-posit">What you need from Posit</a></li>
+  <li><a href="#request-a-license-file" id="toc-request-a-license-file" class="nav-link active" data-scroll-target="#request-a-license-file">Step 0: Request a license file</a></li>
   <li><a href="#install-positron-server" id="toc-install-positron-server" class="nav-link" data-scroll-target="#install-positron-server">Step 1: Install Positron Server in the single-user image</a></li>
   <li><a href="#install-jupyter-positron-server" id="toc-install-jupyter-positron-server" class="nav-link" data-scroll-target="#install-jupyter-positron-server">Step 2: Install jupyter-positron-server in the single-user image</a></li>
-  <li><a href="#point-single-user-servers-at-positron-server" id="toc-point-single-user-servers-at-positron-server" class="nav-link" data-scroll-target="#point-single-user-servers-at-positron-server">Step 3: Point single-user servers at positron-server</a></li>
+  <li><a href="#point-single-user-servers-at-positron-server" id="toc-point-single-user-servers-at-positron-server" class="nav-link" data-scroll-target="#point-single-user-servers-at-positron-server">Step 3: Add Positron Server to the session PATH</a></li>
   <li><a href="#restart-jupyterhub" id="toc-restart-jupyterhub" class="nav-link" data-scroll-target="#restart-jupyterhub">Step 4: Restart JupyterHub</a></li>
   <li><a href="#how-it-works" id="toc-how-it-works" class="nav-link" data-scroll-target="#how-it-works">How it works</a></li>
   <li><a href="#move-an-existing-deployment-off-the-verifier" id="toc-move-an-existing-deployment-off-the-verifier" class="nav-link" data-scroll-target="#move-an-existing-deployment-off-the-verifier">Move an existing deployment off the verifier</a></li>
@@ -208,149 +211,113 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<p>This guide walks an administrator through deploying Positron Server on JupyterHub. Positron Server reads a license file that you place inside its own install directory, and validates that file with the bundled <code>license-manager</code> binary.</p>
-<div class="callout callout-style-default callout-important callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-Important
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<p>This guide covers Positron Server 2026.09.0 and newer, and 2026.06.1 and older. Positron Server 2026.07.0 through 2026.08.2 validate a signed token instead of a license file, and need the extra setup on the <a href="./verifier_get_started.html">verifier setup</a> page. See the <a href="./index.html#which-setup-applies-to-your-version">version matrix</a> to confirm which guide applies to the version you install.</p>
-</div>
-</div>
-<div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-Note
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<p>To skip the steps on this page, the <a href="./deployment.html">deployment templates</a> page covers a one-shot install script for The Littlest JupyterHub (TLJH) and a docker-compose template.</p>
-</div>
-</div>
-<section id="what-you-need-from-posit" class="level2">
-<h2 class="anchored" data-anchor-id="what-you-need-from-posit">What you need from Posit</h2>
-<p>Send email to <a href="mailto:academic-licenses@posit.co">academic-licenses@posit.co</a> to request a license file (<code>license.lic</code>). This file is proof of entitlement, and it is the only file this setup needs from Posit.</p>
-<p>Positron Server is free for educational use. For the eligibility terms, see the <a href="https://github.com/posit-dev/positron/blob/main/LICENSE.txt">Positron Education License Rider</a>.</p>
+<p>This guide sets up Positron Server on JupyterHub. You install two things in the single-user environment: Positron Server itself, and <code>jupyter-positron-server</code>, which adds a Positron tile to the JupyterLab launcher. Then you add Positron Server to the session <code>PATH</code> and restart JupyterHub.</p>
+<p>To skip these steps, use one of the <a href="./deployment.html">deployment templates</a>. They include an install script for The Littlest JupyterHub (TLJH) and a docker-compose template.</p>
+<section id="request-a-license-file" class="level2">
+<h2 class="anchored" data-anchor-id="request-a-license-file">Step 0: Request a license file</h2>
+<p>Positron Server is free for educational use under the <a href="https://github.com/posit-dev/positron/blob/main/LICENSE.txt">Positron Education License Rider</a>. To request a license file (<code>license.lic</code>), send an email to <a href="mailto:academic-licenses@posit.co">academic-licenses@posit.co</a>. This file is the only thing you need from Posit.</p>
 </section>
 <section id="install-positron-server" class="level2">
 <h2 class="anchored" data-anchor-id="install-positron-server">Step 1: Install Positron Server in the single-user image</h2>
-<p>Take the exact version string from the <a href="https://github.com/posit-dev/positron/releases">Positron releases page</a>, then download and unpack the build for your architecture:</p>
+<p>Positron Server is available only as a Linux archive from the Posit content delivery network (CDN). It does not appear on the Positron download page or on the GitHub releases page. Download the build that matches the CPU architecture of your single-user servers:</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Architecture</th>
+<th>Download</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>x86_64 (Intel and AMD)</td>
+<td><a href="https://cdn.posit.co/positron/releases/server/x86_64/positron-server-linux-x64-2026.10.0-297.tar.gz">positron-server-linux-x64-2026.10.0-297.tar.gz</a></td>
+</tr>
+<tr class="even">
+<td>ARM64</td>
+<td><a href="https://cdn.posit.co/positron/releases/server/arm64/positron-server-linux-arm64-2026.10.0-297.tar.gz">positron-server-linux-arm64-2026.10.0-297.tar.gz</a></td>
+</tr>
+</tbody>
+</table>
+<p>Then unpack it into <code>/opt/positron-server</code>. To download and unpack from the command line, run the command for your architecture.</p>
+<p>For x86_64:</p>
 <div class="code-with-filename">
 <div class="code-with-filename-file">
 <pre><strong>Terminal</strong></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1" data-filename="Terminal"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="va">POSITRON_VERSION</span><span class="op">=</span>2026.09.0-256       <span class="co"># exact string from the releases page</span></span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="va">POSITRON_ARCH</span><span class="op">=</span>x64                    <span class="co"># x64 or arm64</span></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="va">CDN_ARCH</span><span class="op">=</span>x86_64                      <span class="co"># x86_64 for x64, arm64 for arm64</span></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-L</span> <span class="st">"https://cdn.posit.co/positron/releases/server/</span><span class="va">${CDN_ARCH}</span><span class="st">/positron-server-linux-</span><span class="va">${POSITRON_ARCH}</span><span class="st">-</span><span class="va">${POSITRON_VERSION}</span><span class="st">.tar.gz"</span> <span class="dt">\</span></span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">-o</span> /tmp/positron-server.tar.gz</span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="fu">mkdir</span> <span class="at">-p</span> /opt/positron-server</span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="fu">tar</span> <span class="at">-xzf</span> /tmp/positron-server.tar.gz <span class="at">-C</span> /opt/positron-server <span class="at">--strip-components</span><span class="op">=</span>1</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1" data-filename="Terminal"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-L</span> <span class="at">-o</span> /tmp/positron-server.tar.gz https://cdn.posit.co/positron/releases/server/x86_64/positron-server-linux-x64-2026.10.0-297.tar.gz</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">mkdir</span> <span class="at">-p</span> /opt/positron-server</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">tar</span> <span class="at">-xzf</span> /tmp/positron-server.tar.gz <span class="at">-C</span> /opt/positron-server <span class="at">--strip-components</span><span class="op">=</span>1</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-Note
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<p>Positron spells the CPU architecture three ways. The download filename uses <code>x64</code> or <code>arm64</code>, the Content Delivery Network (CDN) path uses <code>x86_64</code> or <code>arm64</code>, and the activation directory uses <code>x86_64</code> or <code>aarch64</code>. Throughout this guide, <code>&lt;arch&gt;</code> means the activation directory name.</p>
-</div>
-</div>
-<p>Place the license file next to the <code>license-manager</code> binary, in the activation directory for your architecture:</p>
+<p>For ARM64:</p>
 <div class="code-with-filename">
 <div class="code-with-filename-file">
 <pre><strong>Terminal</strong></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2" data-filename="Terminal"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">install</span> <span class="at">-m</span> 644 license.lic /opt/positron-server/resources/activation/linux/<span class="op">&lt;</span>arch<span class="op">&gt;</span>/license.lic</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2" data-filename="Terminal"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-L</span> <span class="at">-o</span> /tmp/positron-server.tar.gz https://cdn.posit.co/positron/releases/server/arm64/positron-server-linux-arm64-2026.10.0-297.tar.gz</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">mkdir</span> <span class="at">-p</span> /opt/positron-server</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="fu">tar</span> <span class="at">-xzf</span> /tmp/positron-server.tar.gz <span class="at">-C</span> /opt/positron-server <span class="at">--strip-components</span><span class="op">=</span>1</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<div class="callout callout-style-default callout-important callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-Important
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<p>Mode <code>644</code> matters. Each single-user session runs <code>positron-server</code> as the student, and <code>positron-server</code> reads and validates this file itself. A root-only mode such as <code>600</code> makes every session fail to start.</p>
-</div>
-</div>
-<p>Confirm the license before you go further:</p>
+<p>Next, copy the license file into the activation directory, next to the bundled <code>license-manager</code> binary. In the path below, replace <code>&lt;arch&gt;</code> with <code>x86_64</code> or <code>aarch64</code>.</p>
 <div class="code-with-filename">
 <div class="code-with-filename-file">
 <pre><strong>Terminal</strong></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3" data-filename="Terminal"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">/opt/positron-server/resources/activation/linux/</span><span class="op">&lt;</span>arch<span class="op">&gt;</span>/license-manager status</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3" data-filename="Terminal"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">install</span> <span class="at">-m</span> 644 license.lic /opt/positron-server/resources/activation/linux/<span class="op">&lt;</span>arch<span class="op">&gt;</span>/license.lic</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>The license file needs mode <code>644</code>. Each session runs <code>positron-server</code> as the student, and <code>positron-server</code> reads the license file itself. With a root-only mode such as <code>600</code>, every session fails to start.</p>
+<p>Before you continue, confirm that <code>license-manager</code> accepts the license file:</p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>Terminal</strong></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4" data-filename="Terminal"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="ex">/opt/positron-server/resources/activation/linux/</span><span class="op">&lt;</span>arch<span class="op">&gt;</span>/license-manager status</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section>
 <section id="install-jupyter-positron-server" class="level2">
 <h2 class="anchored" data-anchor-id="install-jupyter-positron-server">Step 2: Install jupyter-positron-server in the single-user image</h2>
+<p>Install <code>jupyter-positron-server</code> into the Python environment that runs the single-user server. On TLJH, that environment is <code>/opt/tljh/user</code>:</p>
 <div class="code-with-filename">
 <div class="code-with-filename-file">
 <pre><strong>Terminal</strong></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4" data-filename="Terminal"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># for example, in The Littlest JupyterHub</span></span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="ex">/opt/tljh/user/bin/pip</span> install <span class="st">'jupyter-positron-server&gt;=0.0.5'</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5" data-filename="Terminal"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="ex">/opt/tljh/user/bin/pip</span> install <span class="st">'jupyter-positron-server&gt;=0.0.6'</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<p>This proxy extension runs as the user. It adds the Positron tile to the JupyterLab launcher and starts <code>positron-server</code> on the first request.</p>
+<p><code>jupyter-positron-server</code> is a jupyter-server-proxy extension. It adds the Positron tile to the JupyterLab launcher, and starts Positron Server the first time a student opens it.</p>
 </section>
 <section id="point-single-user-servers-at-positron-server" class="level2">
-<h2 class="anchored" data-anchor-id="point-single-user-servers-at-positron-server">Step 3: Point single-user servers at positron-server</h2>
-<p>Put <code>positron-server</code> on the session <code>PATH</code> by adding this to <code>jupyterhub_config.py</code>:</p>
+<h2 class="anchored" data-anchor-id="point-single-user-servers-at-positron-server">Step 3: Add Positron Server to the session PATH</h2>
+<p>JupyterHub starts each single-user server with the variables in <code>c.Spawner.environment</code>. Add <code>/opt/positron-server/bin</code> to <code>PATH</code> there, so that <code>jupyter-positron-server</code> can find <code>positron-server</code>:</p>
 <div class="code-with-filename">
 <div class="code-with-filename-file">
 <pre><strong>jupyterhub_config.py</strong></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5" data-filename="jupyterhub_config.py"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>c.Spawner.environment <span class="op">=</span> {</span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">"PATH"</span>: <span class="st">"/opt/positron-server/bin:"</span> <span class="op">+</span> os.environ.get(<span class="st">"PATH"</span>, <span class="st">"/usr/local/bin:/usr/bin:/bin"</span>),</span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6" data-filename="jupyterhub_config.py"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>c.Spawner.environment <span class="op">=</span> {</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">"PATH"</span>: <span class="st">"/opt/positron-server/bin:"</span> <span class="op">+</span> os.environ.get(<span class="st">"PATH"</span>, <span class="st">"/usr/local/bin:/usr/bin:/bin"</span>),</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<p>This setup needs no license environment variables. Positron Server finds the license file in its own install directory.</p>
+<p>You do not need any license environment variables. Positron Server finds <code>license.lic</code> in its activation directory.</p>
 </section>
 <section id="restart-jupyterhub" class="level2">
 <h2 class="anchored" data-anchor-id="restart-jupyterhub">Step 4: Restart JupyterHub</h2>
+<p>Restart JupyterHub to load the configuration:</p>
 <div class="code-with-filename">
 <div class="code-with-filename-file">
 <pre><strong>Terminal</strong></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6" data-filename="Terminal"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="ex">systemctl</span> restart jupyterhub</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7" data-filename="Terminal"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="ex">systemctl</span> restart jupyterhub</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<p>Students can then select the Positron tile in the JupyterLab launcher.</p>
+<p>After the restart, students see a Positron tile in the JupyterLab launcher. To open Positron instead of JupyterLab when students sign in, see <a href="./configuration.html#start-students-in-positron-server">Start students in Positron Server</a>.</p>
 </section>
 <section id="how-it-works" class="level2">
 <h2 class="anchored" data-anchor-id="how-it-works">How it works</h2>
-<p>When a student opens Positron:</p>
-<ol type="1">
-<li><code>jupyter-positron-server</code> kicks off starting Positron Server.</li>
-<li>Positron Server validates the license file, and then starts.</li>
-<li><code>jupyter-positron-server</code> opens Positron Server with a connection token for the session.</li>
-</ol>
-<pre class="text"><code>Single-user server
-  jupyter-positron-server    starts positron-server on the first request
-  positron-server            validates the license file and starts
-  license.lic                mode 644, read by the session</code></pre>
-<p>A license file that is missing, expired, or altered stops the session from starting. See <a href="./troubleshooting.html">Troubleshooting</a> for what each failure looks like in the logs.</p>
+<p>When a student selects the Positron tile, <code>jupyter-positron-server</code> starts <code>positron-server</code> inside the single-user server of that student. Positron Server checks <code>license.lic</code> before it starts, so a missing, expired, or altered license file stops the session. When Positron Server is running, <code>jupyter-positron-server</code> opens it in the browser with a connection token for that session.</p>
+<p><a href="./troubleshooting.html">Troubleshooting</a> shows what each license failure looks like in the logs.</p>
 </section>
 <section id="move-an-existing-deployment-off-the-verifier" class="level2">
 <h2 class="anchored" data-anchor-id="move-an-existing-deployment-off-the-verifier">Move an existing deployment off the verifier</h2>
-<p>If you set up Positron Server 2026.07.0 through 2026.08.2 with the signing key and the Hub verifier service, upgrading to 2026.09.0 or newer removes both. Make these four changes:</p>
+<p>If you set up Positron Server 2026.07.0 through 2026.08.2 with the signing key and the Hub verifier service, you do not need either one after you upgrade to 2026.09.0 or later. To remove them, make these four changes:</p>
 <ol type="1">
 <li>Change the license file mode from <code>600</code> to <code>644</code>, so sessions can read it.</li>
 <li>Remove <code>POSITRON_LICENSE_MINTING_ENDPOINT</code> from <code>c.Spawner.environment</code>.</li>
@@ -361,7 +328,7 @@ Important
 <section id="next-steps" class="level2">
 <h2 class="anchored" data-anchor-id="next-steps">Next steps</h2>
 <ul>
-<li><a href="./configuration.html">Configuration</a> covers the environment variables that <code>jupyter-positron-server</code> reads, and the memory each session needs.</li>
+<li><a href="./configuration.html">Configuration</a> covers the environment variables that <code>jupyter-positron-server</code> reads, landing students in Positron, and limits on memory and CPU.</li>
 <li><a href="./deployment.html">Deployment templates</a> covers the TLJH install script and the docker-compose template.</li>
 <li><a href="./troubleshooting.html">Troubleshooting</a> covers a session that does not start.</li>
 </ul>
@@ -777,7 +744,7 @@ Important
       &nbsp;
     </div>   
     <div class="nav-footer-center">
-<p>Proudly supported by <a href="https://posit.co/"><img src="https://www.posit.co/wp-content/uploads/2022/10/posit-logo-fullcolor-TM.svg" class="img-fluid" alt="Posit PBC" width="65"></a></p>
+<p>Proudly supported by <a href="https://posit.co/"><img src="images/posit-logo.svg" class="img-fluid" alt="Posit PBC" width="65"></a></p>
 </div>
     <div class="nav-footer-right">
       &nbsp;

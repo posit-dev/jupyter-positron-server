@@ -1,222 +1,5 @@
 [
   {
-    "objectID": "configuration.html",
-    "href": "configuration.html",
-    "title": "Configuration",
-    "section": "",
-    "text": "Environment variables control how jupyter-positron-server runs Positron Server inside your Jupyter environment."
-  },
-  {
-    "objectID": "configuration.html#environment-variables",
-    "href": "configuration.html#environment-variables",
-    "title": "Configuration",
-    "section": "Environment variables",
-    "text": "Environment variables\n\n\n\nVariable\nDescription\n\n\n\n\nPOSITRON_LICENSE_KEY_FILE\nPath to a license file that jupyter-positron-server passes to positron-server as --license-key-file. On Positron Server 2026.09.0 and newer, this file can be a raw license.lic. Leave it unset when the license file sits in the activation directory at &lt;positron-server-path&gt;/resources/activation/linux/&lt;arch&gt;/license.lic, which is where positron-server looks by default.\n\n\nPOSITRON_LICENSE_MINTING_ENDPOINT\nURL of the JupyterHub minting endpoint that issues short-lived signed license tokens. Applies to Positron Server 2026.07.0 through 2026.08.2 only. Takes precedence over POSITRON_LICENSE_KEY_FILE. See Verifier setup.\n\n\nPOSITRON_ENFORCED_SETTINGS\nJSON object of Positron settings that students cannot change. See Admin-enforced settings.\n\n\nPOSITRON_HOST\nHost address for Positron Server to bind to. Defaults to 127.0.0.1.\n\n\nJSP_DEFAULT_FOLDER\nDirectory that Positron Server opens. Defaults to JUPYTERHUB_ROOT_DIR, then HOME.\n\n\nJSP_POSITRON_LAUNCHER_DISABLED\nSet to any value to hide the Positron tile in the JupyterLab launcher.\n\n\n\n\n\n\n\n\n\nNote\n\n\n\nOn Positron Server 2026.09.0 and newer, a license needs no environment variable at all. positron-server finds license.lic in its own activation directory. Both license variables are for deployments that keep the file somewhere else, or that still run on 2026.07.0 through 2026.08.2."
-  },
-  {
-    "objectID": "configuration.html#admin-enforced-settings",
-    "href": "configuration.html#admin-enforced-settings",
-    "title": "Configuration",
-    "section": "Admin-enforced settings",
-    "text": "Admin-enforced settings\nPOSITRON_ENFORCED_SETTINGS lets administrators lock Positron settings so students cannot override them through the Settings UI, or by editing settings.json directly. Locked settings appear grayed out with a policy indicator. Enforced settings survive profile changes, workspace switches, and direct edits to ~/.positron-server/data/User/settings.json.\nRequirements: jupyter-positron-server 0.0.4 or newer, and Positron Server 2026.07.1-5 or newer.\nCreate the config file:\n\n\nTerminal\n\ncat &gt; /opt/tljh/config/jupyterhub_config.d/positron_enforced.py &lt;&lt; 'EOF'\nc.Spawner.environment = {\n    'POSITRON_ENFORCED_SETTINGS': '{\"workbench.colorTheme\":\"Default Positron Dark\",\"extensions.autoUpdate\":false}'\n}\nEOF\n\nSessions that are already running keep their settings until a student starts a new session.\n\n\n\n\n\n\nImportant\n\n\n\nEach assignment to c.Spawner.environment replaces the whole dictionary. Set every session variable in one assignment, including PATH."
-  },
-  {
-    "objectID": "configuration.html#memory-requirements",
-    "href": "configuration.html#memory-requirements",
-    "title": "Configuration",
-    "section": "Memory requirements",
-    "text": "Memory requirements\nAllocate at least 2.5 GB of RAM per Positron Server session. The right amount depends on the size of the workload:\n\nLight: single console, few extensions, simple scripts, basic app development\nStandard: runtime switching, multiple consoles, multiple extensions, app development\nHeavy: memory-intensive extensions such as file watchers or language servers, multiple concurrent apps, large datasets\n\nUse the table below to match each workload level to its minimum and recommended memory allocation.\n\n\n\nWorkload\nMinimum\nRecommended\n\n\n\n\nLight\n2 GB\n2.5 GB\n\n\nStandard\n2.5 GB\n4 GB\n\n\nHeavy\n4 GB\n6 GB or more\n\n\n\nSigns of insufficient memory include slow runtime switching, extensions that fail to install, degraded app performance, and crashes during memory-intensive operations.\n\n\n\n\n\n\nNote\n\n\n\nFor the full guidance this section summarizes, see the Positron Pro memory allocation FAQ."
-  },
-  {
-    "objectID": "configuration.html#hub-license-minting",
-    "href": "configuration.html#hub-license-minting",
-    "title": "Configuration",
-    "section": "Hub license minting",
-    "text": "Hub license minting\n\n\n\n\n\n\nNote\n\n\n\nHub license minting is a former way of working, scoped to Positron Server 2026.07.0 through 2026.08.2, and not recommended for a new deployment. Positron Server 2026.09.0 and newer validate license.lic directly and need no minting service. See Verifier setup only if you are deploying that exact version range."
-  },
-  {
-    "objectID": "reference/setup_positron_server.html",
-    "href": "reference/setup_positron_server.html",
-    "title": "setup_positron_server",
-    "section": "",
-    "text": "setup_positron_server()\nConfigure jupyter-server-proxy to run Positron Server.\nReturns a configuration dictionary that jupyter-server-proxy uses to launch or connect to a Positron Server instance. The behavior depends on environment variables:\n\nIf JSP_POSITRON_PORT is set, connects to an existing server on that TCP port\nIf JSP_POSITRON_SOCKET is set, connects to an existing server via UNIX socket\nOtherwise, starts a new positron-server process\n\n\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\n\n\n\n\n\ndict\nConfiguration dictionary containing: - new_browser_tab (bool): Whether to open in a new browser tab - timeout (int): Server startup timeout in seconds - launcher_entry (dict): JupyterLab launcher configuration - command (list): Command to start server (empty if connecting to existing) - port (int) or unix_socket (str): Connection details (if applicable) - environment (dict): Environment variables for the server process\n\n\n\n\n\n\nwhich_positron_server : Locates the positron-server executable."
-  },
-  {
-    "objectID": "reference/setup_positron_server.html#returns",
-    "href": "reference/setup_positron_server.html#returns",
-    "title": "setup_positron_server",
-    "section": "",
-    "text": "Name\nType\nDescription\n\n\n\n\n\ndict\nConfiguration dictionary containing: - new_browser_tab (bool): Whether to open in a new browser tab - timeout (int): Server startup timeout in seconds - launcher_entry (dict): JupyterLab launcher configuration - command (list): Command to start server (empty if connecting to existing) - port (int) or unix_socket (str): Connection details (if applicable) - environment (dict): Environment variables for the server process"
-  },
-  {
-    "objectID": "reference/setup_positron_server.html#see-also",
-    "href": "reference/setup_positron_server.html#see-also",
-    "title": "setup_positron_server",
-    "section": "",
-    "text": "which_positron_server : Locates the positron-server executable."
-  },
-  {
-    "objectID": "reference/index.html",
-    "href": "reference/index.html",
-    "title": "Reference",
-    "section": "",
-    "text": "Functions to configure the Positron server proxy\n\n\n\nsetup_positron_server\nConfigure jupyter-server-proxy to run Positron Server.\n\n\nwhich_positron_server\nLocate the positron-server executable."
-  },
-  {
-    "objectID": "reference/index.html#setup-functions",
-    "href": "reference/index.html#setup-functions",
-    "title": "Reference",
-    "section": "",
-    "text": "Functions to configure the Positron server proxy\n\n\n\nsetup_positron_server\nConfigure jupyter-server-proxy to run Positron Server.\n\n\nwhich_positron_server\nLocate the positron-server executable."
-  },
-  {
-    "objectID": "deployment.html",
-    "href": "deployment.html",
-    "title": "Deployment templates",
-    "section": "",
-    "text": "The repository ships three deployment templates, so you do not have to run the setup steps by hand. Pick the one that matches your JupyterHub:\nAll of them need a license file (license.lic) from Posit: proof of entitlement. Send email to academic-licenses@posit.co.\nAll three templates target Positron Server 2026.09.0 and newer. If you are deploying Positron Server 2026.07.0 through 2026.08.2 instead, which validate a Hub-minted signing token, a former way of working, follow Verifier setup by hand. None of these templates automate that flow."
-  },
-  {
-    "objectID": "deployment.html#tljh-one-shot-install-script",
-    "href": "deployment.html#tljh-one-shot-install-script",
-    "title": "Deployment templates",
-    "section": "TLJH one-shot install script",
-    "text": "TLJH one-shot install script\nscripts/install-positron.sh performs every step of the Get started guide in one run. It downloads and unpacks Positron Server, installs the license next to license-manager (mode 644), installs jupyter-positron-server in the user environment, generates the JupyterHub config that puts positron-server on the session PATH, and reloads TLJH.\n\nPrerequisites\n\nAn existing TLJH deployment. Run the script once, as root, on the TLJH host.\nlicense.lic on that host.\n\n\n\nUsage\nRun as root, and configure everything through environment variables:\n\n\nTerminal\n\nsudo POSITRON_VERSION=2026.09.0-256 POSITRON_ARCH=x64 \\\n     LICENSE_SRC=./license.lic \\\n     ./scripts/install-positron.sh\n\nThe script is self-contained. It needs no file other than your license, so you can copy this one script onto the host.\n\n\nCommon options\nEvery setting is an environment variable with a TLJH default. Run ./scripts/install-positron.sh --help to see them all with current values. The ones you reach for most often:\n\n\n\n\n\n\n\n\nVariable\nPurpose\nDefault\n\n\n\n\nPOSITRON_VERSION\nPositron Server release to install\n2026.09.0-256\n\n\nPOSITRON_ARCH\nCPU arch, either x64 or arm64\narm64\n\n\nLICENSE_SRC\nPath to your license file\n./license.lic\n\n\nPOSITRON_TARBALL\nUse a pre-downloaded tarball instead of the CDN\ndownload\n\n\nPOSITRON_SERVER_PKG\njupyter-positron-server spec, from PyPI or a git+https URL\njupyter-positron-server&gt;=0.0.6\n\n\n\n\n\n\n\n\n\nNote\n\n\n\nTo install without network access to the CDN, download the tarball elsewhere and pass POSITRON_TARBALL=path/to/positron-server.tar.gz.\n\n\nThe script stops early with a clear message if the license is missing, so a forgotten file fails before any changes are made.\n\n\nVerify the install\nWhen it finishes, the script prints the check to run:\n\n\nTerminal\n\n# License status (license-manager requires root)\nsudo /opt/positron-server/resources/activation/linux/&lt;arch&gt;/license-manager status\n\n&lt;arch&gt; is the activation directory name, either x86_64 or aarch64. Students can then launch Positron from the JupyterLab launcher."
-  },
-  {
-    "objectID": "deployment.html#docker-compose-template",
-    "href": "deployment.html#docker-compose-template",
-    "title": "Deployment templates",
-    "section": "docker-compose template",
-    "text": "docker-compose template\nThe scripts/docker/ directory is the Docker-native counterpart: a JupyterHub + DockerSpawner hub image and a single-user Positron image, wired together with docker-compose. It is a deployment template: copy and adapt it. Do not treat it as a finished product.\nFrom the scripts/docker/ directory:\n\n\nTerminal\n\n# 1. Configure: copy the example env, then edit arch, version, and ports\ncp .env.example .env\n\n# 2. Add the license. Git-ignored, mounted read-only, never baked into an image\ncp /path/to/license.lic secrets/license.lic\nchmod 644 secrets/license.lic\n\n# 3. Build both images. The single-user image is behind a build-only profile, so name it\ndocker compose build hub singleuser\n\n# 4. Start the hub (run from this directory -- see \"How it works\" in the README)\ndocker compose up -d\n\nThen open http://localhost:8000, or your HUB_PORT. If the license is missing, the hub fails at boot with a clear message rather than at session-start time. DockerSpawner then bind-mounts license.lic straight into each spawned single-user container’s activation directory. positron-server validates it itself, the same as every other template here.\n\n\n\n\n\n\nWarning\n\n\n\nThe template ships with DummyAuthenticator, which accepts any username and any password. Replace it with a real authenticator, such as OAuth, native, or LDAP, in hub/jupyterhub_config.py, and rebuild before you expose the hub to anyone.\n\n\nSee scripts/docker/README.md for the full configuration reference and how the license mount works."
-  },
-  {
-    "objectID": "deployment.html#zero-to-jupyterhub-kubernetes",
-    "href": "deployment.html#zero-to-jupyterhub-kubernetes",
-    "title": "Deployment templates",
-    "section": "Zero to JupyterHub (Kubernetes)",
-    "text": "Zero to JupyterHub (Kubernetes)\nscripts/z2jh/ targets Zero to JupyterHub (the official JupyterHub Helm chart).\n\n\n\n\n\n\nImportant\n\n\n\nThis template targets Positron Server 2026.09.0-256 and jupyter-positron-server==0.0.6, which read the license file directly from the activation directory.\n\n\nThere is no custom hub image. Nothing Positron-related runs on the Hub, so the chart’s stock hub image is used unchanged: no hub.image, no hub.extraVolumes. Everything lives in the single-user image, and the license is a Kubernetes Secret mounted into user pods.\n\nUsage\nBuild the single-user image and load or push it where your cluster can reach it:\n\n\nTerminal\n\ncd scripts/z2jh\ndocker build -t positron-singleuser:v1 --build-arg POSITRON_ARCH=x64 \\\n  -f Dockerfile.singleuser .\n\n# local cluster\nkind load docker-image positron-singleuser:v1\n\nSet the architecture directory in values.yaml to match your nodes, then install, passing the license at install time so it never lands in a values file or in git:\n\n\nTerminal\n\nhelm repo add jupyterhub https://hub.jupyter.org/helm-chart/ && helm repo update\n\nhelm upgrade --install positron jupyterhub/jupyterhub \\\n  --version 4.4.1 --namespace jupyterhub --create-namespace \\\n  --values values.yaml \\\n  --set-file 'singleuser.extraFiles.license\\.lic.stringData'=./license.lic \\\n  --wait\n\nkubectl -n jupyterhub port-forward svc/proxy-public 8080:http\n\n\n\nTroubleshooting\nTwo things in values.yaml are easy to get wrong, and both fail with symptoms that point somewhere else entirely:\n\nsubPath is required. The license must mount at the full file path. Mounting at the directory replaces it, so license-manager and the activation libraries disappear. values.yaml uses singleuser.extraFiles, which derives subPath for you. values-secret-alternative.yaml does not.\nThe activation directory is architecture-specific: x86_64 on amd64 nodes, aarch64 on arm64. Every tarball ships both, fully populated, so the wrong one looks entirely normal on inspection. Mixed-architecture node pools cannot be served by a single mountPath. You need per-architecture singleuser.profileList entries with node selectors.\n\nSee Troubleshooting for the symptoms and the diagnostic commands.\n\n\nVerifying\nlicense-manager status requires root. On TLJH you can sudo it. User pods run as uid 1000 with no privilege escalation, so here it cannot be run at all. Check the mount and what Positron itself reports instead:\n\n\nTerminal\n\nPOD=$(kubectl -n jupyterhub get pod -l component=singleuser-server -o name | head -1)\nkubectl -n jupyterhub exec $POD -c notebook -- \\\n  ls -l /opt/positron-server/resources/activation/linux/x86_64/\nkubectl -n jupyterhub logs $POD -c notebook | grep -i \"license verified\"\n\nA healthy listing keeps license-manager, librclient.so, librserver.so and license-manager.conf beside license.lic.\nSee scripts/z2jh/README.md for the full configuration reference."
-  },
-  {
-    "objectID": "deployment.html#next-steps",
-    "href": "deployment.html#next-steps",
-    "title": "Deployment templates",
-    "section": "Next steps",
-    "text": "Next steps\n\nConfiguration covers environment variables and admin-enforced settings.\nTroubleshooting covers a session that does not start."
-  },
-  {
-    "objectID": "troubleshooting.html",
-    "href": "troubleshooting.html",
-    "title": "Troubleshooting",
-    "section": "",
-    "text": "When Positron does not start for a student, the cause is almost always in one of four places: the launcher extension in the user environment, the license file, the install itself, which covers architecture and version, or, on Positron Server 2026.07.0 through 2026.08.2, the Hub verifier service. This page is organized by symptom."
-  },
-  {
-    "objectID": "troubleshooting.html#where-to-look-first",
-    "href": "troubleshooting.html#where-to-look-first",
-    "title": "Troubleshooting",
-    "section": "Where to look first",
-    "text": "Where to look first\nMost answers are in the logs.\n\nTLJH / systemddocker-compose\n\n\n\n\nTerminal\n\n# Full Hub log, which covers spawn errors and service registration\njournalctl -u jupyterhub --no-pager -n 200\n\n\n\n\n\nTerminal\n\n# Hub log\ndocker compose logs hub\n\n# A student's single-user container, named by `docker ps`\ndocker logs &lt;jupyter-USERNAME-container&gt;\n\n\n\n\nThe single-user server log shows what jupyter-positron-server and positron-server reported at launch. Reach it from the JupyterHub UI under the student server, or from the spawner logs."
-  },
-  {
-    "objectID": "troubleshooting.html#the-positron-tile-does-not-appear",
-    "href": "troubleshooting.html#the-positron-tile-does-not-appear",
-    "title": "Troubleshooting",
-    "section": "The Positron tile does not appear",
-    "text": "The Positron tile does not appear\njupyter-positron-server provides the tile through jupyter-server-proxy, in the user environment.\nCheck the user environment:\n\n\nTerminal\n\n/opt/tljh/user/bin/pip show jupyter-positron-server\n/opt/tljh/user/bin/jupyter server extension list\n\nFixes:\n\nExtension missing: install it in the user environment and enable the proxy.\n\n\nTerminal\n\n/opt/tljh/user/bin/pip install 'jupyter-positron-server&gt;=0.0.5'\n/opt/tljh/user/bin/jupyter server extension enable --sys-prefix jupyter_server_proxy\n\nInstalled but no tile: confirm JSP_POSITRON_LAUNCHER_DISABLED is not set in the spawner environment. Any value hides the tile.\nRestart the student server, by stopping and starting it from the JupyterHub UI. The extension is picked up on server start, not on Hub reload."
-  },
-  {
-    "objectID": "troubleshooting.html#the-tile-is-there-but-positron-never-loads",
-    "href": "troubleshooting.html#the-tile-is-there-but-positron-never-loads",
-    "title": "Troubleshooting",
-    "section": "The tile is there, but Positron never loads",
-    "text": "The tile is there, but Positron never loads\nThe launcher runs, and positron-server fails to start.\nCheck the browser tab first. When positron-server exits during startup, the tab shows a “Positron Server failed to start” page with the end of the log positron-server writes on its own. That log names the failing step, so read it before going to the single-user server log. The launch is retried about every 30 seconds, so once the cause is fixed, refreshing the tab is enough. No server restart is needed. A refresh that briefly shows a proxy error landed mid-retry. Refresh again.\nIf the tab instead sits on a spinner for two minutes and then shows could not start positron in time, positron-server never exited. It hung. Go to the single-user server log for that one.\nCheck the single-user server log for the failing step, then:\n\npositron-server: command not found, or binary not found: positron-server is not on the session PATH. Confirm the spawner sets it:\n# TLJH: jupyterhub_config.py\nc.Spawner.environment = {\n    \"PATH\": \"/opt/positron-server/bin:\" + os.environ.get(\"PATH\", \"/usr/local/bin:/usr/bin:/bin\"),\n}\nIn the docker template the binary is on PATH through the single-user image ENV, and the spawner does not override PATH.\nA license error: see the section below that matches your Positron Server version."
-  },
-  {
-    "objectID": "troubleshooting.html#license-errors-on-2026.09.0-and-newer",
-    "href": "troubleshooting.html#license-errors-on-2026.09.0-and-newer",
-    "title": "Troubleshooting",
-    "section": "License errors on 2026.09.0 and newer",
-    "text": "License errors on 2026.09.0 and newer\nThese versions read license.lic from the activation directory and validate it with the bundled license-manager. Check the license first:\n\n\nTerminal\n\n/opt/positron-server/resources/activation/linux/&lt;arch&gt;/license-manager status\n\nCommon failures:\n\nPermission denied on the license file: each session reads the file as the student, so a root-only mode such as 600 fails every session. Confirm the mode is 644.\n\n\nTerminal\n\nls -l /opt/positron-server/resources/activation/linux/&lt;arch&gt;/license.lic\nchmod 644 /opt/positron-server/resources/activation/linux/&lt;arch&gt;/license.lic\n\nExpired or altered license: license-manager status reports the reason. A license file that exists but does not verify stops the session rather than falling back to anything else. Request a replacement from academic-licenses@posit.co.\nWrong architecture directory: positron-server looks under resources/activation/linux/x86_64 on x64 hosts and resources/activation/linux/aarch64 on arm64 hosts. A license placed in the other directory is not found."
-  },
-  {
-    "objectID": "troubleshooting.html#license-errors-on-2026.07.0-through-2026.08.2",
-    "href": "troubleshooting.html#license-errors-on-2026.07.0-through-2026.08.2",
-    "title": "Troubleshooting",
-    "section": "License errors on 2026.07.0 through 2026.08.2",
-    "text": "License errors on 2026.07.0 through 2026.08.2\nThese versions accept a signed token only, which the Hub verifier mints. The verifier runs as a managed JupyterHub service, so its output lands in the Hub log:\n\n\nTerminal\n\njournalctl -u jupyterhub --no-pager | grep -i positron-license\n\n\n\n\n\n\n\nNote\n\n\n\nThis section covers a hand-rolled Verifier setup deployment. Neither scripts/install-positron.sh nor the scripts/docker/ template in this repository sets up the verifier anymore. Both target Positron Server 2026.09.0 and newer, and 2026.06.1 and older, which validate license.lic directly. See License errors on 2026.09.0 and newer instead if you deployed with one of those templates.\n\n\n\nThe verifier is not running or not registered\n\nNo mention at all: the service config was not loaded. Confirm that jupyterhub_config.py, or the generated positron-license.py in jupyterhub_config.d/, contains the c.JupyterHub.services block, then reload.\n\n\nTerminal\n\ntljh-config reload\n# or: systemctl restart jupyterhub\n\nThe service starts and then dies: confirm the command exists in the Hub environment.\n\n\nTerminal\n\n/opt/tljh/hub/bin/pip show jupyter-positron-verifier\nls -l /opt/tljh/hub/bin/positron-verifier\n\nPort conflict on VERIFIER_PORT, which defaults to 10101: another process holds the port. Change VERIFIER_PORT and update POSITRON_LICENSE_MINTING_ENDPOINT to match.\n\n\n\nMint calls fail\n\nSigning key not readable: the verifier runs as the Hub service account and reads POSITRON_MINTING_KEY_FILE. Confirm the file exists and that account can read it.\n\n\nTerminal\n\nls -l /etc/positron/signing-key.pem   # mode 600, owned by the Hub user\n\nMinting endpoint unreachable or wrong URL: POSITRON_LICENSE_MINTING_ENDPOINT must point at the Hub-proxied service path, e.g., http://127.0.0.1:10101/services/positron-license/mint.\n403 or other authorization errors from the mint call: the service role is missing scopes. Confirm the c.JupyterHub.load_roles block grants the positron-license service read:users.\n\n\n\n\n\n\n\nNote\n\n\n\nUpgrading to Positron Server 2026.09.0 or newer removes this whole class of failure. See Move an existing deployment off the verifier."
-  },
-  {
-    "objectID": "troubleshooting.html#install-time-failures",
-    "href": "troubleshooting.html#install-time-failures",
-    "title": "Troubleshooting",
-    "section": "Install-time failures",
-    "text": "Install-time failures\n\nDownload fails with curl 403 or 404: the POSITRON_VERSION and POSITRON_ARCH combination does not exist on the Content Delivery Network (CDN). Verify the version string against the Positron releases page, or download the tarball yourself and pass POSITRON_TARBALL=./positron-server.tar.gz."
-  },
-  {
-    "objectID": "troubleshooting.html#docker-compose-specifics",
-    "href": "troubleshooting.html#docker-compose-specifics",
-    "title": "Troubleshooting",
-    "section": "docker-compose specifics",
-    "text": "docker-compose specifics\n\nThe hub container exits at boot reporting a file not found or empty: the license secret was not placed. Copy it into scripts/docker/secrets/. A missing bind-mount source makes Docker create an empty directory, which is why the hub checks at boot.\n\n\nTerminal\n\ncp /path/to/license.lic secrets/license.lic\nchmod 644 secrets/license.lic\ndocker compose up -d\n\nSingle-user containers fail to spawn with a license error: confirm POSITRON_LICENSE_HOST_PATH (set from ${PWD} in docker-compose.yml) resolved to the right absolute path. docker compose config prints the resolved value. It must be a path on the Docker host, which is why docker compose needs to be run from scripts/docker/ itself."
-  },
-  {
-    "objectID": "troubleshooting.html#zero-to-jupyterhub-kubernetes-specifics",
-    "href": "troubleshooting.html#zero-to-jupyterhub-kubernetes-specifics",
-    "title": "Troubleshooting",
-    "section": "Zero to JupyterHub (Kubernetes) specifics",
-    "text": "Zero to JupyterHub (Kubernetes) specifics\nLogs live in the single-user pod, and positron-server restart-loops on failure, so always use --tail:\n\n\nTerminal\n\nPOD=$(kubectl -n jupyterhub get pod -l component=singleuser-server -o name | head -1)\nkubectl -n jupyterhub logs $POD -c notebook --tail=200\n\n-c notebook avoids the “Defaulted container” notice from the pod’s init container.\n\ncould not start positron in time\nThe browser shows a blank page with a spinner for about two minutes, then a 500 with could not start positron in time. The message implicates slowness, but in a Kubernetes deployment it is far more often the license mount. The two-minute delay is jupyter-server-proxy giving up.\nCheck the activation directory first:\n\n\nTerminal\n\nkubectl -n jupyterhub exec $POD -c notebook -- \\\n  ls -l /opt/positron-server/resources/activation/linux/&lt;arch&gt;/\n\nIf only license.lic is there, plus entries like ..data and a timestamped directory, the Secret was mounted at the directory instead of at the file path. Add subPath: license.lic and make mountPath the full file path, or switch to singleuser.extraFiles, which derives subPath for you.\nIf the directory looks healthy but Positron still fails, the license is probably in the wrong architecture directory. Both x86_64 and aarch64 ship in every tarball and both look complete, so this is invisible to inspection:\n\n\nTerminal\n\nkubectl -n jupyterhub exec $POD -c notebook -- \\\n  python3 -c \"import platform; print(platform.machine())\"\n\nWhatever that prints is the only directory Positron consults.\n\n\nNo license key provided in the pod log\nNo license key provided. A license key is required to use Positron in a hosted\nenvironment. Provide a license key with the --license-key or --license-key-file ...\nTaken literally this suggests the license is missing, and following its advice leads nowhere. It appears whenever Positron cannot validate a license, which includes the case where the license is mounted and readable but the activation libraries beside it were masked. Work through the activation-directory checks above before touching --license-key-file.\n\n\nConfirming the license is readable at all\n\n\nTerminal\n\nkubectl -n jupyterhub exec $POD -c notebook -- id\nkubectl -n jupyterhub exec $POD -c notebook -- \\\n  head -c 30 /opt/positron-server/resources/activation/linux/&lt;arch&gt;/license.lic\n\nid reports uid=1000(jovyan) gid=100(users), and the license appears as root:users with mode 0440. Note that license-manager status requires root: usable via sudo on The Littlest JupyterHub (TLJH), but not in user pods, which have no privilege escalation.\n\n\nUser servers fail to spawn\nThe single-user image’s jupyterhub must be compatible with the Hub’s. Compare:\n\n\nTerminal\n\nkubectl -n jupyterhub exec deploy/hub -- jupyterhub --version\ndocker run --rm --entrypoint pip &lt;your-image&gt; show jupyterhub\n\nA patch-level difference is fine. A larger gap needs a pin in the image.\n\n\nExtensions reinstall on every launch\nExpected when singleuser.storage.type is none, because $HOME is ephemeral and Positron re-bootstraps ~/.positron-server/extensions each spawn. Set storage.type: dynamic so it happens once."
-  },
-  {
-    "objectID": "troubleshooting.html#still-stuck",
-    "href": "troubleshooting.html#still-stuck",
-    "title": "Troubleshooting",
-    "section": "Still stuck?",
-    "text": "Still stuck?\nOpen an issue at the jupyter-positron-server issue tracker with the relevant Hub and single-user log excerpts, your Positron Server version, and which setup path you used."
-  },
-  {
-    "objectID": "index.html",
-    "href": "index.html",
-    "title": "jupyter-positron-server",
-    "section": "",
-    "text": "Run Positron Server inside your JupyterHub environment."
-  },
-  {
-    "objectID": "index.html#overview",
-    "href": "index.html#overview",
-    "title": "jupyter-positron-server",
-    "section": "Overview",
-    "text": "Overview\njupyter-positron-server is a jupyter-server-proxy extension that runs Positron Server within JupyterHub. Students reach the full Positron IDE from their Jupyter environment, with no separate deployment.\nThis project draws inspiration from jupyter-rsession-proxy, which does the same for RStudio Server. Both packages use the jupyter-server-proxy framework to bring an external web application into the Jupyter ecosystem."
-  },
-  {
-    "objectID": "index.html#which-setup-applies-to-your-version",
-    "href": "index.html#which-setup-applies-to-your-version",
-    "title": "jupyter-positron-server",
-    "section": "Which setup applies to your version",
-    "text": "Which setup applies to your version\nPositron Server changed how it verifies a license twice, so the setup steps depend on the version you install. Find your version in the table below, then follow the guide in the last column.\n\n\n\nPositron Server version\nHow the license is verified\nWhat to install\nSetup guide\n\n\n\n\n2026.09.0 and newer\npositron-server validates license.lic in its own activation directory\njupyter-positron-server\nGet started\n\n\n2026.07.0 through 2026.08.2\nA Hub service mints a signed, per-session token from a signing key. No license file is read by the session\njupyter-positron-server and jupyter-positron-verifier\nVerifier setup\n\n\n2026.06.1 and older\npositron-server validates license.lic in its own activation directory\njupyter-positron-server\nGet started\n\n\n\n\n\n\n\n\n\nImportant\n\n\n\nThe signing key is a former way of working, scoped to Positron Server 2026.07.0 through 2026.08.2, and not recommended for a new deployment. See Verifier setup only if you are deploying that exact version range.\n\n\n\n\n\n\n\n\nNote\n\n\n\nThe two license file rows differ in one detail. On 2026.06.1 and older, install jupyter-positron-server version 0.0.4. On 2026.09.0 and newer, install version 0.0.5 or newer."
-  },
-  {
-    "objectID": "index.html#features",
-    "href": "index.html#features",
-    "title": "jupyter-positron-server",
-    "section": "Features",
-    "text": "Features\nPositron Server provides a data science IDE with no local install and no new infrastructure:\n\nRich Python and R support\nOpenVSX extension marketplace access\nBuilt-in data viewer and variables explorer\nIntegrated debugger, help pane, and version control"
-  },
-  {
-    "objectID": "index.html#requirements",
-    "href": "index.html#requirements",
-    "title": "jupyter-positron-server",
-    "section": "Requirements",
-    "text": "Requirements\n\nPython 3.9 or newer\npositron-server installed and available on PATH\nA Positron license file, and a signing key on 2026.07.0 through 2026.08.2 only\nAt least 2.5 GB of RAM per session. See memory requirements"
-  },
-  {
-    "objectID": "index.html#get-a-license",
-    "href": "index.html#get-a-license",
-    "title": "jupyter-positron-server",
-    "section": "Get a license",
-    "text": "Get a license\nPositron Server is available for educational use only. Free licenses are available for currently enrolled students using Positron for coursework. For the full eligibility terms, review the Positron Education License Rider.\nTo request a license, send email to academic-licenses@posit.co."
-  },
-  {
     "objectID": "verifier_get_started.html",
     "href": "verifier_get_started.html",
     "title": "Verifier setup for 2026.07.0 through 2026.08.2",
@@ -287,6 +70,41 @@
     "text": "Next steps\n\nTo move off this setup, see Move an existing deployment off the verifier.\nConfiguration covers the environment variables that jupyter-positron-server reads.\nTroubleshooting covers a verifier that does not start and a mint call that fails."
   },
   {
+    "objectID": "deployment.html",
+    "href": "deployment.html",
+    "title": "Deployment templates",
+    "section": "",
+    "text": "The repository ships three deployment templates, so you do not have to run the setup steps by hand. Pick the one that matches your JupyterHub:\nAll of them need a license file (license.lic) from Posit. Send an email to academic-licenses@posit.co to request a license.\nAll three templates target Positron Server 2026.09.0 and newer. If you are deploying Positron Server 2026.07.0 through 2026.08.2 instead, which validate a Hub-minted signing token, a former way of working, follow Verifier setup by hand. None of these templates automate that flow."
+  },
+  {
+    "objectID": "deployment.html#tljh-one-shot-install-script",
+    "href": "deployment.html#tljh-one-shot-install-script",
+    "title": "Deployment templates",
+    "section": "TLJH one-shot install script",
+    "text": "TLJH one-shot install script\nscripts/install-positron.sh performs every step of the Get started guide in one run. It downloads and unpacks Positron Server, installs the license next to license-manager (mode 644), installs jupyter-positron-server in the user environment, generates the JupyterHub config that puts positron-server on the session PATH, and reloads TLJH.\n\nPrerequisites\n\nAn existing TLJH deployment. Run the script once, as root, on the TLJH host.\nlicense.lic on that host.\n\n\n\nUsage\nRun as root, and configure everything through environment variables:\n\n\nTerminal\n\nsudo POSITRON_VERSION=2026.10.0-297 POSITRON_ARCH=x64 \\\n     LICENSE_SRC=./license.lic \\\n     ./scripts/install-positron.sh\n\nThe script is self-contained. It needs no file other than your license, so you can copy this one script onto the host.\n\n\nCommon options\nEvery setting is an environment variable with a TLJH default. Run ./scripts/install-positron.sh --help to see them all with current values. The ones you reach for most often:\n\n\n\n\n\n\n\n\nVariable\nPurpose\nDefault\n\n\n\n\nPOSITRON_VERSION\nPositron Server release to install\n2026.10.0-297\n\n\nPOSITRON_ARCH\nCPU arch, either x64 or arm64\narm64\n\n\nLICENSE_SRC\nPath to your license file\n./license.lic\n\n\nPOSITRON_TARBALL\nUse a pre-downloaded tarball instead of the CDN\ndownload\n\n\nPOSITRON_SERVER_PKG\njupyter-positron-server spec, from PyPI or a git+https URL\njupyter-positron-server&gt;=0.0.6\n\n\n\n\n\n\n\n\n\nNote\n\n\n\nTo install without network access to the CDN, download the tarball elsewhere and pass POSITRON_TARBALL=path/to/positron-server.tar.gz.\n\n\nThe script stops early with a clear message if the license is missing, so a forgotten file fails before any changes are made.\n\n\nVerify the install\nWhen it finishes, the script prints the check to run:\n\n\nTerminal\n\n# License status (license-manager requires root)\nsudo /opt/positron-server/resources/activation/linux/&lt;arch&gt;/license-manager status\n\n&lt;arch&gt; is the activation directory name, either x86_64 or aarch64. Students can then launch Positron from the JupyterLab launcher."
+  },
+  {
+    "objectID": "deployment.html#docker-compose-template",
+    "href": "deployment.html#docker-compose-template",
+    "title": "Deployment templates",
+    "section": "docker-compose template",
+    "text": "docker-compose template\nThe scripts/docker/ directory is the Docker-native counterpart: a JupyterHub + DockerSpawner hub image and a single-user Positron image, wired together with docker-compose. It is a deployment template: copy and adapt it. Do not treat it as a finished product.\nFrom the scripts/docker/ directory:\n\n\nTerminal\n\n# 1. Configure: copy the example env, then edit arch, version, and ports\ncp .env.example .env\n\n# 2. Add the license. Git-ignored, mounted read-only, never baked into an image\ncp /path/to/license.lic secrets/license.lic\nchmod 644 secrets/license.lic\n\n# 3. Build both images. The single-user image is behind a build-only profile, so name it\ndocker compose build hub singleuser\n\n# 4. Start the hub (run from this directory -- see \"How it works\" in the README)\ndocker compose up -d\n\nThen open http://localhost:8000, or your HUB_PORT. If the license is missing, the hub fails at boot with a clear message rather than at session-start time. DockerSpawner then bind-mounts license.lic straight into each spawned single-user container’s activation directory. positron-server validates it itself, the same as every other template here.\n\n\n\n\n\n\nWarning\n\n\n\nThe template ships with DummyAuthenticator, which accepts any username and any password. Replace it with a real authenticator, such as OAuth, native, or LDAP, in hub/jupyterhub_config.py, and rebuild before you expose the hub to anyone.\n\n\nSee scripts/docker/README.md for the full configuration reference and how the license mount works."
+  },
+  {
+    "objectID": "deployment.html#zero-to-jupyterhub-kubernetes",
+    "href": "deployment.html#zero-to-jupyterhub-kubernetes",
+    "title": "Deployment templates",
+    "section": "Zero to JupyterHub (Kubernetes)",
+    "text": "Zero to JupyterHub (Kubernetes)\nscripts/z2jh/ targets Zero to JupyterHub (the official JupyterHub Helm chart).\n\n\n\n\n\n\nImportant\n\n\n\nThis template targets Positron Server 2026.10.0-297 and jupyter-positron-server==0.0.6, which read the license file directly from the activation directory.\n\n\nThere is no custom hub image. Nothing Positron-related runs on the Hub, so the chart’s stock hub image is used unchanged: no hub.image, no hub.extraVolumes. Everything lives in the single-user image, and the license is a Kubernetes Secret mounted into user pods.\n\nUsage\nBuild the single-user image and load or push it where your cluster can reach it:\n\n\nTerminal\n\ncd scripts/z2jh\ndocker build -t positron-singleuser:v1 --build-arg POSITRON_ARCH=x64 \\\n  -f Dockerfile.singleuser .\n\n# local cluster\nkind load docker-image positron-singleuser:v1\n\nSet the architecture directory in values.yaml to match your nodes, then install, passing the license at install time so it never lands in a values file or in git:\n\n\nTerminal\n\nhelm repo add jupyterhub https://hub.jupyter.org/helm-chart/ && helm repo update\n\nhelm upgrade --install positron jupyterhub/jupyterhub \\\n  --version 4.4.1 --namespace jupyterhub --create-namespace \\\n  --values values.yaml \\\n  --set-file 'singleuser.extraFiles.license\\.lic.stringData'=./license.lic \\\n  --wait\n\nkubectl -n jupyterhub port-forward svc/proxy-public 8080:http\n\n\n\nTroubleshooting\nTwo things in values.yaml are easy to get wrong, and both fail with symptoms that point somewhere else entirely:\n\nsubPath is required. The license must mount at the full file path. Mounting at the directory replaces it, so license-manager and the activation libraries disappear. values.yaml uses singleuser.extraFiles, which derives subPath for you. values-secret-alternative.yaml does not.\nThe activation directory is architecture-specific: x86_64 on amd64 nodes, aarch64 on arm64. Every tarball ships both, fully populated, so the wrong one looks entirely normal on inspection. Mixed-architecture node pools cannot be served by a single mountPath. You need per-architecture singleuser.profileList entries with node selectors.\n\nSee Troubleshooting for the symptoms and the diagnostic commands.\n\n\nVerifying\nlicense-manager status requires root. On TLJH you can sudo it. User pods run as uid 1000 with no privilege escalation, so here it cannot be run at all. Check the mount and what Positron itself reports instead:\n\n\nTerminal\n\nPOD=$(kubectl -n jupyterhub get pod -l component=singleuser-server -o name | head -1)\nkubectl -n jupyterhub exec $POD -c notebook -- \\\n  ls -l /opt/positron-server/resources/activation/linux/x86_64/\nkubectl -n jupyterhub logs $POD -c notebook | grep -i \"license verified\"\n\nA healthy listing keeps license-manager, librclient.so, librserver.so and license-manager.conf beside license.lic.\nSee scripts/z2jh/README.md for the full configuration reference."
+  },
+  {
+    "objectID": "deployment.html#next-steps",
+    "href": "deployment.html#next-steps",
+    "title": "Deployment templates",
+    "section": "Next steps",
+    "text": "Next steps\n\nConfiguration covers environment variables, landing students in Positron, admin-enforced settings, and limits on memory and CPU.\nTroubleshooting covers a session that does not start."
+  },
+  {
     "objectID": "reference/which_positron_server.html",
     "href": "reference/which_positron_server.html",
     "title": "which_positron_server",
@@ -315,66 +133,262 @@
     "text": "&gt;&gt;&gt; from jupyter_positron_server import which_positron_server\n&gt;&gt;&gt; path = which_positron_server()\n&gt;&gt;&gt; print(path)\n'/opt/positron-server/bin/positron-server'"
   },
   {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "jupyter-positron-server",
+    "section": "",
+    "text": "Run Positron Server inside your JupyterHub environment."
+  },
+  {
+    "objectID": "index.html#overview",
+    "href": "index.html#overview",
+    "title": "jupyter-positron-server",
+    "section": "Overview",
+    "text": "Overview\njupyter-positron-server is a jupyter-server-proxy extension that runs Positron Server within JupyterHub. Students reach the full Positron IDE from their Jupyter environment, with no separate deployment.\nThis project draws inspiration from jupyter-rsession-proxy, which does the same for RStudio Server. Both packages use the jupyter-server-proxy framework to bring an external web application into the Jupyter ecosystem."
+  },
+  {
+    "objectID": "index.html#features",
+    "href": "index.html#features",
+    "title": "jupyter-positron-server",
+    "section": "Features",
+    "text": "Features\nPositron Server provides a data science IDE with no local install and no new infrastructure:\n\nRich Python and R support\nOpenVSX extension marketplace access\nBuilt-in data viewer and variables explorer\nIntegrated debugger, help pane, and version control"
+  },
+  {
+    "objectID": "index.html#requirements",
+    "href": "index.html#requirements",
+    "title": "jupyter-positron-server",
+    "section": "Requirements",
+    "text": "Requirements\n\nPython 3.9 or newer\npositron-server installed and available on PATH\nA Positron license file, and a signing key on 2026.07.0 through 2026.08.2 only\nAt least 2.5 GB of RAM per session. See memory requirements"
+  },
+  {
+    "objectID": "index.html#get-a-license",
+    "href": "index.html#get-a-license",
+    "title": "jupyter-positron-server",
+    "section": "Get a license",
+    "text": "Get a license\nPositron Server is available for educational use only. Free licenses are available for currently enrolled students using Positron for coursework. For the full eligibility terms, review the Positron Education License Rider.\nTo request a license, send email to academic-licenses@posit.co."
+  },
+  {
+    "objectID": "index.html#which-setup-applies-to-your-version",
+    "href": "index.html#which-setup-applies-to-your-version",
+    "title": "jupyter-positron-server",
+    "section": "Which setup applies to your version",
+    "text": "Which setup applies to your version\nPositron Server changed how it verifies a license twice, so the setup steps depend on the version you install. Find your version in the table below, then follow the guide in the last column.\n\n\n\nPositron Server version\nHow the license is verified\nWhat to install\nSetup guide\n\n\n\n\n2026.09.0 and newer\npositron-server validates license.lic in its own activation directory\njupyter-positron-server\nGet started\n\n\n2026.07.0 through 2026.08.2\nA Hub service mints a signed, per-session token from a signing key. No license file is read by the session\njupyter-positron-server and jupyter-positron-verifier\nVerifier setup\n\n\n2026.06.1 and older\npositron-server validates license.lic in its own activation directory\njupyter-positron-server\nGet started\n\n\n\n\n\n\n\n\n\nImportant\n\n\n\nThe signing key is a former way of working, scoped to Positron Server 2026.07.0 through 2026.08.2, and not recommended for a new deployment. See Verifier setup only if you are deploying that exact version range.\n\n\nThe two license file rows differ in one detail. On 2026.06.1 and older, install jupyter-positron-server version 0.0.4. On 2026.09.0 and newer, install version 0.0.6 or newer."
+  },
+  {
+    "objectID": "configuration.html",
+    "href": "configuration.html",
+    "title": "Configuration",
+    "section": "",
+    "text": "You configure jupyter-positron-server through environment variables, and the JupyterHub side through jupyterhub_config.py. This page covers both, and the settings that matter most when you run Positron Server for a group of users, such as a class. Treat the suggested values as starting points, then measure your own hardware and number of users and adjust."
+  },
+  {
+    "objectID": "configuration.html#environment-variables",
+    "href": "configuration.html#environment-variables",
+    "title": "Configuration",
+    "section": "Environment variables",
+    "text": "Environment variables\n\n\n\nVariable\nDescription\n\n\n\n\nPOSITRON_LICENSE_KEY_FILE\nPath to a license file that jupyter-positron-server passes to positron-server as --license-key-file. On Positron Server 2026.09.0 and newer, this file can be a raw license.lic. Leave it unset when the license file sits in the activation directory at &lt;positron-server-path&gt;/resources/activation/linux/&lt;arch&gt;/license.lic, which is where positron-server looks by default.\n\n\nPOSITRON_LICENSE_MINTING_ENDPOINT\nURL of the JupyterHub minting endpoint that issues short-lived signed license tokens. Applies to Positron Server 2026.07.0 through 2026.08.2 only. Takes precedence over POSITRON_LICENSE_KEY_FILE. See Verifier setup.\n\n\nPOSITRON_CONNECTION_TOKEN\nSets the connection token that Positron Server validates on every request. Defaults to a random token for each session. Set it per session from a pre_spawn_hook to land students in Positron Server through Spawner.default_url. Do not set one fixed value for all sessions. See Start students in Positron Server.\n\n\nPOSITRON_ENFORCED_SETTINGS\nJSON object of Positron settings that students cannot change. See Admin-enforced settings.\n\n\nPOSITRON_HOST\nHost address for Positron Server to bind to. Defaults to 127.0.0.1.\n\n\nJSP_DEFAULT_FOLDER\nDirectory that Positron Server opens. Defaults to JUPYTERHUB_ROOT_DIR, then HOME.\n\n\nJSP_POSITRON_LAUNCHER_DISABLED\nSet to any value to hide the Positron tile in the JupyterLab launcher.\n\n\n\nOn Positron Server 2026.09.0 and newer, a license needs no environment variable at all. positron-server finds license.lic in its own activation directory. Both license variables are for deployments that keep the file somewhere else, or that still run on 2026.07.0 through 2026.08.2.\n\n\n\n\n\n\nImportant\n\n\n\nEach assignment to c.Spawner.environment replaces the whole dictionary, so use .update() to add a variable. On TLJH, the install script sets PATH in c.SystemdSpawner.environment. A setting on the spawner class takes precedence over c.Spawner, so on TLJH, JupyterHub ignores c.Spawner.environment. Use c.SystemdSpawner.environment.update() instead, in a file in jupyterhub_config.d/ whose name sorts after positron.py."
+  },
+  {
+    "objectID": "configuration.html#start-students-in-positron-server",
+    "href": "configuration.html#start-students-in-positron-server",
+    "title": "Configuration",
+    "section": "Start students in Positron Server",
+    "text": "Start students in Positron Server\nA single-user server opens JupyterLab by default, and students reach Positron Server from the launcher tile. Spawner.default_url changes where a session lands.\nPositron Server validates a connection token on every HTTP and WebSocket request. The launcher tile works because it carries that token as a tkn query parameter. A bare /positron URL carries no token, so Positron Server answers 403 Forbidden.\nThe token protects the port that Positron Server listens on, so only the student who owns the session can connect to it. To land students in Positron Server, make a new token when each session starts. Put it in the session environment and in the landing URL:\n\n\njupyterhub_config.py\n\nimport secrets\n\ndef positron_token_hook(spawner):\n    token = secrets.token_hex(16)\n    # Copy the dictionary. The configured value can be shared by every spawner.\n    spawner.environment = {**spawner.environment, \"POSITRON_CONNECTION_TOKEN\": token}\n    spawner.default_url = f\"/positron/?tkn={token}\"\n\nc.Spawner.pre_spawn_hook = positron_token_hook\n\nOn TLJH, put this code in a file in /opt/tljh/config/jupyterhub_config.d/, then run sudo tljh-config reload. Do not set one fixed token for all sessions. Every student sees the token in their own URL. On TLJH, all sessions share one host, so a student with the token can open the Positron Server of another student. Students can still reach JupyterLab at /user/&lt;username&gt;/lab when they need the notebook interface."
+  },
+  {
+    "objectID": "configuration.html#admin-enforced-settings",
+    "href": "configuration.html#admin-enforced-settings",
+    "title": "Configuration",
+    "section": "Admin-enforced settings",
+    "text": "Admin-enforced settings\nPOSITRON_ENFORCED_SETTINGS lets administrators lock Positron settings so students cannot override them through the Settings UI, or by editing settings.json directly. Locked settings appear grayed out with a policy indicator. Enforced settings survive profile changes, workspace switches, and direct edits to ~/.positron-server/data/User/settings.json.\nRequirements: jupyter-positron-server 0.0.4 or newer, and Positron Server 2026.07.1-5 or newer.\nTwo settings come up often for coursework:\n\nai.enabled: set to false to turn off every Positron AI feature at once. To turn features off one at a time, see the Positron AI configuration reference.\nextensions.autoUpdate: set to false to hold extension versions steady across a class for the length of a term.\n\nOn TLJH, create a config file that locks both:\n\n\nTerminal\n\ncat &gt; /opt/tljh/config/jupyterhub_config.d/positron_enforced.py &lt;&lt; 'EOF'\nc.SystemdSpawner.environment.update({\n    'POSITRON_ENFORCED_SETTINGS': '{\"ai.enabled\":false,\"extensions.autoUpdate\":false}'\n})\nEOF\n\nThe file name positron_enforced.py sorts after positron.py, so the update runs after the install script sets PATH. On other spawners, use c.Spawner.environment.update(...) in jupyterhub_config.py.\nSessions that are already running keep their settings until a student starts a new session."
+  },
+  {
+    "objectID": "configuration.html#memory-requirements",
+    "href": "configuration.html#memory-requirements",
+    "title": "Configuration",
+    "section": "Memory requirements",
+    "text": "Memory requirements\nAllocate memory per Positron Server session based on the size of the workload:\n\nLight: single console, few extensions, simple scripts, basic app development\nStandard: runtime switching, multiple consoles, multiple extensions, app development\nHeavy: memory-intensive extensions such as file watchers or language servers, multiple concurrent apps, large datasets\n\nUse the Minimum column for your workload tier.\n\n\n\nWorkload\nMinimum\nRecommended\n\n\n\n\nLight\n2 GB\n2.5 GB\n\n\nStandard\n2.5 GB\n4 GB\n\n\nHeavy\n4 GB\n6 GB or more\n\n\n\nSigns of insufficient memory include slow runtime switching, extensions that fail to install, degraded app performance, and crashes during memory-intensive operations.\n\n\n\n\n\n\nNote\n\n\n\nFor the full guidance this section summarizes, see the Positron Pro memory allocation FAQ.\n\n\n\nCap memory and CPU per session\nTo enforce the recommended allocation for a standard workload, set limits in jupyterhub_config.py:\n\n\njupyterhub_config.py\n\nc.Spawner.mem_limit = '4G'\nc.Spawner.cpu_limit = 1\n\nmem_limit is a hard cap, not a share. The spawner stops a session that reaches the cap. A value below the Minimum for the workload risks OOM kills. The example’s 4G matches the Standard recommendation.\nOn TLJH, set the same limits through tljh-config:\n\n\nTerminal\n\nsudo tljh-config set limits.memory 4G\nsudo tljh-config set limits.cpu 1\nsudo tljh-config reload"
+  },
+  {
+    "objectID": "configuration.html#hub-license-minting-deprecated",
+    "href": "configuration.html#hub-license-minting-deprecated",
+    "title": "Configuration",
+    "section": "Hub license minting (deprecated)",
+    "text": "Hub license minting (deprecated)\nHub license minting is a former way of working, scoped to Positron Server 2026.07.0 through 2026.08.2, and not recommended for a new deployment. Positron Server 2026.09.0 and newer validate license.lic directly and need no minting service. See Verifier setup only if you are deploying that exact version range."
+  },
+  {
+    "objectID": "configuration.html#next-steps",
+    "href": "configuration.html#next-steps",
+    "title": "Configuration",
+    "section": "Next steps",
+    "text": "Next steps\n\nDeployment templates covers the TLJH install script and the docker-compose template.\nTroubleshooting covers a session that does not start."
+  },
+  {
     "objectID": "get_started.html",
     "href": "get_started.html",
     "title": "Get started",
     "section": "",
-    "text": "This guide walks an administrator through deploying Positron Server on JupyterHub. Positron Server reads a license file that you place inside its own install directory, and validates that file with the bundled license-manager binary."
+    "text": "This guide sets up Positron Server on JupyterHub. You install two things in the single-user environment: Positron Server itself, and jupyter-positron-server, which adds a Positron tile to the JupyterLab launcher. Then you add Positron Server to the session PATH and restart JupyterHub.\nTo skip these steps, use one of the deployment templates. They include an install script for The Littlest JupyterHub (TLJH) and a docker-compose template."
   },
   {
-    "objectID": "get_started.html#what-you-need-from-posit",
-    "href": "get_started.html#what-you-need-from-posit",
+    "objectID": "get_started.html#request-a-license-file",
+    "href": "get_started.html#request-a-license-file",
     "title": "Get started",
-    "section": "What you need from Posit",
-    "text": "What you need from Posit\nSend email to academic-licenses@posit.co to request a license file (license.lic). This file is proof of entitlement, and it is the only file this setup needs from Posit.\nPositron Server is free for educational use. For the eligibility terms, see the Positron Education License Rider."
+    "section": "Step 0: Request a license file",
+    "text": "Step 0: Request a license file\nPositron Server is free for educational use under the Positron Education License Rider. To request a license file (license.lic), send an email to academic-licenses@posit.co. This file is the only thing you need from Posit."
   },
   {
     "objectID": "get_started.html#install-positron-server",
     "href": "get_started.html#install-positron-server",
     "title": "Get started",
     "section": "Step 1: Install Positron Server in the single-user image",
-    "text": "Step 1: Install Positron Server in the single-user image\nTake the exact version string from the Positron releases page, then download and unpack the build for your architecture:\n\n\nTerminal\n\nPOSITRON_VERSION=2026.09.0-256       # exact string from the releases page\nPOSITRON_ARCH=x64                    # x64 or arm64\nCDN_ARCH=x86_64                      # x86_64 for x64, arm64 for arm64\n\ncurl -L \"https://cdn.posit.co/positron/releases/server/${CDN_ARCH}/positron-server-linux-${POSITRON_ARCH}-${POSITRON_VERSION}.tar.gz\" \\\n  -o /tmp/positron-server.tar.gz\n\nmkdir -p /opt/positron-server\ntar -xzf /tmp/positron-server.tar.gz -C /opt/positron-server --strip-components=1\n\n\n\n\n\n\n\nNote\n\n\n\nPositron spells the CPU architecture three ways. The download filename uses x64 or arm64, the Content Delivery Network (CDN) path uses x86_64 or arm64, and the activation directory uses x86_64 or aarch64. Throughout this guide, &lt;arch&gt; means the activation directory name.\n\n\nPlace the license file next to the license-manager binary, in the activation directory for your architecture:\n\n\nTerminal\n\ninstall -m 644 license.lic /opt/positron-server/resources/activation/linux/&lt;arch&gt;/license.lic\n\n\n\n\n\n\n\nImportant\n\n\n\nMode 644 matters. Each single-user session runs positron-server as the student, and positron-server reads and validates this file itself. A root-only mode such as 600 makes every session fail to start.\n\n\nConfirm the license before you go further:\n\n\nTerminal\n\n/opt/positron-server/resources/activation/linux/&lt;arch&gt;/license-manager status"
+    "text": "Step 1: Install Positron Server in the single-user image\nPositron Server is available only as a Linux archive from the Posit content delivery network (CDN). It does not appear on the Positron download page or on the GitHub releases page. Download the build that matches the CPU architecture of your single-user servers:\n\n\n\nArchitecture\nDownload\n\n\n\n\nx86_64 (Intel and AMD)\npositron-server-linux-x64-2026.10.0-297.tar.gz\n\n\nARM64\npositron-server-linux-arm64-2026.10.0-297.tar.gz\n\n\n\nThen unpack it into /opt/positron-server. To download and unpack from the command line, run the command for your architecture.\nFor x86_64:\n\n\nTerminal\n\ncurl -L -o /tmp/positron-server.tar.gz https://cdn.posit.co/positron/releases/server/x86_64/positron-server-linux-x64-2026.10.0-297.tar.gz\nmkdir -p /opt/positron-server\ntar -xzf /tmp/positron-server.tar.gz -C /opt/positron-server --strip-components=1\n\nFor ARM64:\n\n\nTerminal\n\ncurl -L -o /tmp/positron-server.tar.gz https://cdn.posit.co/positron/releases/server/arm64/positron-server-linux-arm64-2026.10.0-297.tar.gz\nmkdir -p /opt/positron-server\ntar -xzf /tmp/positron-server.tar.gz -C /opt/positron-server --strip-components=1\n\nNext, copy the license file into the activation directory, next to the bundled license-manager binary. In the path below, replace &lt;arch&gt; with x86_64 or aarch64.\n\n\nTerminal\n\ninstall -m 644 license.lic /opt/positron-server/resources/activation/linux/&lt;arch&gt;/license.lic\n\nThe license file needs mode 644. Each session runs positron-server as the student, and positron-server reads the license file itself. With a root-only mode such as 600, every session fails to start.\nBefore you continue, confirm that license-manager accepts the license file:\n\n\nTerminal\n\n/opt/positron-server/resources/activation/linux/&lt;arch&gt;/license-manager status"
   },
   {
     "objectID": "get_started.html#install-jupyter-positron-server",
     "href": "get_started.html#install-jupyter-positron-server",
     "title": "Get started",
     "section": "Step 2: Install jupyter-positron-server in the single-user image",
-    "text": "Step 2: Install jupyter-positron-server in the single-user image\n\n\nTerminal\n\n# for example, in The Littlest JupyterHub\n/opt/tljh/user/bin/pip install 'jupyter-positron-server&gt;=0.0.5'\n\nThis proxy extension runs as the user. It adds the Positron tile to the JupyterLab launcher and starts positron-server on the first request."
+    "text": "Step 2: Install jupyter-positron-server in the single-user image\nInstall jupyter-positron-server into the Python environment that runs the single-user server. On TLJH, that environment is /opt/tljh/user:\n\n\nTerminal\n\n/opt/tljh/user/bin/pip install 'jupyter-positron-server&gt;=0.0.6'\n\njupyter-positron-server is a jupyter-server-proxy extension. It adds the Positron tile to the JupyterLab launcher, and starts Positron Server the first time a student opens it."
   },
   {
     "objectID": "get_started.html#point-single-user-servers-at-positron-server",
     "href": "get_started.html#point-single-user-servers-at-positron-server",
     "title": "Get started",
-    "section": "Step 3: Point single-user servers at positron-server",
-    "text": "Step 3: Point single-user servers at positron-server\nPut positron-server on the session PATH by adding this to jupyterhub_config.py:\n\n\njupyterhub_config.py\n\nimport os\n\nc.Spawner.environment = {\n    \"PATH\": \"/opt/positron-server/bin:\" + os.environ.get(\"PATH\", \"/usr/local/bin:/usr/bin:/bin\"),\n}\n\nThis setup needs no license environment variables. Positron Server finds the license file in its own install directory."
+    "section": "Step 3: Add Positron Server to the session PATH",
+    "text": "Step 3: Add Positron Server to the session PATH\nJupyterHub starts each single-user server with the variables in c.Spawner.environment. Add /opt/positron-server/bin to PATH there, so that jupyter-positron-server can find positron-server:\n\n\njupyterhub_config.py\n\nimport os\n\nc.Spawner.environment = {\n    \"PATH\": \"/opt/positron-server/bin:\" + os.environ.get(\"PATH\", \"/usr/local/bin:/usr/bin:/bin\"),\n}\n\nYou do not need any license environment variables. Positron Server finds license.lic in its activation directory."
   },
   {
     "objectID": "get_started.html#restart-jupyterhub",
     "href": "get_started.html#restart-jupyterhub",
     "title": "Get started",
     "section": "Step 4: Restart JupyterHub",
-    "text": "Step 4: Restart JupyterHub\n\n\nTerminal\n\nsystemctl restart jupyterhub\n\nStudents can then select the Positron tile in the JupyterLab launcher."
+    "text": "Step 4: Restart JupyterHub\nRestart JupyterHub to load the configuration:\n\n\nTerminal\n\nsystemctl restart jupyterhub\n\nAfter the restart, students see a Positron tile in the JupyterLab launcher. To open Positron instead of JupyterLab when students sign in, see Start students in Positron Server."
   },
   {
     "objectID": "get_started.html#how-it-works",
     "href": "get_started.html#how-it-works",
     "title": "Get started",
     "section": "How it works",
-    "text": "How it works\nWhen a student opens Positron:\n\njupyter-positron-server kicks off starting Positron Server.\nPositron Server validates the license file, and then starts.\njupyter-positron-server opens Positron Server with a connection token for the session.\n\nSingle-user server\n  jupyter-positron-server    starts positron-server on the first request\n  positron-server            validates the license file and starts\n  license.lic                mode 644, read by the session\nA license file that is missing, expired, or altered stops the session from starting. See Troubleshooting for what each failure looks like in the logs."
+    "text": "How it works\nWhen a student selects the Positron tile, jupyter-positron-server starts positron-server inside the single-user server of that student. Positron Server checks license.lic before it starts, so a missing, expired, or altered license file stops the session. When Positron Server is running, jupyter-positron-server opens it in the browser with a connection token for that session.\nTroubleshooting shows what each license failure looks like in the logs."
   },
   {
     "objectID": "get_started.html#move-an-existing-deployment-off-the-verifier",
     "href": "get_started.html#move-an-existing-deployment-off-the-verifier",
     "title": "Get started",
     "section": "Move an existing deployment off the verifier",
-    "text": "Move an existing deployment off the verifier\nIf you set up Positron Server 2026.07.0 through 2026.08.2 with the signing key and the Hub verifier service, upgrading to 2026.09.0 or newer removes both. Make these four changes:\n\nChange the license file mode from 600 to 644, so sessions can read it.\nRemove POSITRON_LICENSE_MINTING_ENDPOINT from c.Spawner.environment.\nRemove the positron-license entry from c.JupyterHub.services, and the positron-license-service entry from c.JupyterHub.load_roles.\nDelete the signing key at /etc/positron/signing-key.pem, and uninstall jupyter-positron-verifier from the Hub environment."
+    "text": "Move an existing deployment off the verifier\nIf you set up Positron Server 2026.07.0 through 2026.08.2 with the signing key and the Hub verifier service, you do not need either one after you upgrade to 2026.09.0 or later. To remove them, make these four changes:\n\nChange the license file mode from 600 to 644, so sessions can read it.\nRemove POSITRON_LICENSE_MINTING_ENDPOINT from c.Spawner.environment.\nRemove the positron-license entry from c.JupyterHub.services, and the positron-license-service entry from c.JupyterHub.load_roles.\nDelete the signing key at /etc/positron/signing-key.pem, and uninstall jupyter-positron-verifier from the Hub environment."
   },
   {
     "objectID": "get_started.html#next-steps",
     "href": "get_started.html#next-steps",
     "title": "Get started",
     "section": "Next steps",
-    "text": "Next steps\n\nConfiguration covers the environment variables that jupyter-positron-server reads, and the memory each session needs.\nDeployment templates covers the TLJH install script and the docker-compose template.\nTroubleshooting covers a session that does not start."
+    "text": "Next steps\n\nConfiguration covers the environment variables that jupyter-positron-server reads, landing students in Positron, and limits on memory and CPU.\nDeployment templates covers the TLJH install script and the docker-compose template.\nTroubleshooting covers a session that does not start."
+  },
+  {
+    "objectID": "reference/index.html",
+    "href": "reference/index.html",
+    "title": "Reference",
+    "section": "",
+    "text": "Functions to configure the Positron server proxy\n\n\n\nsetup_positron_server\nConfigure jupyter-server-proxy to run Positron Server.\n\n\nwhich_positron_server\nLocate the positron-server executable."
+  },
+  {
+    "objectID": "reference/index.html#setup-functions",
+    "href": "reference/index.html#setup-functions",
+    "title": "Reference",
+    "section": "",
+    "text": "Functions to configure the Positron server proxy\n\n\n\nsetup_positron_server\nConfigure jupyter-server-proxy to run Positron Server.\n\n\nwhich_positron_server\nLocate the positron-server executable."
+  },
+  {
+    "objectID": "reference/setup_positron_server.html",
+    "href": "reference/setup_positron_server.html",
+    "title": "setup_positron_server",
+    "section": "",
+    "text": "setup_positron_server()\nConfigure jupyter-server-proxy to run Positron Server.\nReturns a configuration dictionary that jupyter-server-proxy uses to launch or connect to a Positron Server instance. The behavior depends on environment variables:\n\nIf JSP_POSITRON_PORT is set, connects to an existing server on that TCP port\nIf JSP_POSITRON_SOCKET is set, connects to an existing server via UNIX socket\nOtherwise, starts a new positron-server process\n\n\n\n\n\n\n\n\n\n\n\nName\nType\nDescription\n\n\n\n\n\ndict\nConfiguration dictionary containing: - new_browser_tab (bool): Whether to open in a new browser tab - timeout (int): Server startup timeout in seconds - launcher_entry (dict): JupyterLab launcher configuration - command (list): Command to start server (empty if connecting to existing) - port (int) or unix_socket (str): Connection details (if applicable) - environment (dict): Environment variables for the server process\n\n\n\n\n\n\nwhich_positron_server : Locates the positron-server executable."
+  },
+  {
+    "objectID": "reference/setup_positron_server.html#returns",
+    "href": "reference/setup_positron_server.html#returns",
+    "title": "setup_positron_server",
+    "section": "",
+    "text": "Name\nType\nDescription\n\n\n\n\n\ndict\nConfiguration dictionary containing: - new_browser_tab (bool): Whether to open in a new browser tab - timeout (int): Server startup timeout in seconds - launcher_entry (dict): JupyterLab launcher configuration - command (list): Command to start server (empty if connecting to existing) - port (int) or unix_socket (str): Connection details (if applicable) - environment (dict): Environment variables for the server process"
+  },
+  {
+    "objectID": "reference/setup_positron_server.html#see-also",
+    "href": "reference/setup_positron_server.html#see-also",
+    "title": "setup_positron_server",
+    "section": "",
+    "text": "which_positron_server : Locates the positron-server executable."
+  },
+  {
+    "objectID": "troubleshooting.html",
+    "href": "troubleshooting.html",
+    "title": "Troubleshooting",
+    "section": "",
+    "text": "When Positron does not start for a student, the cause is almost always in one of four places: the launcher extension in the user environment, the license file, the install itself, which covers architecture and version, or, on Positron Server 2026.07.0 through 2026.08.2, the Hub verifier service. This page is organized by symptom."
+  },
+  {
+    "objectID": "troubleshooting.html#where-to-look-first",
+    "href": "troubleshooting.html#where-to-look-first",
+    "title": "Troubleshooting",
+    "section": "Where to look first",
+    "text": "Where to look first\nMost answers are in the logs.\n\nTLJH / systemddocker-compose\n\n\n\n\nTerminal\n\n# Full Hub log, which covers spawn errors and service registration\njournalctl -u jupyterhub --no-pager -n 200\n\n\n\n\n\nTerminal\n\n# Hub log\ndocker compose logs hub\n\n# A student's single-user container, named by `docker ps`\ndocker logs &lt;jupyter-USERNAME-container&gt;\n\n\n\n\nThe single-user server log shows what jupyter-positron-server and positron-server reported at launch. Reach it from the JupyterHub UI under the student server, or from the spawner logs."
+  },
+  {
+    "objectID": "troubleshooting.html#the-positron-tile-does-not-appear",
+    "href": "troubleshooting.html#the-positron-tile-does-not-appear",
+    "title": "Troubleshooting",
+    "section": "The Positron tile does not appear",
+    "text": "The Positron tile does not appear\njupyter-positron-server provides the tile through jupyter-server-proxy, in the user environment.\nCheck the user environment:\n\n\nTerminal\n\n/opt/tljh/user/bin/pip show jupyter-positron-server\n/opt/tljh/user/bin/jupyter server extension list\n\nFixes:\n\nExtension missing: install it in the user environment and enable the proxy.\n\n\nTerminal\n\n/opt/tljh/user/bin/pip install 'jupyter-positron-server&gt;=0.0.5'\n/opt/tljh/user/bin/jupyter server extension enable --sys-prefix jupyter_server_proxy\n\nInstalled but no tile: confirm JSP_POSITRON_LAUNCHER_DISABLED is not set in the spawner environment. Any value hides the tile.\nRestart the student server, by stopping and starting it from the JupyterHub UI. The extension is picked up on server start, not on Hub reload."
+  },
+  {
+    "objectID": "troubleshooting.html#the-tile-is-there-but-positron-never-loads",
+    "href": "troubleshooting.html#the-tile-is-there-but-positron-never-loads",
+    "title": "Troubleshooting",
+    "section": "The tile is there, but Positron never loads",
+    "text": "The tile is there, but Positron never loads\nThe launcher runs, and positron-server fails to start.\nCheck the browser tab first. When positron-server exits during startup, the tab shows a “Positron Server failed to start” page with the end of the log positron-server writes on its own. That log names the failing step, so read it before going to the single-user server log. The launch is retried about every 30 seconds, so once the cause is fixed, refreshing the tab is enough. No server restart is needed. A refresh that briefly shows a proxy error landed mid-retry. Refresh again.\nIf the tab instead sits on a spinner for two minutes and then shows could not start positron in time, positron-server never exited. It hung. Go to the single-user server log for that one.\nCheck the single-user server log for the failing step, then:\n\npositron-server: command not found, or binary not found: positron-server is not on the session PATH. Confirm the spawner sets it:\n# TLJH: jupyterhub_config.py\nc.Spawner.environment = {\n    \"PATH\": \"/opt/positron-server/bin:\" + os.environ.get(\"PATH\", \"/usr/local/bin:/usr/bin:/bin\"),\n}\nIn the docker template the binary is on PATH through the single-user image ENV, and the spawner does not override PATH.\nA license error: see the section below that matches your Positron Server version."
+  },
+  {
+    "objectID": "troubleshooting.html#license-errors-on-2026.09.0-and-newer",
+    "href": "troubleshooting.html#license-errors-on-2026.09.0-and-newer",
+    "title": "Troubleshooting",
+    "section": "License errors on 2026.09.0 and newer",
+    "text": "License errors on 2026.09.0 and newer\nThese versions read license.lic from the activation directory and validate it with the bundled license-manager. Check the license first:\n\n\nTerminal\n\n/opt/positron-server/resources/activation/linux/&lt;arch&gt;/license-manager status\n\nCommon failures:\n\nPermission denied on the license file: each session reads the file as the student, so a root-only mode such as 600 fails every session. Confirm the mode is 644.\n\n\nTerminal\n\nls -l /opt/positron-server/resources/activation/linux/&lt;arch&gt;/license.lic\nchmod 644 /opt/positron-server/resources/activation/linux/&lt;arch&gt;/license.lic\n\nExpired or altered license: license-manager status reports the reason. A license file that exists but does not verify stops the session rather than falling back to anything else. Request a replacement from academic-licenses@posit.co.\nWrong architecture directory: positron-server looks under resources/activation/linux/x86_64 on x64 hosts and resources/activation/linux/aarch64 on arm64 hosts. A license placed in the other directory is not found."
+  },
+  {
+    "objectID": "troubleshooting.html#license-errors-on-2026.07.0-through-2026.08.2",
+    "href": "troubleshooting.html#license-errors-on-2026.07.0-through-2026.08.2",
+    "title": "Troubleshooting",
+    "section": "License errors on 2026.07.0 through 2026.08.2",
+    "text": "License errors on 2026.07.0 through 2026.08.2\nThese versions accept a signed token only, which the Hub verifier mints. The verifier runs as a managed JupyterHub service, so its output lands in the Hub log:\n\n\nTerminal\n\njournalctl -u jupyterhub --no-pager | grep -i positron-license\n\n\n\n\n\n\n\nNote\n\n\n\nThis section covers a hand-rolled Verifier setup deployment. Neither scripts/install-positron.sh nor the scripts/docker/ template in this repository sets up the verifier anymore. Both target Positron Server 2026.09.0 and newer, and 2026.06.1 and older, which validate license.lic directly. See License errors on 2026.09.0 and newer instead if you deployed with one of those templates.\n\n\n\nThe verifier is not running or not registered\n\nNo mention at all: the service config was not loaded. Confirm that jupyterhub_config.py, or the generated positron-license.py in jupyterhub_config.d/, contains the c.JupyterHub.services block, then reload.\n\n\nTerminal\n\ntljh-config reload\n# or: systemctl restart jupyterhub\n\nThe service starts and then dies: confirm the command exists in the Hub environment.\n\n\nTerminal\n\n/opt/tljh/hub/bin/pip show jupyter-positron-verifier\nls -l /opt/tljh/hub/bin/positron-verifier\n\nPort conflict on VERIFIER_PORT, which defaults to 10101: another process holds the port. Change VERIFIER_PORT and update POSITRON_LICENSE_MINTING_ENDPOINT to match.\n\n\n\nMint calls fail\n\nSigning key not readable: the verifier runs as the Hub service account and reads POSITRON_MINTING_KEY_FILE. Confirm the file exists and that account can read it.\n\n\nTerminal\n\nls -l /etc/positron/signing-key.pem   # mode 600, owned by the Hub user\n\nMinting endpoint unreachable or wrong URL: POSITRON_LICENSE_MINTING_ENDPOINT must point at the Hub-proxied service path, e.g., http://127.0.0.1:10101/services/positron-license/mint.\n403 or other authorization errors from the mint call: the service role is missing scopes. Confirm the c.JupyterHub.load_roles block grants the positron-license service read:users.\n\n\n\n\n\n\n\nNote\n\n\n\nUpgrading to Positron Server 2026.09.0 or newer removes this whole class of failure. See Move an existing deployment off the verifier."
+  },
+  {
+    "objectID": "troubleshooting.html#install-time-failures",
+    "href": "troubleshooting.html#install-time-failures",
+    "title": "Troubleshooting",
+    "section": "Install-time failures",
+    "text": "Install-time failures\n\nDownload fails with curl 403 or 404: the POSITRON_VERSION and POSITRON_ARCH combination does not exist on the Content Delivery Network (CDN). Verify the version string against the Positron releases page, or download the tarball yourself and pass POSITRON_TARBALL=./positron-server.tar.gz."
+  },
+  {
+    "objectID": "troubleshooting.html#docker-compose-specifics",
+    "href": "troubleshooting.html#docker-compose-specifics",
+    "title": "Troubleshooting",
+    "section": "docker-compose specifics",
+    "text": "docker-compose specifics\n\nThe hub container exits at boot reporting a file not found or empty: the license secret was not placed. Copy it into scripts/docker/secrets/. A missing bind-mount source makes Docker create an empty directory, which is why the hub checks at boot.\n\n\nTerminal\n\ncp /path/to/license.lic secrets/license.lic\nchmod 644 secrets/license.lic\ndocker compose up -d\n\nSingle-user containers fail to spawn with a license error: confirm POSITRON_LICENSE_HOST_PATH (set from ${PWD} in docker-compose.yml) resolved to the right absolute path. docker compose config prints the resolved value. It must be a path on the Docker host, which is why docker compose needs to be run from scripts/docker/ itself."
+  },
+  {
+    "objectID": "troubleshooting.html#zero-to-jupyterhub-kubernetes-specifics",
+    "href": "troubleshooting.html#zero-to-jupyterhub-kubernetes-specifics",
+    "title": "Troubleshooting",
+    "section": "Zero to JupyterHub (Kubernetes) specifics",
+    "text": "Zero to JupyterHub (Kubernetes) specifics\nLogs live in the single-user pod, and positron-server restart-loops on failure, so always use --tail:\n\n\nTerminal\n\nPOD=$(kubectl -n jupyterhub get pod -l component=singleuser-server -o name | head -1)\nkubectl -n jupyterhub logs $POD -c notebook --tail=200\n\n-c notebook avoids the “Defaulted container” notice from the pod’s init container.\n\ncould not start positron in time\nThe browser shows a blank page with a spinner for about two minutes, then a 500 with could not start positron in time. The message implicates slowness, but in a Kubernetes deployment it is far more often the license mount. The two-minute delay is jupyter-server-proxy giving up.\nCheck the activation directory first:\n\n\nTerminal\n\nkubectl -n jupyterhub exec $POD -c notebook -- \\\n  ls -l /opt/positron-server/resources/activation/linux/&lt;arch&gt;/\n\nIf only license.lic is there, plus entries like ..data and a timestamped directory, the Secret was mounted at the directory instead of at the file path. Add subPath: license.lic and make mountPath the full file path, or switch to singleuser.extraFiles, which derives subPath for you.\nIf the directory looks healthy but Positron still fails, the license is probably in the wrong architecture directory. Both x86_64 and aarch64 ship in every tarball and both look complete, so this is invisible to inspection:\n\n\nTerminal\n\nkubectl -n jupyterhub exec $POD -c notebook -- \\\n  python3 -c \"import platform; print(platform.machine())\"\n\nWhatever that prints is the only directory Positron consults.\n\n\nNo license key provided in the pod log\nNo license key provided. A license key is required to use Positron in a hosted\nenvironment. Provide a license key with the --license-key or --license-key-file ...\nTaken literally this suggests the license is missing, and following its advice leads nowhere. It appears whenever Positron cannot validate a license, which includes the case where the license is mounted and readable but the activation libraries beside it were masked. Work through the activation-directory checks above before touching --license-key-file.\n\n\nConfirming the license is readable at all\n\n\nTerminal\n\nkubectl -n jupyterhub exec $POD -c notebook -- id\nkubectl -n jupyterhub exec $POD -c notebook -- \\\n  head -c 30 /opt/positron-server/resources/activation/linux/&lt;arch&gt;/license.lic\n\nid reports uid=1000(jovyan) gid=100(users), and the license appears as root:users with mode 0440. Note that license-manager status requires root: usable via sudo on The Littlest JupyterHub (TLJH), but not in user pods, which have no privilege escalation.\n\n\nUser servers fail to spawn\nThe single-user image’s jupyterhub must be compatible with the Hub’s. Compare:\n\n\nTerminal\n\nkubectl -n jupyterhub exec deploy/hub -- jupyterhub --version\ndocker run --rm --entrypoint pip &lt;your-image&gt; show jupyterhub\n\nA patch-level difference is fine. A larger gap needs a pin in the image.\n\n\nExtensions reinstall on every launch\nExpected when singleuser.storage.type is none, because $HOME is ephemeral and Positron re-bootstraps ~/.positron-server/extensions each spawn. Set storage.type: dynamic so it happens once."
+  },
+  {
+    "objectID": "troubleshooting.html#still-stuck",
+    "href": "troubleshooting.html#still-stuck",
+    "title": "Troubleshooting",
+    "section": "Still stuck?",
+    "text": "Still stuck?\nOpen an issue at the jupyter-positron-server issue tracker with the relevant Hub and single-user log excerpts, your Positron Server version, and which setup path you used."
   }
 ]

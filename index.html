@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.10.18">
+<meta name="generator" content="quarto-1.10.19">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -41,10 +41,10 @@ ul.task-list li input[type="checkbox"] {
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="site_libs/quarto-html/anchor.min.js"></script>
 <link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-bf27225e3a48a9273f3daa8f8e829971.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-dd413af1298e352d8fe9223d27e63c61.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-c4d3e0078a890bf3a79e9e11db7ee5ef.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -97,18 +97,21 @@ ul.task-list li input[type="checkbox"] {
     <a class="nav-link" href="./get_started.html"> 
 <span class="menu-text">Get started</span></a>
   </li>  
-  <li class="nav-item">
-    <a class="nav-link" href="./verifier_get_started.html"> 
-<span class="menu-text">Verifier setup</span></a>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-deployment" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Deployment</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-deployment">    
+        <li>
+    <a class="dropdown-item" href="./configuration.html">
+ <span class="dropdown-text">Configuration</span></a>
   </li>  
-  <li class="nav-item">
-    <a class="nav-link" href="./deployment.html"> 
-<span class="menu-text">Deployment</span></a>
+        <li>
+    <a class="dropdown-item" href="./deployment.html">
+ <span class="dropdown-text">Templates</span></a>
   </li>  
-  <li class="nav-item">
-    <a class="nav-link" href="./configuration.html"> 
-<span class="menu-text">Configuration</span></a>
-  </li>  
+    </ul>
+  </li>
   <li class="nav-item">
     <a class="nav-link" href="./troubleshooting.html"> 
 <span class="menu-text">Troubleshooting</span></a>
@@ -141,10 +144,10 @@ ul.task-list li input[type="checkbox"] {
    
   <ul>
   <li><a href="#overview" id="toc-overview" class="nav-link active" data-scroll-target="#overview">Overview</a></li>
-  <li><a href="#which-setup-applies-to-your-version" id="toc-which-setup-applies-to-your-version" class="nav-link" data-scroll-target="#which-setup-applies-to-your-version">Which setup applies to your version</a></li>
   <li><a href="#features" id="toc-features" class="nav-link" data-scroll-target="#features">Features</a></li>
   <li><a href="#requirements" id="toc-requirements" class="nav-link" data-scroll-target="#requirements">Requirements</a></li>
   <li><a href="#get-a-license" id="toc-get-a-license" class="nav-link" data-scroll-target="#get-a-license">Get a license</a></li>
+  <li><a href="#which-setup-applies-to-your-version" id="toc-which-setup-applies-to-your-version" class="nav-link" data-scroll-target="#which-setup-applies-to-your-version">Which setup applies to your version</a></li>
   </ul>
 </nav>
     </div>
@@ -175,6 +178,30 @@ ul.task-list li input[type="checkbox"] {
 <h2 class="anchored" data-anchor-id="overview">Overview</h2>
 <p><code>jupyter-positron-server</code> is a <a href="https://jupyter-server-proxy.readthedocs.io/">jupyter-server-proxy</a> extension that runs Positron Server within JupyterHub. Students reach the full Positron IDE from their Jupyter environment, with no separate deployment.</p>
 <p>This project draws inspiration from <a href="https://github.com/jupyterhub/jupyter-rsession-proxy">jupyter-rsession-proxy</a>, which does the same for RStudio Server. Both packages use the <code>jupyter-server-proxy</code> framework to bring an external web application into the Jupyter ecosystem.</p>
+</section>
+<section id="features" class="level2">
+<h2 class="anchored" data-anchor-id="features">Features</h2>
+<p>Positron Server provides a data science IDE with no local install and no new infrastructure:</p>
+<ul>
+<li>Rich Python and R support</li>
+<li>OpenVSX extension marketplace access</li>
+<li>Built-in data viewer and variables explorer</li>
+<li>Integrated debugger, help pane, and version control</li>
+</ul>
+</section>
+<section id="requirements" class="level2">
+<h2 class="anchored" data-anchor-id="requirements">Requirements</h2>
+<ul>
+<li>Python 3.9 or newer</li>
+<li><code>positron-server</code> installed and available on <code>PATH</code></li>
+<li>A Positron license file, and a signing key on 2026.07.0 through 2026.08.2 only</li>
+<li>At least 2.5 GB of RAM per session. See <a href="./configuration.html#memory-requirements">memory requirements</a></li>
+</ul>
+</section>
+<section id="get-a-license" class="level2">
+<h2 class="anchored" data-anchor-id="get-a-license">Get a license</h2>
+<p>Positron Server is available for educational use only. Free licenses are available for currently enrolled students using Positron for coursework. For the full eligibility terms, review the <a href="https://github.com/posit-dev/positron/blob/main/LICENSE.txt">Positron Education License Rider</a>.</p>
+<p>To request a license, send email to <a href="mailto:academic-licenses@posit.co">academic-licenses@posit.co</a>.</p>
 </section>
 <section id="which-setup-applies-to-your-version" class="level2">
 <h2 class="anchored" data-anchor-id="which-setup-applies-to-your-version">Which setup applies to your version</h2>
@@ -222,43 +249,7 @@ Important
 <p>The signing key is a former way of working, scoped to Positron Server 2026.07.0 through 2026.08.2, and not recommended for a new deployment. See <a href="./verifier_get_started.html">Verifier setup</a> only if you are deploying that exact version range.</p>
 </div>
 </div>
-<div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-Note
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<p>The two license file rows differ in one detail. On 2026.06.1 and older, install <code>jupyter-positron-server</code> version 0.0.4. On 2026.09.0 and newer, install version 0.0.5 or newer.</p>
-</div>
-</div>
-</section>
-<section id="features" class="level2">
-<h2 class="anchored" data-anchor-id="features">Features</h2>
-<p>Positron Server provides a data science IDE with no local install and no new infrastructure:</p>
-<ul>
-<li>Rich Python and R support</li>
-<li>OpenVSX extension marketplace access</li>
-<li>Built-in data viewer and variables explorer</li>
-<li>Integrated debugger, help pane, and version control</li>
-</ul>
-</section>
-<section id="requirements" class="level2">
-<h2 class="anchored" data-anchor-id="requirements">Requirements</h2>
-<ul>
-<li>Python 3.9 or newer</li>
-<li><code>positron-server</code> installed and available on <code>PATH</code></li>
-<li>A Positron license file, and a signing key on 2026.07.0 through 2026.08.2 only</li>
-<li>At least 2.5 GB of RAM per session. See <a href="./configuration.html#memory-requirements">memory requirements</a></li>
-</ul>
-</section>
-<section id="get-a-license" class="level2">
-<h2 class="anchored" data-anchor-id="get-a-license">Get a license</h2>
-<p>Positron Server is available for educational use only. Free licenses are available for currently enrolled students using Positron for coursework. For the full eligibility terms, review the <a href="https://github.com/posit-dev/positron/blob/main/LICENSE.txt">Positron Education License Rider</a>.</p>
-<p>To request a license, send email to <a href="mailto:academic-licenses@posit.co">academic-licenses@posit.co</a>.</p>
+<p>The two license file rows differ in one detail. On 2026.06.1 and older, install <code>jupyter-positron-server</code> version 0.0.4. On 2026.09.0 and newer, install version 0.0.6 or newer.</p>
 
 
 </section>
@@ -671,7 +662,7 @@ Note
       &nbsp;
     </div>   
     <div class="nav-footer-center">
-<p>Proudly supported by <a href="https://posit.co/"><img src="https://www.posit.co/wp-content/uploads/2022/10/posit-logo-fullcolor-TM.svg" class="img-fluid" alt="Posit PBC" width="65"></a></p>
+<p>Proudly supported by <a href="https://posit.co/"><img src="images/posit-logo.svg" class="img-fluid" alt="Posit PBC" width="65"></a></p>
 </div>
     <div class="nav-footer-right">
       &nbsp;
