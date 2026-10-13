@@ -37,11 +37,9 @@ through 2026.08.2, and not recommended for a new deployment. See
 version range.
 :::
 
-::: callout-note
 The two license file rows differ in one detail. On 2026.06.1 and older, install
 `jupyter-positron-server` version 0.0.4. On 2026.09.0 and newer, install version
-0.0.5 or newer.
-:::
+0.0.6 or newer.
 
 ## Features
 
