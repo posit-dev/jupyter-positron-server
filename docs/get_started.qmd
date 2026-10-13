@@ -31,10 +31,20 @@ single-user servers:
 | x86_64 (Intel and AMD) | [positron-server-linux-x64-{{< var positron.version >}}.tar.gz]({{< var positron.url-x64 >}}) |
 | ARM64 | [positron-server-linux-arm64-{{< var positron.version >}}.tar.gz]({{< var positron.url-arm64 >}}) |
 
-Then unpack it into `/opt/positron-server`. To download and unpack from the command line, run the commands below. For ARM64, use the ARM64 link in place of the x64 link.
+Then unpack it into `/opt/positron-server`. To download and unpack from the command line, run the command for your architecture.
+
+For x86_64:
 
 ```{.bash filename="Terminal"}
 curl -L -o /tmp/positron-server.tar.gz {{< var positron.url-x64 >}}
+mkdir -p /opt/positron-server
+tar -xzf /tmp/positron-server.tar.gz -C /opt/positron-server --strip-components=1
+```
+
+For ARM64:
+
+```{.bash filename="Terminal"}
+curl -L -o /tmp/positron-server.tar.gz {{< var positron.url-arm64 >}}
 mkdir -p /opt/positron-server
 tar -xzf /tmp/positron-server.tar.gz -C /opt/positron-server --strip-components=1
 ```

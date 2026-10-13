@@ -11,7 +11,7 @@ website:
   page-footer:
     center: |
       Proudly supported by
-      [![](/images/posit-logo.svg){fig-alt="Posit PBC" width=65px}](https://posit.co/)
+      [![](images/posit-logo.svg){fig-alt="Posit PBC" width=65px}](https://posit.co/)
   navbar:
     background: light
     pinned: true

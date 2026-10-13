@@ -103,16 +103,13 @@ new session.
 
 ## Memory requirements
 
-Allocate at least 2.5 GB of RAM per Positron Server session. A Positron Server
-session uses more memory than an RStudio session or a plain Jupyter kernel, and the
-right amount depends on the size of the workload:
+Allocate memory per Positron Server session based on the size of the workload:
 
 - **Light**: single console, few extensions, simple scripts, basic app development
 - **Standard**: runtime switching, multiple consoles, multiple extensions, app development
 - **Heavy**: memory-intensive extensions such as file watchers or language servers, multiple concurrent apps, large datasets
 
-Use the table below to match each workload level to its minimum and recommended
-memory allocation.
+Use the Minimum column for your workload tier.
 
 | Workload | Minimum | Recommended |
 |----------|---------|-------------|
@@ -140,8 +137,9 @@ c.Spawner.cpu_limit = 1
 ```
 
 `mem_limit` is a hard cap, not a share.
-The spawner stops a session that reaches the cap, so a value below the recommended allocation produces crashes during memory-intensive work.
-The 2 GB floor suits a light workload only.
+The spawner stops a session that reaches the cap.
+A value below the Minimum for the workload risks OOM kills.
+The example's `4G` matches the Standard recommendation.
 
 On TLJH, set the same limits through `tljh-config`:
 
