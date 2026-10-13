@@ -11,8 +11,8 @@ setup steps by hand. Pick the one that matches your JupyterHub:
 | [Single-host docker-compose](#docker-compose-template) | `scripts/docker/` template |
 | [Zero to JupyterHub (Kubernetes)](#zero-to-jupyterhub-kubernetes) | `scripts/z2jh/` template |
 
-All of them need a **license file** (`license.lic`) from Posit: proof of
-entitlement. Send email to [academic-licenses@posit.co](mailto:academic-licenses@posit.co).
+All of them need a license file (`license.lic`) from Posit.
+Send an email to [academic-licenses@posit.co](mailto:academic-licenses@posit.co) to request a license.
 
 ::: callout-note
 Positron spells the CPU architecture three ways: the download filename uses
@@ -48,7 +48,7 @@ session `PATH`, and reloads TLJH.
 Run as root, and configure everything through environment variables:
 
 ```{.bash filename="Terminal"}
-sudo POSITRON_VERSION=2026.09.0-256 POSITRON_ARCH=x64 \
+sudo POSITRON_VERSION={{< var positron.version >}} POSITRON_ARCH=x64 \
      LICENSE_SRC=./license.lic \
      ./scripts/install-positron.sh
 ```
@@ -64,7 +64,7 @@ ones you reach for most often:
 
 | Variable | Purpose | Default |
 |---|---|---|
-| `POSITRON_VERSION` | Positron Server release to install | `2026.09.0-256` |
+| `POSITRON_VERSION` | Positron Server release to install | `{{< var positron.version >}}` |
 | `POSITRON_ARCH` | CPU arch, either `x64` or `arm64` | `arm64` |
 | `LICENSE_SRC` | Path to your license file | `./license.lic` |
 | `POSITRON_TARBALL` | Use a pre-downloaded tarball instead of the CDN | download |
@@ -137,7 +137,7 @@ targets [Zero to JupyterHub](https://z2jh.jupyter.org/) (the official JupyterHub
 Helm chart).
 
 ::: callout-important
-This template targets Positron Server `2026.09.0-256` and
+This template targets Positron Server `{{< var positron.version >}}` and
 `jupyter-positron-server==0.0.6`, which read the license file directly from the
 activation directory.
 :::
@@ -216,6 +216,6 @@ for the full configuration reference.
 
 ## Next steps
 
-- [Configuration](configuration.qmd) covers environment variables and
-  admin-enforced settings.
+- [Configuration](configuration.qmd) covers environment variables, landing
+  students in Positron, admin-enforced settings, and limits on memory and CPU.
 - [Troubleshooting](troubleshooting.qmd) covers a session that does not start.

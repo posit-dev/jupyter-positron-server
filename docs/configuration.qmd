@@ -2,8 +2,11 @@
 title: "Configuration"
 ---
 
-Environment variables control how `jupyter-positron-server` runs Positron Server
-inside your Jupyter environment.
+You configure `jupyter-positron-server` through environment variables, and the
+JupyterHub side through `jupyterhub_config.py`. This page covers both, and the
+settings that matter most when you run Positron Server for a group of users, such
+as a class. Treat the suggested values as starting points, then measure your own
+hardware and number of users and adjust.
 
 ## Environment variables
 
@@ -11,17 +14,56 @@ inside your Jupyter environment.
 |----------|-------------|
 | `POSITRON_LICENSE_KEY_FILE` | Path to a license file that `jupyter-positron-server` passes to `positron-server` as `--license-key-file`. On Positron Server 2026.09.0 and newer, this file can be a raw `license.lic`. Leave it unset when the license file sits in the activation directory at `<positron-server-path>/resources/activation/linux/<arch>/license.lic`, which is where `positron-server` looks by default. |
 | `POSITRON_LICENSE_MINTING_ENDPOINT` | URL of the JupyterHub minting endpoint that issues short-lived signed license tokens. Applies to Positron Server 2026.07.0 through 2026.08.2 only. Takes precedence over `POSITRON_LICENSE_KEY_FILE`. See [Verifier setup](verifier_get_started.qmd). |
+| `POSITRON_CONNECTION_TOKEN` | Sets the connection token that Positron Server validates on every request. Defaults to a random token for each session. Set it per session from a `pre_spawn_hook` to land students in Positron Server through `Spawner.default_url`. Do not set one fixed value for all sessions. See [Start students in Positron Server](#start-students-in-positron-server). |
 | `POSITRON_ENFORCED_SETTINGS` | JSON object of Positron settings that students cannot change. See [Admin-enforced settings](#admin-enforced-settings). |
 | `POSITRON_HOST` | Host address for Positron Server to bind to. Defaults to `127.0.0.1`. |
 | `JSP_DEFAULT_FOLDER` | Directory that Positron Server opens. Defaults to `JUPYTERHUB_ROOT_DIR`, then `HOME`. |
 | `JSP_POSITRON_LAUNCHER_DISABLED` | Set to any value to hide the Positron tile in the JupyterLab launcher. |
 
-::: callout-note
 On Positron Server 2026.09.0 and newer, a license needs no environment variable
 at all. `positron-server` finds `license.lic` in its own activation directory.
 Both license variables are for deployments that keep the file somewhere else, or
 that still run on 2026.07.0 through 2026.08.2.
+
+::: callout-important
+Each assignment to `c.Spawner.environment` replaces the whole dictionary, so use
+`.update()` to add a variable. On TLJH, the install script sets `PATH` in
+`c.SystemdSpawner.environment`. A setting on the spawner class takes precedence
+over `c.Spawner`, so on TLJH, JupyterHub ignores `c.Spawner.environment`. Use
+`c.SystemdSpawner.environment.update()` instead, in a file in
+`jupyterhub_config.d/` whose name sorts after `positron.py`.
 :::
+
+## Start students in Positron Server
+
+A single-user server opens JupyterLab by default, and students reach Positron Server
+from the launcher tile. `Spawner.default_url` changes where a session lands.
+
+Positron Server validates a connection token on every HTTP and WebSocket request.
+The launcher tile works because it carries that token as a `tkn` query parameter.
+A bare `/positron` URL carries no token, so Positron Server answers `403 Forbidden`.
+
+The token protects the port that Positron Server listens on, so only the student who owns the session can connect to it.
+To land students in Positron Server, make a new token when each session starts.
+Put it in the session environment and in the landing URL:
+
+```{.python filename="jupyterhub_config.py"}
+import secrets
+
+def positron_token_hook(spawner):
+    token = secrets.token_hex(16)
+    # Copy the dictionary. The configured value can be shared by every spawner.
+    spawner.environment = {**spawner.environment, "POSITRON_CONNECTION_TOKEN": token}
+    spawner.default_url = f"/positron/?tkn={token}"
+
+c.Spawner.pre_spawn_hook = positron_token_hook
+```
+
+On TLJH, put this code in a file in `/opt/tljh/config/jupyterhub_config.d/`, then run `sudo tljh-config reload`.
+Do not set one fixed token for all sessions.
+Every student sees the token in their own URL.
+On TLJH, all sessions share one host, so a student with the token can open the Positron Server of another student.
+Students can still reach JupyterLab at `/user/<username>/lab` when they need the notebook interface.
 
 ## Admin-enforced settings
 
@@ -34,35 +76,40 @@ direct edits to `~/.positron-server/data/User/settings.json`.
 **Requirements**: `jupyter-positron-server` 0.0.4 or newer, and Positron Server
 2026.07.1-5 or newer.
 
-Create the config file:
+Two settings come up often for coursework:
+
+- **`ai.enabled`**: set to `false` to turn off every Positron AI feature at once. To
+  turn features off one at a time, see the
+  [Positron AI configuration reference](https://positron.posit.co/ai-configuration.html).
+- **`extensions.autoUpdate`**: set to `false` to hold extension versions steady across
+  a class for the length of a term.
+
+On TLJH, create a config file that locks both:
 
 ```{.bash filename="Terminal"}
 cat > /opt/tljh/config/jupyterhub_config.d/positron_enforced.py << 'EOF'
-c.Spawner.environment = {
-    'POSITRON_ENFORCED_SETTINGS': '{"workbench.colorTheme":"Default Positron Dark","extensions.autoUpdate":false}'
-}
+c.SystemdSpawner.environment.update({
+    'POSITRON_ENFORCED_SETTINGS': '{"ai.enabled":false,"extensions.autoUpdate":false}'
+})
 EOF
 ```
+
+The file name `positron_enforced.py` sorts after `positron.py`, so the update runs
+after the install script sets `PATH`. On other spawners, use
+`c.Spawner.environment.update(...)` in `jupyterhub_config.py`.
 
 Sessions that are already running keep their settings until a student starts a
 new session.
 
-::: callout-important
-Each assignment to `c.Spawner.environment` replaces the whole dictionary. Set
-every session variable in one assignment, including `PATH`.
-:::
-
 ## Memory requirements
 
-Allocate at least 2.5 GB of RAM per Positron Server session. The right amount
-depends on the size of the workload:
+Allocate memory per Positron Server session based on the size of the workload:
 
 - **Light**: single console, few extensions, simple scripts, basic app development
 - **Standard**: runtime switching, multiple consoles, multiple extensions, app development
 - **Heavy**: memory-intensive extensions such as file watchers or language servers, multiple concurrent apps, large datasets
 
-Use the table below to match each workload level to its minimum and recommended
-memory allocation.
+Use the Minimum column for your workload tier.
 
 | Workload | Minimum | Recommended |
 |----------|---------|-------------|
@@ -79,12 +126,39 @@ For the full guidance this section summarizes, see the Positron Pro
 [memory allocation FAQ](https://docs.posit.co/ide/server-pro/user/positron/reference/faq.html#allocate-sufficient-memory-for-your-positron-pro-session).
 :::
 
-## Hub license minting
+### Cap memory and CPU per session
 
-::: callout-note
+To enforce the recommended allocation for a standard workload, set limits in
+`jupyterhub_config.py`:
+
+```{.python filename="jupyterhub_config.py"}
+c.Spawner.mem_limit = '4G'
+c.Spawner.cpu_limit = 1
+```
+
+`mem_limit` is a hard cap, not a share.
+The spawner stops a session that reaches the cap.
+A value below the Minimum for the workload risks OOM kills.
+The example's `4G` matches the Standard recommendation.
+
+On TLJH, set the same limits through `tljh-config`:
+
+```{.bash filename="Terminal"}
+sudo tljh-config set limits.memory 4G
+sudo tljh-config set limits.cpu 1
+sudo tljh-config reload
+```
+
+## Hub license minting (deprecated)
+
 Hub license minting is a former way of working, scoped to Positron Server
 2026.07.0 through 2026.08.2, and not recommended for a new deployment. Positron
 Server 2026.09.0 and newer validate `license.lic` directly and need no minting
 service. See [Verifier setup](verifier_get_started.qmd) only if you are
 deploying that exact version range.
-:::
+
+## Next steps
+
+- [Deployment templates](deployment.qmd) covers the TLJH install script and the
+  docker-compose template.
+- [Troubleshooting](troubleshooting.qmd) covers a session that does not start.

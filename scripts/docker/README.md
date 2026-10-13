@@ -4,7 +4,7 @@ The Docker-native counterpart to [`scripts/install-positron.sh`](../install-posi
 (which targets The Littlest JupyterHub). This is a **deployment template**: a
 starting point you copy and adapt for a real deployment.
 
-> **Targets Positron Server 2026.09.0-256** and `jupyter-positron-server>=0.0.6`,
+> **Targets Positron Server 2026.10.0-297** and `jupyter-positron-server>=0.0.6`,
 > which validate `license.lic` directly through the bundled `license-manager`.
 > If you are instead deploying Positron Server 2026.07.0 through 2026.08.2
 > (which validate a Hub-minted signing token, a former way of working), follow
