@@ -218,4 +218,6 @@ for the full configuration reference.
 
 - [Configuration](configuration.qmd) covers environment variables and
   admin-enforced settings.
+- [Common settings](common_settings.qmd) covers the JupyterHub settings that
+  matter most for a group of users.
 - [Troubleshooting](troubleshooting.qmd) covers a session that does not start.

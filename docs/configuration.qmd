@@ -11,6 +11,7 @@ inside your Jupyter environment.
 |----------|-------------|
 | `POSITRON_LICENSE_KEY_FILE` | Path to a license file that `jupyter-positron-server` passes to `positron-server` as `--license-key-file`. On Positron Server 2026.09.0 and newer, this file can be a raw `license.lic`. Leave it unset when the license file sits in the activation directory at `<positron-server-path>/resources/activation/linux/<arch>/license.lic`, which is where `positron-server` looks by default. |
 | `POSITRON_LICENSE_MINTING_ENDPOINT` | URL of the JupyterHub minting endpoint that issues short-lived signed license tokens. Applies to Positron Server 2026.07.0 through 2026.08.2 only. Takes precedence over `POSITRON_LICENSE_KEY_FILE`. See [Verifier setup](verifier_get_started.qmd). |
+| `POSITRON_CONNECTION_TOKEN` | Sets the connection token that Positron Server validates on every request. Defaults to a random token for each session. Set it per session from a `pre_spawn_hook` to land students in Positron Server through `Spawner.default_url`. Do not set one fixed value for all sessions. See [Common settings](common_settings.qmd#start-students-in-positron-server). |
 | `POSITRON_ENFORCED_SETTINGS` | JSON object of Positron settings that students cannot change. See [Admin-enforced settings](#admin-enforced-settings). |
 | `POSITRON_HOST` | Host address for Positron Server to bind to. Defaults to `127.0.0.1`. |
 | `JSP_DEFAULT_FOLDER` | Directory that Positron Server opens. Defaults to `JUPYTERHUB_ROOT_DIR`, then `HOME`. |
@@ -38,9 +39,9 @@ Create the config file:
 
 ```{.bash filename="Terminal"}
 cat > /opt/tljh/config/jupyterhub_config.d/positron_enforced.py << 'EOF'
-c.Spawner.environment = {
+c.SystemdSpawner.environment.update({
     'POSITRON_ENFORCED_SETTINGS': '{"workbench.colorTheme":"Default Positron Dark","extensions.autoUpdate":false}'
-}
+})
 EOF
 ```
 
@@ -48,8 +49,11 @@ Sessions that are already running keep their settings until a student starts a
 new session.
 
 ::: callout-important
-Each assignment to `c.Spawner.environment` replaces the whole dictionary. Set
-every session variable in one assignment, including `PATH`.
+The TLJH install script sets `PATH` in `c.SystemdSpawner.environment`. A setting on
+the spawner class takes precedence over `c.Spawner`, so on TLJH, JupyterHub ignores
+`c.Spawner.environment`. Use `.update()` to add to the dictionary, because an
+assignment replaces it. The file name `positron_enforced.py` sorts after
+`positron.py`, so the update runs after the install script's assignment.
 :::
 
 ## Memory requirements
