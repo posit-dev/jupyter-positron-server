@@ -1,0 +1,4 @@
+positron:
+  version: "2026.10.0-297"
+  url-x64: "https://cdn.posit.co/positron/releases/server/x86_64/positron-server-linux-x64-2026.10.0-297.tar.gz"
+  url-arm64: "https://cdn.posit.co/positron/releases/server/arm64/positron-server-linux-arm64-2026.10.0-297.tar.gz"

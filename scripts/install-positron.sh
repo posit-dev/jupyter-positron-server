@@ -20,7 +20,7 @@
 # Everything is configurable via the environment variables below; the defaults
 # match a standard TLJH layout. Override any of them inline, e.g.:
 #
-#   sudo POSITRON_VERSION=2026.09.0-256 POSITRON_ARCH=arm64 \
+#   sudo POSITRON_VERSION=2026.10.0-297 POSITRON_ARCH=arm64 \
 #        LICENSE_SRC=./license.lic \
 #        ./install-positron.sh
 #
@@ -31,7 +31,7 @@ set -euo pipefail
 # ---------------------------------------------------------------------------
 
 # Which Positron Server release to install and for which CPU architecture.
-POSITRON_VERSION="${POSITRON_VERSION:-2026.09.0-256}"
+POSITRON_VERSION="${POSITRON_VERSION:-2026.10.0-297}"
 POSITRON_ARCH="${POSITRON_ARCH:-arm64}"          # arm64 | x64
 
 # Where Positron Server is unpacked.
